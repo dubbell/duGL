@@ -1,8 +1,14 @@
 #include <glad/gl.h>
 #include <GLFW/glfw3.h>
 #include <iostream>
+
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
+
 #include "shader.h"
 #include "stb_image.h"
+
 
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
@@ -126,6 +132,13 @@ int main() {
 
     stbi_image_free(data);
 
+
+    // rotation/scaling transform
+    glm::mat4 trans1 = glm::mat4(1.0f), trans2;
+    trans1 = glm::translate(trans1, glm::vec3(0.5f, -0.5f, 0.0f));
+    // assign uniform location
+    unsigned int transformLoc = glGetUniformLocation(shader.ID, "transform");
+
     
     // bind VAO, subsequent VBO calls are stored in VAO
     glBindVertexArray(VAO); 
@@ -149,6 +162,8 @@ int main() {
     shader.use(); // use shader program
     shader.setInt("texture1", 0);  // set texture units
     shader.setInt("texture2", 1);
+
+    
     
     while (!glfwWindowShouldClose(window)) {
         processInput(window);
@@ -156,6 +171,10 @@ int main() {
         // clear color buffer
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
+
+        // rotate and transfer matrix data
+        trans2 = glm::rotate(trans1, (float)glfwGetTime(), glm::vec3(0.0f, 0.0f, 1.0f));
+        glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(trans2));
         
         glBindVertexArray(VAO);  // bind VAO
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);  // draw rectangle
