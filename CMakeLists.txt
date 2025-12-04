@@ -7,7 +7,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /MD")
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /MDd")
 
-add_executable(${PROJECT_NAME} main.cpp shader.cpp vendor/glad/src/gl.c)
+add_executable(${PROJECT_NAME} main.cpp shader.cpp vendor/glad/src/gl.c stb_image.cpp)
 
 target_include_directories(${PROJECT_NAME} PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}/vendor/glfw/include
@@ -24,8 +24,8 @@ target_link_libraries(${PROJECT_NAME}
     shell32.lib
 )
 
-set(SHADER_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/shaders")
-set(SHADER_DEST_DIR "$<TARGET_FILE_DIR:duGL>/shaders")
+set(SHADER_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/assets")
+set(SHADER_DEST_DIR "$<TARGET_FILE_DIR:duGL>/assets")
 
 add_custom_command(
     TARGET duGL POST_BUILD
