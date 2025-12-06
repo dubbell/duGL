@@ -7,10 +7,8 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <GLFW/glfw3.h>
 
-#include "shader.h"
-#include "init_utils.h"
-#include "camera.h"
-#include "keyboard.h"
+#include <app.h>
+#include <init_utils.h>
 
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
@@ -26,24 +24,7 @@ int main() {
     // update view port on window resize using callback function
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
 
-    Shader shader("assets/shaders/basic.vert", "assets/shaders/basic.frag");
-
-    glm::vec3 cameraStart(0.0f, 0.0f, 0.0f);
-    Camera* camera = new Camera(cameraStart, 1.0f);
-
-    KeyboardController* keyboardController = new KeyboardController(window);
-    keyboardController->registerKeyboardObserver(camera);
-
-    keyboardController->registerKey(GLFW_KEY_W);
-    keyboardController->registerKey(GLFW_KEY_A);
-    keyboardController->registerKey(GLFW_KEY_S);
-    keyboardController->registerKey(GLFW_KEY_D);
-
-
-    glfwSetWindowUserPointer(window, keyboardController);
-    glfwSetCursorPosCallback(window, [](GLFWwindow* window, double xpos, double ypos) {
-        KeyboardController* controller = static_cast<KeyboardController*>(glfwGetWindowUserPointer(window));
-    });
+    Application* application = new Application(window);
 
     // create buffers and VAO, multiple VBOs/EBOs can exist, but only one can be bound at a time
     

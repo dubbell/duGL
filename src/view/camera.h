@@ -6,7 +6,7 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <GLFW/glfw3.h>
 
-#include "keyboard_controllable.h"
+#include <keyboard_controllable.h>
 
 
 class Camera : public KeyboardControllable
@@ -23,7 +23,8 @@ private:
     glm::vec3 toGlobal(glm::vec3 local);
 
 public:
-    Camera(glm::vec3 &startingPosition, float maxSpeed);
+    Camera();
+    Camera(glm::vec3 startingPosition, float maxSpeed);
 
     void setPosition(glm::vec3 &newPosition);
 
