@@ -4,17 +4,12 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
+#include <GLFW/glfw3.h>
+
+#include "keyboard_controllable.h"
 
 
-class Basis
-{
-public:
-    const glm::vec3 front, right, up;
-    Basis(glm::vec3 front, glm::vec3 right, glm::vec3 up) : front(front), right(right), up(up) {};
-};
-
-
-class Camera
+class Camera : public KeyboardControllable
 {
 private:
     float maxSpeed;
@@ -23,7 +18,9 @@ private:
     glm::vec3 position;
     glm::vec3 velocity;
 
-    Basis getLocalBasis();
+    glm::mat3 getLocalBasis();
+
+    glm::vec3 toGlobal(glm::vec3 local);
 
 public:
     Camera(glm::vec3 &startingPosition, float maxSpeed);
@@ -38,6 +35,8 @@ public:
 
     void turnRight(float deltaYaw);
     void turnUp(float deltaPitch);
+
+    void processKeyboardInput(std::map<int, int> &keyboardState);
 
     glm::mat4 getView() const;
 };
