@@ -1,13 +1,21 @@
 #include "camera.h"
 
 
-Camera::Camera(glm::vec3 &startingPosition, float maxSpeed) : velocity(0.0f, 0.0f, 0.0f)
-{
-    position = startingPosition;
-    maxSpeed = maxSpeed;
-    pitch = 0.0f;
-    yaw = 0.0f;
-}
+Camera::Camera() 
+    : position(0.0f, 0.0f, 0.0f), 
+      velocity(0.0f, 0.0f, 0.0f), 
+      maxSpeed(0.0f), 
+      pitch(0.0f), 
+      yaw(0.0f) 
+{};
+
+Camera::Camera(glm::vec3 startingPosition, float maxSpeed) 
+    : position(startingPosition),
+      velocity(0.0f, 0.0f, 0.0f),
+      maxSpeed(maxSpeed), 
+      pitch(0.0f), 
+      yaw(0.0f)
+{}
 
 glm::mat3 Camera::getLocalBasis()
 {

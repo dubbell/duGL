@@ -1,14 +1,20 @@
 #include "mouse.h"
 
 
-MouseController::MouseController(Camera* camera)
+MouseController::MouseController()
+    : lastX(0.0f), lastY(0.0f), sensitivity(0.1f), firstMouse(true) {}
+
+MouseController::MouseController(Camera* camera) 
+    : camera(camera), lastX(0.0f), lastY(0.0f), sensitivity(0.1f), firstMouse(true) {}
+
+
+    
+void MouseController::setCamera(Camera* camera)
 {
-    lastX, lastY = 0.0f, 0.0f;
-    sensitivity = 0.1f;
-    firstMouse = true;
+    this->camera = camera;
 }
 
-void MouseController::mouseCallback(GLFWwindow* window, double xpos, double ypos)
+void MouseController::cursorPosCallback(float xpos, float ypos)
 {
     if (firstMouse)
         {

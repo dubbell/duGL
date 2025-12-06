@@ -16,9 +16,12 @@ private:
     bool firstMouse;
 
 public:
+    MouseController();
     MouseController(Camera* camera);
 
-    void mouseCallback(GLFWwindow* window, double xpos, double ypos);
+    void setCamera(Camera* camera);
+
+    void cursorPosCallback(float xpos, float ypos);
 };
 
 
