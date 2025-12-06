@@ -9,7 +9,7 @@ Camera::Camera(glm::vec3 &startingPosition, float maxSpeed) : velocity(0.0f, 0.0
     yaw = 0.0f;
 }
 
-Basis Camera::getLocalBasis()
+glm::mat3 Camera::getLocalBasis()
 {
     glm::vec3 front = glm::normalize(glm::vec3(
         cos(glm::radians(yaw)) * cos(glm::radians(pitch)),
@@ -20,8 +20,17 @@ Basis Camera::getLocalBasis()
 
     glm::vec3 up = glm::cross(right, front);
 
-    return Basis(front, right, up);
+    return glm::mat3(front, right, up);
 }
+
+glm::vec3 Camera::toGlobal(glm::vec3 local)
+{
+    glm::mat3 globalToLocal = getLocalBasis();
+    return glm::transpose(globalToLocal) * local;
+}
+
+
+
 
 void Camera::setPosition(glm::vec3 &newPosition)
 {
@@ -35,8 +44,8 @@ void Camera::setVelocity(glm::vec3 &newVelocity)
 
 void Camera::setLocalVelocity(glm::vec3 &localVelocity)
 {
-    Basis basis = getLocalBasis();
-    velocity = localVelocity.x * basis.right + localVelocity.y * basis.up - localVelocity.z * basis.front;
+    glm::mat3 localToGlobal = getLocalBasis();
+    velocity = glm::transpose(localToGlobal) * localVelocity;
 }
 
 void Camera::accelerate(glm::vec3 &acceleration)
@@ -44,10 +53,9 @@ void Camera::accelerate(glm::vec3 &acceleration)
     velocity += acceleration;
 }
 
-void Camera::accelerateLocally(glm::vec3 &acceleration)
+void Camera::accelerateLocally(glm::vec3 &localAcceleration)
 {
-    Basis basis = getLocalBasis();
-    velocity += acceleration.x * basis.right + acceleration.y * basis.up - acceleration.z * basis.front;
+    velocity += toGlobal(localAcceleration);
 }
 
 void Camera::turnRight(float deltaYaw)
@@ -62,6 +70,29 @@ void Camera::turnUp(float deltaPitch)
     pitch += deltaPitch;
     if (pitch < -89.0f) pitch = -89.0f;
     else if (pitch > 89.0f) pitch = 89.0f;
+}
+
+
+void Camera::processKeyboardInput(std::map<int, int> &keyboardState)
+{
+    float speed = 2.0f;
+    glm::vec3 globalVelocity(0.0f, 0.0f, 0.0f);
+
+    if (keyboardState[GLFW_KEY_W] == GLFW_PRESS)
+    {
+        if (keyboardState[GLFW_KEY_S] == GLFW_RELEASE)
+            globalVelocity += toGlobal(glm::vec3(0.0f, 0.0f, -speed));
+    }
+    else if (keyboardState[GLFW_KEY_S] == GLFW_PRESS)
+        globalVelocity += toGlobal(glm::vec3(0.0f, 0.0f, speed));
+
+    if (keyboardState[GLFW_KEY_A] == GLFW_PRESS)
+    {
+        if (keyboardState[GLFW_KEY_D] == GLFW_RELEASE)
+            globalVelocity += toGlobal(glm::vec3(-speed, 0.0f, 0.0f));
+    }
+    else if (keyboardState[GLFW_KEY_D] == GLFW_PRESS)
+        globalVelocity += toGlobal(glm::vec3(speed, 0.0f, 0.0f));
 }
 
 

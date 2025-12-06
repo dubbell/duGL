@@ -7,17 +7,22 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /MD")
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /MDd")
 
-add_executable(${PROJECT_NAME} main.cpp shader.cpp vendor/glad/src/gl.c stb_image.cpp)
+add_library(project_dependencies INTERFACE)
 
-target_include_directories(${PROJECT_NAME} PUBLIC
-    ${CMAKE_CURRENT_SOURCE_DIR}/vendor/glfw/include
-    ${CMAKE_CURRENT_SOURCE_DIR}/vendor/glad/include
-    ${CMAKE_CURRENT_SOURCE_DIR}/vendor/glm
+target_include_directories(project_dependencies INTERFACE
+    ${CMAKE_CURRENT_SOURCE_DIR}/lib/glfw/include
+    ${CMAKE_CURRENT_SOURCE_DIR}/lib/glad/include
+    ${CMAKE_CURRENT_SOURCE_DIR}/lib/glm
 )
 
-target_link_libraries(${PROJECT_NAME}
-    ${CMAKE_CURRENT_SOURCE_DIR}/vendor/glfw/lib-vc2022/glfw3.lib
-    
+add_subdirectory(src)
+
+add_executable(${PROJECT_NAME} src/main.cpp lib/glad/src/gl.c)
+
+target_link_libraries(${PROJECT_NAME} PRIVATE
+    application
+    project_dependencies
+    ${CMAKE_CURRENT_SOURCE_DIR}/lib/glfw/lib-vc2022/glfw3.lib
     opengl32.lib
     user32.lib
     gdi32.lib
@@ -31,5 +36,5 @@ add_custom_command(
     TARGET duGL POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_directory
     ARGS ${SHADER_SOURCE_DIR} ${SHADER_DEST_DIR}
-    COMMENT "Copying shaderse directory to output folder."
+    COMMENT "Copying assets directory to output folder."
 )
