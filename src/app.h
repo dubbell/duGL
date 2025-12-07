@@ -12,6 +12,8 @@
 #include <keyboard.h>
 #include <mouse.h>
 #include <shader.h>
+#include <render_collection.h>
+#include <vertex_factory.h>
 
 
 class Application
@@ -19,9 +21,9 @@ class Application
 private:
     GLFWwindow* window;
     Camera camera;
-    Shader shader;
+    glm::mat4 projectionMatrix;
 
-
+    std::vector<RenderCollection> renderCollections;
 
     KeyboardController keyboardController;
     MouseController mouseController;
@@ -29,9 +31,7 @@ private:
 public:
     Application(GLFWwindow* window);
 
-    void createArrayEntity(std::string &name, float vertices[], int vertexCount);
-    void createElementArrayEntity(std::string &name, float vertices[], float indices[], int vertexCount, int indexCount);
-
+    void setupCubeScene();
     void startMainLoop();
 
     static void frameBufferSizeCallback(GLFWwindow*, int width, int height);

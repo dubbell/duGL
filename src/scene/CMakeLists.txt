@@ -1,5 +1,9 @@
-add_library(entity STATIC entity.cpp)
+add_library(scene STATIC 
+    renderable.cpp 
+    render_collection.cpp 
+    entity.cpp 
+    vertex_factory.cpp)
 
-target_include_directories(entity PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+target_include_directories(scene PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 
-target_link_libraries(entity PRIVATE project_dependencies)
+target_link_libraries(scene PRIVATE project_dependencies pipeline view)

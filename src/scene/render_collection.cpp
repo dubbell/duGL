@@ -13,13 +13,14 @@ void RenderCollection::refreshAttributePtrs() const
 {
     glBindVertexArray(VAO);
 
-    int accSize = 0, attrIndex = 0;
+    int attrIndex = 0;
+    size_t offset = 0;
     for (auto attr : attributes)
     {
-        glVertexAttribPointer(attrIndex, attr.size, attr.type, attr.normalized, vertexStride, (void*)accSize);
+        glVertexAttribPointer(attrIndex, attr.size, attr.type, attr.normalized, vertexStride, (void*)offset);
         glEnableVertexAttribArray(attrIndex);
         attrIndex += 1;
-        accSize = attr.size * sizeof(attr.type);
+        offset = attr.size * sizeof(attr.type);
     }
 
     glBindVertexArray(0);
@@ -32,13 +33,14 @@ void RenderCollection::addVertexAttribute(GLuint size, GLenum type, GLboolean no
     refreshAttributePtrs();
 }
 
-void RenderCollection::createRenderable(std::string name, float vertices[], int vertexCount)
+void RenderCollection::createRenderable(std::string name, std::vector<float> vertexData)
 {
     int vertexStart = static_cast<int>(data.size());
-    Renderable renderable(vertexStart, vertexCount);
-    renderables[name] = renderable;
-    data.insert(data.end(), &vertices[0], &vertices[vertexCount]);
-    totalSize += sizeof(vertices);
+    int vertexDataSize = static_cast<int>(vertexData.size());
+    Renderable renderable(vertexStart, vertexDataSize);
+    renderables.insert({name, renderable});
+    data.insert(data.end(), vertexData.begin(), vertexData.end());
+    totalSize += sizeof(float) * vertexDataSize;
 }
 
 void RenderCollection::createEntity(std::string renderable, glm::vec3 &position)
@@ -69,7 +71,7 @@ void RenderCollection::renderEntities(glm::mat4 &viewMatrix, glm::mat4 &projecti
 
     for (auto iter = entities.begin(); iter != entities.end(); iter++)
     {
-        Renderable renderable = renderables[iter->first];
+        Renderable renderable = renderables.at(iter->first);
         for (Entity entity : iter->second)
         {
             glm::mat4 modelMatrix = glm::translate(glm::mat4(1.0f), entity.getPosition());

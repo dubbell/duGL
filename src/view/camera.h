@@ -15,6 +15,8 @@ private:
     float maxSpeed;
     float yaw, pitch;
 
+    glm::mat4 projectionMatrix;
+
     glm::vec3 position;
     glm::vec3 velocity;
 
@@ -39,7 +41,8 @@ public:
 
     void processKeyboardInput(std::map<int, int> &keyboardState);
 
-    glm::mat4 getView() const;
+    glm::mat4 getViewMatrix() const;
+    glm::mat4 getProjectionMatrix() const;
 };
 
 #endif
