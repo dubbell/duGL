@@ -38,7 +38,7 @@ public:
     void refreshAttributePtrs() const;
     void addVertexAttribute(GLuint size, GLenum type, GLboolean normalized);
 
-    void createRenderable(std::string name, float vertices[], int vertexCount);
+    void createRenderable(std::string name, std::vector<float> vertexData);
     void createEntity(std::string renderable, glm::vec3 &position);
 
     void loadRemote() const;

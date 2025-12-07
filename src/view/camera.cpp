@@ -7,7 +7,9 @@ Camera::Camera()
       maxSpeed(0.0f), 
       pitch(0.0f), 
       yaw(0.0f) 
-{};
+{
+    projectionMatrix = glm::perspective(glm::radians(45.0f), 800.0f / 600.0f, 0.1f, 100.0f);
+};
 
 Camera::Camera(glm::vec3 startingPosition, float maxSpeed) 
     : position(startingPosition),
@@ -15,7 +17,9 @@ Camera::Camera(glm::vec3 startingPosition, float maxSpeed)
       maxSpeed(maxSpeed), 
       pitch(0.0f), 
       yaw(0.0f)
-{}
+{
+    projectionMatrix = glm::perspective(glm::radians(45.0f), 800.0f / 600.0f, 0.1f, 100.0f);
+}
 
 glm::mat3 Camera::getLocalBasis()
 {
@@ -105,7 +109,7 @@ void Camera::processKeyboardInput(std::map<int, int> &keyboardState)
 
 
 
-glm::mat4 Camera::getView() const
+glm::mat4 Camera::getViewMatrix() const
 {
     glm::vec3 front = glm::normalize(glm::vec3(
         cos(glm::radians(yaw)) * cos(glm::radians(pitch)),
@@ -117,3 +121,7 @@ glm::mat4 Camera::getView() const
     return glm::lookAt(position, position + front, up);
 }
 
+glm::mat4 Camera::getProjectionMatrix() const
+{
+    return projectionMatrix;
+}
