@@ -20,6 +20,16 @@ public:
 
     Shader(const char* vertexPath, const char* fragmentPath);
 
+    // enable move functionality
+    Shader(Shader&& other) noexcept;
+    Shader& operator=(Shader&& other) noexcept;
+
+    // delete copy functionality
+    Shader(const Shader&) = delete;
+    Shader& operator=(const Shader&) = delete;
+
+    ~Shader();
+
     void use();
 
     void setBool(const std::string &name, bool value) const;

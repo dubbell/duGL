@@ -2,7 +2,7 @@
 
 
 
-RenderCollection::RenderCollection(std::shared_ptr<Shader> shader) 
+RenderCollection::RenderCollection(Shader* shader) 
     : shader(shader), vertexStride(0), vertexHead(0), usage(GL_STATIC_DRAW)
 {
     glGenVertexArrays(1, &VAO);

@@ -26,7 +26,8 @@ private:
     Camera camera;
     glm::mat4 projectionMatrix;
 
-    std::vector<std::shared_ptr<RenderCollection>> renderCollections;
+    std::vector<Shader> shaders;
+    std::vector<std::unique_ptr<RenderCollection>> renderCollections;
 
     KeyboardController keyboardController;
     MouseController mouseController;

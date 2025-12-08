@@ -15,10 +15,10 @@
 class RenderCollection
 {
 private:
-    // vertex array object in OpenGL, represents vertex attribute configuration
+    // vertex array and vertex buffer objects in OpenGL
     unsigned int VAO, VBO;
 
-    std::shared_ptr<Shader> shader;
+    Shader* shader;
 
     // attributes of all vertex data
     std::vector<VertexAttribute> attributes;
@@ -35,7 +35,7 @@ private:
     std::map<std::string, std::vector<Entity>> entities;
 
 public:
-    RenderCollection(std::shared_ptr<Shader> shader);
+    RenderCollection(Shader* shader);
 
     void refreshAttributePtrs() const;
     void addVertexAttribute(GLuint size, GLenum type, GLboolean normalized);
