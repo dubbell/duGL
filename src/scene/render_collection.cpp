@@ -2,16 +2,17 @@
 
 
 
-RenderCollection::RenderCollection(Shader* shader) 
-    : shader(shader), vertexStride(0), totalSize(0), usage(GL_STATIC_DRAW)
+RenderCollection::RenderCollection(std::shared_ptr<Shader> shader) 
+    : shader(shader), vertexStride(0), vertexHead(0), usage(GL_STATIC_DRAW)
 {
     glGenVertexArrays(1, &VAO);
-    glGenVertexArrays(1, &VBO);
+    glGenBuffers(1, &VBO);
 }
 
 void RenderCollection::refreshAttributePtrs() const
 {
     glBindVertexArray(VAO);
+    glBindBuffer(GL_ARRAY_BUFFER, VBO);
 
     int attrIndex = 0;
     size_t offset = 0;
@@ -20,7 +21,7 @@ void RenderCollection::refreshAttributePtrs() const
         glVertexAttribPointer(attrIndex, attr.size, attr.type, attr.normalized, vertexStride, (void*)offset);
         glEnableVertexAttribArray(attrIndex);
         attrIndex += 1;
-        offset = attr.size * sizeof(attr.type);
+        offset += attr.size * sizeof(attr.type);
     }
 
     glBindVertexArray(0);
@@ -33,14 +34,12 @@ void RenderCollection::addVertexAttribute(GLuint size, GLenum type, GLboolean no
     refreshAttributePtrs();
 }
 
-void RenderCollection::createRenderable(std::string name, std::vector<float> vertexData)
+void RenderCollection::createRenderable(std::string name, std::vector<float> &newVertexData, GLsizei newVertexCount)
 {
-    int vertexStart = static_cast<int>(data.size());
-    int vertexDataSize = static_cast<int>(vertexData.size());
-    Renderable renderable(vertexStart, vertexDataSize);
+    Renderable renderable(vertexHead, newVertexCount);
+    vertexHead += newVertexCount;
     renderables.insert({name, renderable});
-    data.insert(data.end(), vertexData.begin(), vertexData.end());
-    totalSize += sizeof(float) * vertexDataSize;
+    vertexData.insert(vertexData.end(), newVertexData.begin(), newVertexData.end());
 }
 
 void RenderCollection::createEntity(std::string renderable, glm::vec3 &position)
@@ -50,19 +49,19 @@ void RenderCollection::createEntity(std::string renderable, glm::vec3 &position)
 
 void RenderCollection::loadRemote() const
 {
-    const float* vertexData = data.data();
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBufferData(GL_ARRAY_BUFFER, totalSize, vertexData, usage);
+    glBufferData(GL_ARRAY_BUFFER, vertexData.size() * sizeof(float), vertexData.data(), usage);
 }
 
 void RenderCollection::clearLocal()
 {
-    data.clear();
+    vertexData.clear();
 }
 
 void RenderCollection::renderEntities(glm::mat4 &viewMatrix, glm::mat4 &projectionMatrix)
 {
     glBindVertexArray(VAO);
+    glBindBuffer(GL_ARRAY_BUFFER, VBO);
 
     shader->use();
 

@@ -17,14 +17,14 @@
 class Renderable
 {
 private:
-    int startIndex;
-    int vertexCount;
+    GLint startIndex;
+    GLsizei vertexCount;
 
 public:
-    Renderable(int startIndex, int vertexCount);
+    Renderable(GLint startIndex, GLsizei vertexCount);
 
-    int getStartIndex();
-    int getVertexCount();
+    GLint getStartIndex();
+    GLsizei getVertexCount();
 };
 
 

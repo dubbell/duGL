@@ -8,6 +8,6 @@ add_subdirectory(scene)
 
 target_include_directories(application PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 
-target_link_libraries(application PUBLIC controllers pipeline view utils scene)
-
-target_link_libraries(application PRIVATE project_dependencies)
+target_link_libraries(application 
+    PUBLIC controllers pipeline view utils scene
+    PRIVATE project_dependencies)

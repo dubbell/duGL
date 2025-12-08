@@ -2,32 +2,34 @@
 
 
 MouseController::MouseController()
-    : lastX(0.0f), lastY(0.0f), sensitivity(0.1f), firstMouse(true) {}
-
-MouseController::MouseController(Camera* camera) 
-    : camera(camera), lastX(0.0f), lastY(0.0f), sensitivity(0.1f), firstMouse(true) {}
+    : lastX(0.0f), lastY(0.0f), sensitivity(0.1f), firstMouse(true) 
+{}
 
 
-    
-void MouseController::setCamera(Camera* camera)
+void MouseController::registerObserver(std::shared_ptr<MouseControllable> observer)
 {
-    this->camera = camera;
+    observers.insert(observer);
+}
+
+void MouseController::unregisterObserver(std::shared_ptr<MouseControllable> observer)
+{
+    observers.erase(observer);
 }
 
 void MouseController::cursorPosCallback(float xpos, float ypos)
 {
     if (firstMouse)
-        {
-            lastX = xpos;
-            lastY = ypos;
-            firstMouse = false;
-        }
+    {
+        lastX = xpos;
+        lastY = ypos;
+        firstMouse = false;
+    }
 
-    float xoffset = (xpos - lastX) * sensitivity;
-    float yoffset = (lastY - ypos) * sensitivity; 
+    float xOffset = (xpos - lastX) * sensitivity;
+    float yOffset = (lastY - ypos) * sensitivity; 
     lastX = xpos;
     lastY = ypos;
-    
-    (*camera).turnRight(xoffset);
-    (*camera).turnUp(yoffset);
+
+    for (auto& observer : observers)
+        observer->cursorPosCallback(xOffset, yOffset);
 }

@@ -2,16 +2,16 @@
 
 
 
-Renderable::Renderable(int startIndex, int vertexCount)
+Renderable::Renderable(GLint startIndex, GLsizei vertexCount)
     : startIndex(startIndex), vertexCount(vertexCount)
 {}
 
-int Renderable::getStartIndex()
+GLint Renderable::getStartIndex()
 {
     return startIndex;
 }
 
-int Renderable::getVertexCount()
+GLsizei Renderable::getVertexCount()
 {
     return vertexCount;
 }

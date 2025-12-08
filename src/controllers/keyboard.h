@@ -8,16 +8,16 @@
 #include <utility>
 #include <GLFW/glfw3.h>
 
-#include "keyboard_controllable.h"
+#include <keyboard_controllable.h>
 #include "camera.h"
 
 
 class KeyboardController
 {
 private:
-    GLFWwindow* window;
+    std::shared_ptr<GLFWwindow> window;
 
-    std::set<KeyboardControllable*> observers;
+    std::set<std::shared_ptr<KeyboardControllable>> observers;
     std::set<int> registeredKeys;
     std::map<int, int> keyboardState;
     
@@ -27,8 +27,8 @@ public:
     void registerKey(int key);
     void unregisterKey(int key);
 
-    void registerKeyboardObserver(KeyboardControllable* observer);
-    void unregisterKeyboardObserver(KeyboardControllable* observer);
+    void registerObserver(std::shared_ptr<KeyboardControllable> observer);
+    void unregisterObserver(std::shared_ptr<KeyboardControllable> observer);
 
     void processKeyboardInput();
 };

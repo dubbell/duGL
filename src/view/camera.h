@@ -6,10 +6,13 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <GLFW/glfw3.h>
 
+#include <iostream>
+#include <string>
+
 #include <keyboard_controllable.h>
 
 
-class Camera : public KeyboardControllable
+class Camera
 {
 private:
     float maxSpeed;
@@ -29,6 +32,7 @@ public:
     Camera(glm::vec3 startingPosition, float maxSpeed);
 
     void setPosition(glm::vec3 &newPosition);
+    void updatePosition();
 
     void setVelocity(glm::vec3 &newVelocity);
     void setLocalVelocity(glm::vec3 &newLocalVelocity);
@@ -38,8 +42,6 @@ public:
 
     void turnRight(float deltaYaw);
     void turnUp(float deltaPitch);
-
-    void processKeyboardInput(std::map<int, int> &keyboardState);
 
     glm::mat4 getViewMatrix() const;
     glm::mat4 getProjectionMatrix() const;

@@ -9,6 +9,7 @@
 
 #include <vector>
 #include <map>
+#include <memory>
 
 
 class RenderCollection
@@ -17,15 +18,16 @@ private:
     // vertex array object in OpenGL, represents vertex attribute configuration
     unsigned int VAO, VBO;
 
-    Shader* shader;
+    std::shared_ptr<Shader> shader;
 
     // attributes of all vertex data
     std::vector<VertexAttribute> attributes;
     GLenum usage;
-    int vertexStride, totalSize;
+    GLsizei vertexStride;
+    GLint vertexHead;
 
     // vertices and vertex attributes
-    std::vector<float> data;
+    std::vector<float> vertexData;
 
     // collections of vertices
     std::map<std::string, Renderable> renderables;
@@ -33,12 +35,12 @@ private:
     std::map<std::string, std::vector<Entity>> entities;
 
 public:
-    RenderCollection(Shader* shader);
+    RenderCollection(std::shared_ptr<Shader> shader);
 
     void refreshAttributePtrs() const;
     void addVertexAttribute(GLuint size, GLenum type, GLboolean normalized);
 
-    void createRenderable(std::string name, std::vector<float> vertexData);
+    void createRenderable(std::string name, std::vector<float> &vertexData, GLsizei newVertexCount);
     void createEntity(std::string renderable, glm::vec3 &position);
 
     void loadRemote() const;

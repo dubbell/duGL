@@ -20,12 +20,12 @@ void KeyboardController::unregisterKey(int key)
     registeredKeys.erase(key);
 }
 
-void KeyboardController::registerKeyboardObserver(KeyboardControllable* observer)
+void KeyboardController::registerObserver(std::shared_ptr<KeyboardControllable> observer)
 {
     observers.insert(observer);
 }
 
-void KeyboardController::unregisterKeyboardObserver(KeyboardControllable* observer)
+void KeyboardController::unregisterObserver(std::shared_ptr<KeyboardControllable> observer)
 {
     observers.erase(observer);
 }
@@ -34,9 +34,9 @@ void KeyboardController::processKeyboardInput()
 {
     // get input
     for (int key : registeredKeys)
-        keyboardState[key] = glfwGetKey(window, key);
+        keyboardState[key] = glfwGetKey(window.get(), key);
 
     // process input in observers
-    for (KeyboardControllable* observer : observers)
+    for (auto& observer : observers)
         observer->processKeyboardInput(keyboardState);
 }
