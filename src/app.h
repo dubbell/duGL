@@ -23,13 +23,13 @@ class Application
 private:
     GLFWwindow* window;
 
-    std::shared_ptr<Camera> camera;
+    Camera camera;
     glm::mat4 projectionMatrix;
 
     std::vector<std::shared_ptr<RenderCollection>> renderCollections;
 
-    std::shared_ptr<KeyboardController> keyboardController;
-    std::shared_ptr<MouseController> mouseController;
+    KeyboardController keyboardController;
+    MouseController mouseController;
 
 public:
     Application(int width, int height);

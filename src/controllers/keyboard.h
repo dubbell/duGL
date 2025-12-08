@@ -15,14 +15,17 @@
 class KeyboardController
 {
 private:
-    std::shared_ptr<GLFWwindow> window;
+    GLFWwindow* _window;
 
     std::set<std::shared_ptr<KeyboardControllable>> observers;
     std::set<int> registeredKeys;
     std::map<int, int> keyboardState;
     
 public:
+    KeyboardController();
     KeyboardController(GLFWwindow* window);
+
+    void setWindow(GLFWwindow* window);
 
     void registerKey(int key);
     void unregisterKey(int key);

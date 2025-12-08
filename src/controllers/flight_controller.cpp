@@ -1,7 +1,7 @@
 #include <flight_controller.h>
 
 
-FlightController::FlightController(GLFWwindow* window, std::shared_ptr<Camera> camera) 
+FlightController::FlightController(GLFWwindow* window, Camera* camera) 
     : window(window), camera(camera), speed(0.1f), escapeHold(false), freeCursor(true) 
 {
     activeKeys = {

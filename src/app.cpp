@@ -2,6 +2,7 @@
 
 
 Application::Application(int width, int height)
+    : camera(glm::vec3(0.0f, 0.0f, 0.0f), 1.0f), mouseController(), keyboardController()
 {
     glfwInit();
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
@@ -20,18 +21,15 @@ Application::Application(int width, int height)
     glViewport(0, 0, width, height);
     glEnable(GL_DEPTH_TEST);
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+    
+    keyboardController.setWindow(window);
 
-    mouseController = std::make_shared<MouseController>();
-    keyboardController = std::make_shared<KeyboardController>(window);
+    auto flightController = std::make_shared<FlightController>(window, &camera);
 
-    camera = std::make_shared<Camera>(glm::vec3(0.0f, 0.0f, 0.0f), 1.0f);
-
-    auto flightController = std::make_shared<FlightController>(window, camera);
-
-    mouseController->registerObserver(flightController);
-    keyboardController->registerObserver(flightController);
+    mouseController.registerObserver(flightController);
+    keyboardController.registerObserver(flightController);
     for (int key : flightController->getActiveKeys())
-        keyboardController->registerKey(key);
+        keyboardController.registerKey(key);
 
     glfwSetFramebufferSizeCallback(window, Application::frameBufferSizeCallback);
     glfwSetCursorPosCallback(window, Application::cursorPosCallback);
@@ -74,13 +72,13 @@ void Application::startMainLoop()
 {
     while (!glfwWindowShouldClose(window))
     {
-        keyboardController->processKeyboardInput();
+        keyboardController.processKeyboardInput();
 
         glClearColor(0.1f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        glm::mat4 viewMatrix = camera->getViewMatrix();
-        glm::mat4 projectionMatrix = camera->getProjectionMatrix();
+        glm::mat4 viewMatrix = camera.getViewMatrix();
+        glm::mat4 projectionMatrix = camera.getProjectionMatrix();
 
         for (const auto& renderCollection : renderCollections)
             renderCollection->renderEntities(viewMatrix, projectionMatrix);
@@ -99,5 +97,5 @@ void Application::frameBufferSizeCallback(GLFWwindow* window, int width, int hei
 void Application::cursorPosCallback(GLFWwindow* window, double xpos, double ypos)
 {
     Application* application = static_cast<Application*>(glfwGetWindowUserPointer(window));
-    application->mouseController->cursorPosCallback((float)xpos, (float)ypos);
+    application->mouseController.cursorPosCallback((float)xpos, (float)ypos);
 }
