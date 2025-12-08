@@ -3,23 +3,26 @@
 
 
 #include <GLFW/glfw3.h>
+#include <memory>
+#include <set>
 
-#include "camera.h"
+#include <mouse_controllable.h>
 
 
 class MouseController
 {
 private:
-    Camera* camera;
+    std::set<std::shared_ptr<MouseControllable>> observers;
+
     float lastX, lastY;
     float sensitivity;
     bool firstMouse;
 
 public:
     MouseController();
-    MouseController(Camera* camera);
 
-    void setCamera(Camera* camera);
+    void registerObserver(std::shared_ptr<MouseControllable> observer);
+    void unregisterObserver(std::shared_ptr<MouseControllable> observer);
 
     void cursorPosCallback(float xpos, float ypos);
 };

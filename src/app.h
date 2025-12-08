@@ -7,6 +7,7 @@
 
 #include <GLFW/glfw3.h>
 #include <string>
+#include <memory>
 
 #include <camera.h>
 #include <keyboard.h>
@@ -14,16 +15,18 @@
 #include <shader.h>
 #include <render_collection.h>
 #include <vertex_factory.h>
+#include <flight_controller.h>
 
 
 class Application
 {
 private:
     GLFWwindow* window;
-    Camera camera;
+
+    std::shared_ptr<Camera> camera;
     glm::mat4 projectionMatrix;
 
-    std::vector<RenderCollection> renderCollections;
+    std::vector<std::shared_ptr<RenderCollection>> renderCollections;
 
     KeyboardController keyboardController;
     MouseController mouseController;

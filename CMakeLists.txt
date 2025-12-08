@@ -19,9 +19,9 @@ add_subdirectory(src)
 
 add_executable(${PROJECT_NAME} src/main.cpp lib/glad/src/gl.c)
 
-target_link_libraries(${PROJECT_NAME} PRIVATE
-    application
-    project_dependencies
+target_link_libraries(${PROJECT_NAME} 
+    PUBLIC project_dependencies
+    PRIVATE application
     ${CMAKE_CURRENT_SOURCE_DIR}/lib/glfw/lib-vc2022/glfw3.lib
     opengl32.lib
     user32.lib

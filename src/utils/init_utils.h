@@ -35,6 +35,7 @@ int initialize(GLFWwindow** windowPtr)
 
     // enable depth testing with the z-buffer
     glEnable(GL_DEPTH_TEST);
+    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
     return 0;
 }
