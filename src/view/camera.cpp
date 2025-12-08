@@ -8,7 +8,7 @@ Camera::Camera()
       pitch(0.0f), 
       yaw(0.0f) 
 {
-    projectionMatrix = glm::perspective(glm::radians(90.0f), 800.0f / 600.0f, 0.1f, 100.0f);
+    projectionMatrix = glm::perspective(glm::radians(75.0f), 800.0f / 600.0f, 0.1f, 100.0f);
 };
 
 Camera::Camera(glm::vec3 startingPosition, float maxSpeed) 
@@ -18,7 +18,7 @@ Camera::Camera(glm::vec3 startingPosition, float maxSpeed)
       pitch(0.0f), 
       yaw(0.0f)
 {
-    projectionMatrix = glm::perspective(glm::radians(90.0f), 800.0f / 600.0f, 0.1f, 100.0f);
+    projectionMatrix = glm::perspective(glm::radians(75.0f), 800.0f / 600.0f, 0.1f, 500.0f);
 }
 
 glm::mat3 Camera::getLocalBasis()
