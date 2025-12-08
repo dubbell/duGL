@@ -7,20 +7,15 @@
 #include <glm/gtc/type_ptr.hpp>
 
 #include <app.h>
-#include <init_utils.h>
 
 
 int main()
 {
-    GLFWwindow* window;
-    initialize(&window);
-
-    Application* application = new Application(window);
+    Application* application = new Application(1920, 1080);
 
     application->setupCubeScene();
     application->startMainLoop();
+    application->stop();
 
-    glfwDestroyWindow(window);
-    glfwTerminate();
     return 0;
 }

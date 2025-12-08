@@ -8,7 +8,7 @@ Camera::Camera()
       pitch(0.0f), 
       yaw(0.0f) 
 {
-    projectionMatrix = glm::perspective(glm::radians(45.0f), 800.0f / 600.0f, 0.1f, 100.0f);
+    projectionMatrix = glm::perspective(glm::radians(90.0f), 800.0f / 600.0f, 0.1f, 100.0f);
 };
 
 Camera::Camera(glm::vec3 startingPosition, float maxSpeed) 
@@ -18,7 +18,7 @@ Camera::Camera(glm::vec3 startingPosition, float maxSpeed)
       pitch(0.0f), 
       yaw(0.0f)
 {
-    projectionMatrix = glm::perspective(glm::radians(45.0f), 800.0f / 600.0f, 0.1f, 100.0f);
+    projectionMatrix = glm::perspective(glm::radians(90.0f), 800.0f / 600.0f, 0.1f, 100.0f);
 }
 
 glm::mat3 Camera::getLocalBasis()
@@ -32,13 +32,13 @@ glm::mat3 Camera::getLocalBasis()
 
     glm::vec3 up = glm::cross(right, front);
 
-    return glm::mat3(front, right, up);
+    return glm::mat3(right, up, -front);
 }
 
 glm::vec3 Camera::toGlobal(glm::vec3 local)
 {
     glm::mat3 globalToLocal = getLocalBasis();
-    return glm::transpose(globalToLocal) * local;
+    return globalToLocal * local;
 }
 
 void Camera::setPosition(glm::vec3 &newPosition)
@@ -85,8 +85,6 @@ void Camera::turnUp(float deltaPitch)
     if (pitch < -89.0f) pitch = -89.0f;
     else if (pitch > 89.0f) pitch = 89.0f;
 }
-
-
 
 
 glm::mat4 Camera::getViewMatrix() const

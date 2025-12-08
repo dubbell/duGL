@@ -28,11 +28,12 @@ private:
 
     std::vector<std::shared_ptr<RenderCollection>> renderCollections;
 
-    KeyboardController keyboardController;
-    MouseController mouseController;
+    std::shared_ptr<KeyboardController> keyboardController;
+    std::shared_ptr<MouseController> mouseController;
 
 public:
-    Application(GLFWwindow* window);
+    Application(int width, int height);
+    void stop();
 
     void setupCubeScene();
     void startMainLoop();

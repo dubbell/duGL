@@ -2,6 +2,7 @@
 #define FLIGHT_CONTROLLER_H
 
 #include <memory>
+#include <vector>
 
 #include <keyboard_controllable.h>
 #include <mouse_controllable.h>
@@ -11,11 +12,17 @@
 class FlightController : public KeyboardControllable, public MouseControllable
 {
 private:
-    float speed;
+    GLFWwindow* window;
     std::shared_ptr<Camera> camera;
+    std::vector<int> activeKeys;
+
+    float speed;    
+    bool escapeHold, freeCursor;
 
 public:
-    FlightController(std::shared_ptr<Camera> &camera);
+    FlightController(GLFWwindow* window, std::shared_ptr<Camera> camera);
+
+    std::vector<int> getActiveKeys();
 
     void processKeyboardInput(std::map<int, int> &keyboardState);
     void cursorPosCallback(float xOffset, float yOffset);
