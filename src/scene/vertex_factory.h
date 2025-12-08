@@ -8,6 +8,7 @@ class VertexFactory
 {
 public:
     static std::pair<unsigned int, std::vector<unsigned char>> getColoredCube();
+    static std::pair<unsigned int, std::vector<unsigned char>> getGround();
 };
 
 #endif

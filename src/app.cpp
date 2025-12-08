@@ -51,23 +51,29 @@ void Application::setupCubeScene()
     vertexManager.addAttribute(VAO, 3, GL_FLOAT, GL_FALSE);
     
     auto [cubeVertexCount, cubeData] = VertexFactory::getColoredCube();
+    auto [groundVertexCount, groundData] = VertexFactory::getGround();
     
-    Shader* cubeShader = shaders.emplace_back(std::make_unique<Shader>("assets/shaders/basic.vert", "assets/shaders/basic.frag")).get();
-    Renderable* renderable = vertexManager.createRenderable(VBO, cubeData, cubeVertexCount, GL_STATIC_DRAW, cubeShader);
+    Shader* shader = shaders.emplace_back(std::make_unique<Shader>("assets/shaders/basic.vert", "assets/shaders/basic.frag")).get();
+
+    Renderable* renderableCube = vertexManager.createRenderable(VBO, cubeData, cubeVertexCount, GL_STATIC_DRAW, shader);
+    Renderable* renderableGround = vertexManager.createRenderable(VBO, groundData, groundVertexCount, GL_STATIC_DRAW, shader);
 
     vertexManager.loadAttributes(VAO);
     vertexManager.loadVertexData(VBO);
 
-    RenderTarget& renderTarget = renderTargets.emplace_back(VAO, VBO, cubeShader, std::vector<Entity>{});
+    RenderTarget& renderTarget = renderTargets.emplace_back(VAO, VBO, shader, std::vector<Entity>{});
+
+    glm::vec3 groundPosition(0.0f, -1.0f, 0.0f);
+    renderTarget.entities.emplace_back(Entity(renderableGround, groundPosition));
 
     for (float x : {-5.0f, 5.0f})
     {
-        for (float y : {-5.0f, 5.0f})
+        for (float y : {0.0f, 5.0f})
         {
             for (float z : {-5.0f, 5.0f})
             {
-                glm::vec3 position(x, y, z);
-                renderTarget.entities.emplace_back(Entity(renderable, position));
+                glm::vec3 cubePosition(x, y, z);
+                renderTarget.entities.emplace_back(Entity(renderableCube, cubePosition));
             }
         }
     }
