@@ -13,14 +13,14 @@ class FlightController : public KeyboardControllable, public MouseControllable
 {
 private:
     GLFWwindow* window;
-    std::shared_ptr<Camera> camera;
+    Camera* camera;
     std::vector<int> activeKeys;
 
     float speed;    
     bool escapeHold, freeCursor;
 
 public:
-    FlightController(GLFWwindow* window, std::shared_ptr<Camera> camera);
+    FlightController(GLFWwindow* window, Camera* camera);
 
     std::vector<int> getActiveKeys();
 

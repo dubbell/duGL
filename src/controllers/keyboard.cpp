@@ -1,14 +1,24 @@
 #include "keyboard.h"
 
 
-
-KeyboardController::KeyboardController(GLFWwindow* window) 
-    : window(window),
+KeyboardController::KeyboardController()
+    : _window(nullptr),
       observers(), 
       registeredKeys(), 
       keyboardState()
 {}
 
+KeyboardController::KeyboardController(GLFWwindow* window) 
+    : _window(window),
+      observers(), 
+      registeredKeys(), 
+      keyboardState()
+{}
+
+void KeyboardController::setWindow(GLFWwindow* window)
+{
+    _window = window;
+}
 
 void KeyboardController::registerKey(int key)
 {
@@ -34,7 +44,7 @@ void KeyboardController::processKeyboardInput()
 {
     // get input
     for (int key : registeredKeys)
-        keyboardState[key] = glfwGetKey(window.get(), key);
+        keyboardState[key] = glfwGetKey(_window, key);
 
     // process input in observers
     for (auto& observer : observers)
