@@ -2,17 +2,22 @@
 #define ENTITY_H
 
 #include <renderable.h>
+#include <shader.h>
 
 
 class Entity
 {
 private:
-    glm::vec3 position;
+    Renderable* _renderable;
+    glm::vec3 _position;
 
 public:
-    Entity(glm::vec3 &position);
+    Entity(Renderable* renderable, glm::vec3 &position);
 
     glm::vec3 getPosition();
+    glm::mat4 getModelTransform();
+
+    void render();
 };
 
 

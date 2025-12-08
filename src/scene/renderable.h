@@ -11,20 +11,33 @@
 #include <iostream>
 #include <string>
 
-#include <vertex_attribute.h>
+#include <vmanager_interface.h>
+#include <shader.h>
+
 
 
 class Renderable
 {
 private:
-    GLint startIndex;
-    GLsizei vertexCount;
+    GLint _startIndex;
+    GLsizei _vertexCount;
+    unsigned int _VAO, _VBO;
+
+    IVertexManager* _vertexManager;
+    Shader* _shader;
 
 public:
-    Renderable(GLint startIndex, GLsizei vertexCount);
+    Renderable(GLint startIndex, GLsizei vertexCount, unsigned int VAO, unsigned int VBO, IVertexManager* vertexManager, Shader* shader);
 
     GLint getStartIndex();
+    void setStartIndex(GLint startIndex);
+
     GLsizei getVertexCount();
+
+    Shader* getShader();
+    void setShader(Shader* shader);
+
+    void render();
 };
 
 
