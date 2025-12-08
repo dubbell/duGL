@@ -45,8 +45,10 @@ void Application::stop()
 void Application::setupCubeScene()
 {
     std::vector<float> cubeVertexData = VertexFactory::getColoredCube();
-    auto shaderPtr = std::make_shared<Shader>("assets/shaders/basic.vert", "assets/shaders/basic.frag");
-    auto renderCollection = std::make_shared<RenderCollection>(shaderPtr);
+
+    Shader& shader = shaders.emplace_back("assets/shaders/basic.vert", "assets/shaders/basic.frag");
+    auto renderCollection = std::make_unique<RenderCollection>(&shader);
+
     renderCollection->addVertexAttribute(3, GL_FLOAT, GL_FALSE);
     renderCollection->addVertexAttribute(3, GL_FLOAT, GL_FALSE);
 
@@ -65,7 +67,7 @@ void Application::setupCubeScene()
     }
     
     renderCollection->loadRemote();
-    renderCollections.push_back(renderCollection);
+    renderCollections.push_back(std::move(renderCollection));
 }
 
 void Application::startMainLoop()
