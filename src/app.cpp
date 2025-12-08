@@ -1,25 +1,47 @@
 #include <app.h>
 
 
-Application::Application(GLFWwindow* window)
-    : window(window),
-      keyboardController(window)
+Application::Application(int width, int height)
 {
+    glfwInit();
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
+    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+
+    window = glfwCreateWindow(width, height, "duGL", NULL, NULL);
+    if (window == NULL) {
+        std::cout << "Failed to create GLFW window." << std::endl;
+    }
+    glfwMakeContextCurrent(window);
+    if (!gladLoadGL(glfwGetProcAddress))
+    {
+        std::cout << "Failed to initialize GLAD." << std::endl;
+    }
+    glViewport(0, 0, width, height);
+    glEnable(GL_DEPTH_TEST);
+    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+
+    mouseController = std::make_shared<MouseController>();
+    keyboardController = std::make_shared<KeyboardController>(window);
+
     camera = std::make_shared<Camera>(glm::vec3(0.0f, 0.0f, 0.0f), 1.0f);
 
-    auto flightController = std::make_shared<FlightController>(camera);
+    auto flightController = std::make_shared<FlightController>(window, camera);
 
-    mouseController.registerObserver(flightController);
-    keyboardController.registerObserver(flightController);
-
-    keyboardController.registerKey(GLFW_KEY_W);
-    keyboardController.registerKey(GLFW_KEY_A);
-    keyboardController.registerKey(GLFW_KEY_S);
-    keyboardController.registerKey(GLFW_KEY_D);
+    mouseController->registerObserver(flightController);
+    keyboardController->registerObserver(flightController);
+    for (int key : flightController->getActiveKeys())
+        keyboardController->registerKey(key);
 
     glfwSetFramebufferSizeCallback(window, Application::frameBufferSizeCallback);
     glfwSetCursorPosCallback(window, Application::cursorPosCallback);
     glfwSetWindowUserPointer(window, this);
+}
+
+void Application::stop()
+{
+    glfwDestroyWindow(window);
+    glfwTerminate();
 }
 
 void Application::setupCubeScene()
@@ -52,7 +74,7 @@ void Application::startMainLoop()
 {
     while (!glfwWindowShouldClose(window))
     {
-        keyboardController.processKeyboardInput();
+        keyboardController->processKeyboardInput();
 
         glClearColor(0.1f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -77,5 +99,5 @@ void Application::frameBufferSizeCallback(GLFWwindow* window, int width, int hei
 void Application::cursorPosCallback(GLFWwindow* window, double xpos, double ypos)
 {
     Application* application = static_cast<Application*>(glfwGetWindowUserPointer(window));
-    application->mouseController.cursorPosCallback((float)xpos, (float)ypos);
+    application->mouseController->cursorPosCallback((float)xpos, (float)ypos);
 }
