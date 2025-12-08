@@ -44,15 +44,21 @@ void Application::stop()
 
 void Application::setupCubeScene()
 {
-    std::vector<float> cubeVertexData = VertexFactory::getColoredCube();
+    unsigned int VAO = vertexManager.createAttributeObject();
+    unsigned int VBO = vertexManager.createBufferObject(VAO);
 
-    Shader& shader = shaders.emplace_back("assets/shaders/basic.vert", "assets/shaders/basic.frag");
-    auto renderCollection = std::make_unique<RenderCollection>(&shader);
+    vertexManager.addAttribute(VAO, 3, GL_FLOAT, GL_FALSE);
+    vertexManager.addAttribute(VAO, 3, GL_FLOAT, GL_FALSE);
+    
+    auto [cubeVertexCount, cubeData] = VertexFactory::getColoredCube();
+    
+    Shader* cubeShader = shaders.emplace_back(std::make_unique<Shader>("assets/shaders/basic.vert", "assets/shaders/basic.frag")).get();
+    Renderable* renderable = vertexManager.createRenderable(VBO, cubeData, cubeVertexCount, GL_STATIC_DRAW, cubeShader);
 
-    renderCollection->addVertexAttribute(3, GL_FLOAT, GL_FALSE);
-    renderCollection->addVertexAttribute(3, GL_FLOAT, GL_FALSE);
+    vertexManager.loadAttributes(VAO);
+    vertexManager.loadVertexData(VBO);
 
-    renderCollection->createRenderable("cube", cubeVertexData, 36);
+    RenderTarget& renderTarget = renderTargets.emplace_back(VAO, VBO, cubeShader, std::vector<Entity>{});
 
     for (float x : {-5.0f, 5.0f})
     {
@@ -61,13 +67,10 @@ void Application::setupCubeScene()
             for (float z : {-5.0f, 5.0f})
             {
                 glm::vec3 position(x, y, z);
-                renderCollection->createEntity("cube", position);
+                renderTarget.entities.emplace_back(Entity(renderable, position));
             }
         }
     }
-    
-    renderCollection->loadRemote();
-    renderCollections.push_back(std::move(renderCollection));
 }
 
 void Application::startMainLoop()
@@ -82,8 +85,20 @@ void Application::startMainLoop()
         glm::mat4 viewMatrix = camera.getViewMatrix();
         glm::mat4 projectionMatrix = camera.getProjectionMatrix();
 
-        for (const auto& renderCollection : renderCollections)
-            renderCollection->renderEntities(viewMatrix, projectionMatrix);
+        for (auto& renderTarget : renderTargets)
+        {
+            glBindVertexArray(renderTarget.VAO);
+            glBindBuffer(GL_ARRAY_BUFFER, renderTarget.VBO);
+
+            renderTarget.shader->use();
+            renderTarget.shader->setMatrix("view", viewMatrix);
+            renderTarget.shader->setMatrix("projection", projectionMatrix);
+
+            for (auto& entity : renderTarget.entities) entity.render();
+        }
+
+        glBindVertexArray(0);
+        glBindBuffer(GL_ARRAY_BUFFER, 0);
         
         glfwSwapBuffers(window);
         glfwPollEvents();

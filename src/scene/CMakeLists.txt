@@ -1,6 +1,6 @@
-add_library(scene STATIC 
+add_library(scene STATIC
     renderable.cpp 
-    render_collection.cpp 
+    vertex_manager.cpp 
     entity.cpp 
     vertex_factory.cpp)
 

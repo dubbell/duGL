@@ -8,15 +8,28 @@
 #include <GLFW/glfw3.h>
 #include <string>
 #include <memory>
+#include <map>
 
 #include <camera.h>
 #include <keyboard.h>
 #include <mouse.h>
 #include <shader.h>
-#include <render_collection.h>
 #include <vertex_factory.h>
 #include <flight_controller.h>
+#include <entity.h>
+#include <vertex_manager.h>
 
+
+struct RenderTarget
+{
+public:
+    unsigned int VAO, VBO;
+    Shader* shader;
+    std::vector<Entity> entities;
+
+    RenderTarget(unsigned int vao, unsigned int vbo, Shader* shdr, std::vector<Entity> ents)
+        : VAO(vao), VBO(vbo), shader(shdr), entities(std::move(ents)) {};
+};
 
 class Application
 {
@@ -26,8 +39,10 @@ private:
     Camera camera;
     glm::mat4 projectionMatrix;
 
-    std::vector<Shader> shaders;
-    std::vector<std::unique_ptr<RenderCollection>> renderCollections;
+    std::vector<std::unique_ptr<Shader>> shaders;
+    VertexManager vertexManager;
+
+    std::vector<RenderTarget> renderTargets;
 
     KeyboardController keyboardController;
     MouseController mouseController;
