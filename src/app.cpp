@@ -2,7 +2,6 @@
 
 
 Application::Application(int width, int height)
-    : camera(glm::vec3(0.0f, 0.0f, 0.0f), 1.0f), mouseController(), keyboardController()
 {
     glfwInit();
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
@@ -22,6 +21,8 @@ Application::Application(int width, int height)
     glEnable(GL_DEPTH_TEST);
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
     
+    camera.setAspectRatio(16.0f / 9.0f);
+
     keyboardController.setWindow(window);
 
     auto flightController = std::make_shared<FlightController>(window, &camera);
@@ -115,6 +116,8 @@ void Application::startMainLoop()
 void Application::frameBufferSizeCallback(GLFWwindow* window, int width, int height)
 {
     glViewport(0, 0, width, height);
+    Application* application = static_cast<Application*>(glfwGetWindowUserPointer(window));
+    application->camera.setAspectRatio(float(width) / float(height));
 }
 
 void Application::cursorPosCallback(GLFWwindow* window, double xpos, double ypos)
