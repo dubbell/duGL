@@ -17,6 +17,7 @@ class Camera
 private:
     float maxSpeed;
     float yaw, pitch;
+    float fov, aspectRatio;
 
     glm::mat4 projectionMatrix;
 
@@ -29,7 +30,6 @@ private:
 
 public:
     Camera();
-    Camera(glm::vec3 startingPosition, float maxSpeed);
 
     void setPosition(glm::vec3 &newPosition);
     void updatePosition();
@@ -42,6 +42,9 @@ public:
 
     void turnRight(float deltaYaw);
     void turnUp(float deltaPitch);
+
+    void setFov(float FOV);
+    void setAspectRatio(float AR);
 
     glm::mat4 getViewMatrix() const;
     glm::mat4 getProjectionMatrix() const;

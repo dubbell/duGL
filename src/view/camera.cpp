@@ -1,25 +1,17 @@
 #include "camera.h"
 
 
-Camera::Camera() 
+Camera::Camera()
     : position(0.0f, 0.0f, 0.0f), 
       velocity(0.0f, 0.0f, 0.0f), 
-      maxSpeed(0.0f), 
+      maxSpeed(1.0f), 
       pitch(0.0f), 
-      yaw(0.0f) 
+      yaw(0.0f),
+      fov(90.0f),
+      aspectRatio(4.0 / 3.0f)
 {
-    projectionMatrix = glm::perspective(glm::radians(75.0f), 800.0f / 600.0f, 0.1f, 100.0f);
+    projectionMatrix = glm::perspective(glm::radians(fov), aspectRatio, 0.1f, 500.0f);
 };
-
-Camera::Camera(glm::vec3 startingPosition, float maxSpeed) 
-    : position(startingPosition),
-      velocity(0.0f, 0.0f, 0.0f),
-      maxSpeed(maxSpeed), 
-      pitch(0.0f), 
-      yaw(0.0f)
-{
-    projectionMatrix = glm::perspective(glm::radians(75.0f), 800.0f / 600.0f, 0.1f, 500.0f);
-}
 
 glm::mat3 Camera::getLocalBasis()
 {
@@ -85,6 +77,19 @@ void Camera::turnUp(float deltaPitch)
     if (pitch < -89.0f) pitch = -89.0f;
     else if (pitch > 89.0f) pitch = 89.0f;
 }
+
+void Camera::setFov(float FOV)
+{
+    fov = FOV;
+    projectionMatrix = glm::perspective(glm::radians(fov), aspectRatio, 0.1f, 500.0f);
+}
+
+void Camera::setAspectRatio(float AR)
+{
+    aspectRatio = AR;
+    projectionMatrix = glm::perspective(glm::radians(fov), aspectRatio, 0.1f, 500.0f);
+}
+
 
 
 glm::mat4 Camera::getViewMatrix() const
