@@ -35,6 +35,9 @@ protected:
     std::vector<unsigned int> textures;
     Shader* _shader;
 
+    VertexBuilder();
+    VertexBuilder(VertexManager* vertexManager, int numVertices);
+
     virtual std::vector<std::array<float, 3>> getVertexPositions() = 0;
     virtual std::vector<std::array<float, 2>> getVertexTextureCoords() = 0;
     virtual std::array<float, 3> getVertexColor(std::array<float, 3> position) = 0;
