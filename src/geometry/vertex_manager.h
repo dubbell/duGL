@@ -50,8 +50,6 @@ public:
     VertexManager();
 
     unsigned int createAttributeObject();
-
-    unsigned int createBufferObject();
     unsigned int createBufferObject(unsigned int VAO);
 
     void addAttribute(unsigned int VAO, GLuint size, GLenum type, GLboolean normalized);

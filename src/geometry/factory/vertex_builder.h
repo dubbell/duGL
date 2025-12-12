@@ -21,9 +21,10 @@ protected:
 
     std::vector<std::vector<float>> colors;
     std::vector<unsigned int> textures;
+    Shader* _shader;
 
-    virtual int getVertexCount();
-    virtual std::vector<unsigned char> getData();
+    virtual int getVertexCount() = 0;
+    virtual std::vector<unsigned char> getData() = 0;
 
 public:
     virtual VertexBuilder* addTexture(std::string &texturePath) = 0;
@@ -31,6 +32,7 @@ public:
     virtual VertexBuilder* setVAO(unsigned int VAO) = 0;
     virtual VertexBuilder* setVBO(unsigned int VBO) = 0;
     virtual VertexBuilder* setUsage(GLenum usage) = 0;
+    virtual VertexBuilder* setShader(Shader* shader) = 0;
 
     virtual std::unique_ptr<Renderable> build() = 0;
 };

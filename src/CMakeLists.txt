@@ -8,5 +8,5 @@ add_subdirectory(geometry)
 target_include_directories(application PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 
 target_link_libraries(application 
-    PUBLIC controllers pipeline view geometry
+    PUBLIC controllers pipeline view geometry geometry_factory
     PRIVATE project_dependencies)

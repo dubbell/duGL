@@ -13,12 +13,6 @@ unsigned int VertexManager::createAttributeObject()
     return VAO;
 }
 
-unsigned int VertexManager::createBufferObject()
-{
-    unsigned int VAO = createAttributeObject();
-    return createBufferObject(VAO);
-}
-
 unsigned int VertexManager::createBufferObject(unsigned int VAO)
 {
     unsigned int VBO;
