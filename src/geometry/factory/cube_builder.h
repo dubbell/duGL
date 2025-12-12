@@ -1,5 +1,5 @@
-#ifndef CUBE_TEMPLATE_H
-#define CUBE_TEMPLATE_H
+#ifndef CUBE_BUILDER_H
+#define CUBE_BUILDER_H
 
 #include <vertex_builder.h>
 #include <stb_image.h>
@@ -12,6 +12,7 @@
 #include <iostream>
 #include <map>
 #include <stdexcept>
+#include <array>
 
 
 
@@ -26,24 +27,16 @@ private:
     int vertexCount;
     bool enableTextures, enableColors;
 
-    std::vector<std::vector<float>> colors;
+    std::vector<std::array<float, 3>> colors;
     std::vector<unsigned int> textures;
     Shader* _shader;
-    
-    int getVertexCount() override;
-    std::vector<unsigned char> getData() override;
-    
+
+    std::vector<std::array<float, 3>> getVertexPositions() override;
+    std::vector<std::array<float, 2>> getVertexTextureCoords() override;
+    std::array<float, 3> getVertexColor(std::array<float, 3> position) override;
+
 public:
     CubeBuilder(VertexManager* vertexManager);
-
-    VertexBuilder* addTexture(std::string &texturePath) override;
-    VertexBuilder* addColors(std::vector<std::vector<float>> &colors) override;
-    VertexBuilder* setVAO(unsigned int VAO) override;
-    VertexBuilder* setVBO(unsigned int VBO) override;
-    VertexBuilder* setUsage(GLenum usage) override;
-    VertexBuilder* setShader(Shader* shader) override;
-
-    std::unique_ptr<Renderable> build() override;
 };
 
 
