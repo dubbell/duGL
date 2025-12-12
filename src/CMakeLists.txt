@@ -3,10 +3,10 @@ add_library(application STATIC app.cpp)
 add_subdirectory(controllers)
 add_subdirectory(pipeline)
 add_subdirectory(view)
-add_subdirectory(scene)
+add_subdirectory(geometry)
 
 target_include_directories(application PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 
 target_link_libraries(application 
-    PUBLIC controllers pipeline view scene
+    PUBLIC controllers pipeline view geometry
     PRIVATE project_dependencies)

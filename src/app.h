@@ -14,7 +14,7 @@
 #include <keyboard.h>
 #include <mouse.h>
 #include <shader.h>
-#include <vertex_factory.h>
+#include <factory/vertex_factory.h>
 #include <flight_controller.h>
 #include <entity.h>
 #include <vertex_manager.h>
