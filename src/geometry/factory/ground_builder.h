@@ -1,5 +1,5 @@
-#ifndef CUBE_BUILDER_H
-#define CUBE_BUILDER_H
+#ifndef GROUND_BUILDER_H
+#define GROUND_BUILDER_H
 
 #include <vertex_builder.h>
 #include <stb_image.h>
@@ -12,20 +12,19 @@
 #include <iostream>
 #include <map>
 #include <stdexcept>
-#include <array>
 
 
 
 
-class CubeBuilder : public VertexBuilder
+class GroundBuilder : public VertexBuilder
 {
 protected:
     std::vector<std::array<float, 3>> getVertexPositions() override;
     std::vector<std::array<float, 2>> getVertexTextureCoords() override;
     std::array<float, 3> getVertexColor(std::array<float, 3> position) override;
-
+    
 public:
-    CubeBuilder(VertexManager* vertexManager);
+    GroundBuilder(VertexManager* vertexManager);
 };
 
 

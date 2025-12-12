@@ -1,6 +1,17 @@
 #include <vertex_builder.h>
 
 
+
+
+VertexBuilder::VertexBuilder()
+        : _VAO(0), _VBO(0), _usage(GL_STATIC_DRAW), enableTextures(false), enableColors(false)
+{}
+
+VertexBuilder::VertexBuilder(VertexManager* vertexManager, int numVertices)
+        : _vertexManager(vertexManager), _VAO(0), _VBO(0), vertexCount(numVertices), _usage(GL_STATIC_DRAW), enableTextures(false), enableColors(false)
+{}
+
+
 // setters -----------
 
 VertexBuilder* VertexBuilder::addTexture(std::string &texturePath)
@@ -115,12 +126,13 @@ std::unique_ptr<Renderable> VertexBuilder::build()
     unsigned int VAO = _VAO == 0 ? _vertexManager->createAttributeObject() : _VAO;
     unsigned int VBO = _VBO == 0 ? _vertexManager->createBufferObject(VAO) : _VBO;
     
-    _vertexManager->addAttribute(VAO, 3, GL_FLOAT, GL_FALSE);  // position attribute
-
-    if (enableTextures)
-        _vertexManager->addAttribute(VAO, 2, GL_FLOAT, GL_FALSE);  // texture coord attribute
-    if (enableColors)
-        _vertexManager->addAttribute(VAO, 3, GL_FLOAT, GL_FALSE);  // color attribute
+    // only set attributes if VAO was just created in vertex manager, otherwise they already exist
+    if (_VAO == 0)
+    {
+        _vertexManager->addAttribute(VAO, 3, GL_FLOAT, GL_FALSE);  // position attribute
+        if (enableTextures) _vertexManager->addAttribute(VAO, 2, GL_FLOAT, GL_FALSE);  // texture coord attribute
+        if (enableColors) _vertexManager->addAttribute(VAO, 3, GL_FLOAT, GL_FALSE);  // color attribute
+    }
 
     // generate data
     auto data = getData();
