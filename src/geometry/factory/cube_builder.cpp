@@ -44,16 +44,19 @@ VertexBuilder* CubeBuilder::addColors(std::vector<std::vector<float>> &newColors
 VertexBuilder* CubeBuilder::setVAO(unsigned int VAO)
 {
     _VAO = VAO;
+    return this;
 }
 
 VertexBuilder* CubeBuilder::setVBO(unsigned int VBO)
 {
     _VBO = VBO;
+    return this;
 }
 
 VertexBuilder* CubeBuilder::setUsage(GLenum usage)
 {
     _usage = usage;
+    return this;
 }
 
 

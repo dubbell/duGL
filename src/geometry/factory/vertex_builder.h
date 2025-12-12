@@ -32,7 +32,7 @@ public:
     virtual VertexBuilder* setVBO(unsigned int VBO) = 0;
     virtual VertexBuilder* setUsage(GLenum usage) = 0;
 
-    virtual std::unique_ptr<Renderable> build();
+    virtual std::unique_ptr<Renderable> build() = 0;
 };
 
 #endif
