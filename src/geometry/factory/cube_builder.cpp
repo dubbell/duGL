@@ -6,80 +6,19 @@ CubeBuilder::CubeBuilder(VertexManager* vertexManager)
         : _vertexManager(vertexManager), _VAO(0), _VBO(0), _usage(GL_STATIC_DRAW), vertexCount(36), enableTextures(false), enableColors(false)
 {}
 
-// setters ------------
-
-VertexBuilder* CubeBuilder::addTexture(std::string &texturePath)
+std::array<float, 3> CubeBuilder::getVertexColor(std::array<float, 3> position)
 {
-    unsigned int texture;
-    glGenTextures(1, &texture);
-    glActiveTexture(GL_TEXTURE0 + static_cast<GLint>(textures.size()));
-    glBindTexture(GL_TEXTURE_2D, texture);
-    
-    int width, height, nrChannels;
-    unsigned char* data = stbi_load(texturePath.c_str(), &width, &height, &nrChannels, 0);
-    if (data)
-    {
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
-        glGenerateMipmap(GL_TEXTURE_2D);
-    }
-    else
-    {
-        std::cout << "Failed to load texture." << std::endl;
-    }
+    int cubeCornerIndex = 0;
+    if (x > 0.0f) cubeCornerIndex |= 1;
+    if (y > 0.0f) cubeCornerIndex |= 2;
+    if (z > 0.0f) cubeCornerIndex |= 4;
 
-    stbi_image_free(data);
-    glBindTexture(GL_TEXTURE_2D, 0);
-    glActiveTexture(0);
-
-    textures.push_back(texture);
-    enableTextures = true;
-
-    return this;
+    return colors.at(cubeCornerIndex % colors.size());
 }
 
-VertexBuilder* CubeBuilder::addColors(std::vector<std::vector<float>> &newColors)
+std::vector<std::array<float, 3>> CubeBuilder::getVertexPositions()
 {
-    colors.insert(colors.end(), newColors.begin(), newColors.end());
-    enableColors = true;
-
-    return this;
-}
-
-VertexBuilder* CubeBuilder::setVAO(unsigned int VAO)
-{
-    _VAO = VAO;
-    return this;
-}
-
-VertexBuilder* CubeBuilder::setVBO(unsigned int VBO)
-{
-    _VBO = VBO;
-    return this;
-}
-
-VertexBuilder* CubeBuilder::setUsage(GLenum usage)
-{
-    _usage = usage;
-    return this;
-}
-
-VertexBuilder* CubeBuilder::setShader(Shader* shader)
-{
-    _shader = shader;
-    return this;
-}
-
-
-// compute final renderable -------------
-
-int CubeBuilder::getVertexCount()
-{
-    return vertexCount;
-}
-
-std::vector<unsigned char> CubeBuilder::getData()
-{
-    float cubePositionalData[36][3] = {
+    return {
         {-0.5f, -0.5f, -0.5f},
         {0.5f, -0.5f, -0.5f},
         {0.5f,  0.5f, -0.5f},
@@ -122,8 +61,11 @@ std::vector<unsigned char> CubeBuilder::getData()
         {-0.5f,  0.5f,  0.5f},
         {-0.5f,  0.5f, -0.5f}
     };
+}
 
-    float cubeTextureCoordData[36][2] = {
+std::vector<std::array<float, 2>> CubeBuilder::getVertexTextureCoords()
+{
+    return {
         {0.0f, 0.0f},
         {1.0f, 0.0f},
         {1.0f, 1.0f},
@@ -161,69 +103,5 @@ std::vector<unsigned char> CubeBuilder::getData()
         {0.0f, 0.0f},
         {0.0f, 1.0f}
     };
-    
-    std::vector<float> data(36 * 3 + 36 * 2 * enableTextures + 36 * 3 * enableColors);
-
-    for (size_t v_i = 0; v_i < 36; v_i++)
-    {
-        size_t startIndex = v_i * (3 + 2 * enableTextures + 3 * enableColors);
-
-        std::copy(
-            std::begin(cubePositionalData[v_i]),
-            std::end(cubePositionalData[v_i]),
-            data.begin() + startIndex);
-
-        if (enableTextures) std::copy(
-            std::begin(cubeTextureCoordData[v_i]),
-            std::end(cubeTextureCoordData[v_i]),
-            data.begin() + startIndex + 3);
-
-        if (enableColors)
-        {
-            int cubeCornerIndex = 0;
-            if (cubePositionalData[v_i][0] > 0.0f) cubeCornerIndex |= 1;
-            if (cubePositionalData[v_i][1] > 0.0f) cubeCornerIndex |= 2;
-            if (cubePositionalData[v_i][2] > 0.0f) cubeCornerIndex |= 4;
-
-            std::vector<float> colorVector = colors.at(cubeCornerIndex % colors.size());
-            std::copy(
-                colorVector.begin(),
-                colorVector.end(),
-                data.begin() + startIndex + 3 + 2 * enableTextures);
-        }
-    }
-
-    const unsigned char* dataStart = reinterpret_cast<const unsigned char*>(data.data());
-    const unsigned char* dataEnd = dataStart + (data.size() * sizeof(float));
-
-    return std::vector<unsigned char>(dataStart, dataEnd);
 }
 
-std::unique_ptr<Renderable> CubeBuilder::build()
-{
-    // must have corresponding shader
-    if (_shader == nullptr) throw std::invalid_argument("cube_builder : shader not specified");
-
-    // set or create vertex attribute and buffer objects
-    unsigned int VAO = _VAO == 0 ? _vertexManager->createAttributeObject() : _VAO;
-    unsigned int VBO = _VBO == 0 ? _vertexManager->createBufferObject(VAO) : _VBO;
-    
-    _vertexManager->addAttribute(VAO, 3, GL_FLOAT, GL_FALSE);  // position attribute
-
-    if (enableTextures)
-        _vertexManager->addAttribute(VAO, 2, GL_FLOAT, GL_FALSE);  // texture coord attribute
-    if (enableColors)
-        _vertexManager->addAttribute(VAO, 3, GL_FLOAT, GL_FALSE);  // color attribute
-
-    // generate data
-    auto data = getData();
-
-    // create renderable object
-    auto renderable = std::unique_ptr<Renderable>(_vertexManager->createRenderable(VBO, data, getVertexCount(), _usage, _shader));
-
-    // add textures
-    for (unsigned int texture : textures)
-        renderable->addTexture(texture);
-    
-    return renderable;
-}

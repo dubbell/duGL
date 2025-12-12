@@ -1,5 +1,7 @@
 add_library(geometry_factory STATIC
+    vertex_builder.cpp
     cube_builder.cpp
+    ground_builder.cpp
     renderable_factory.cpp
 )
 
