@@ -9,15 +9,16 @@
 #include <string>
 #include <memory>
 #include <map>
+#include <string>
 
 #include <camera.h>
 #include <keyboard.h>
 #include <mouse.h>
 #include <shader.h>
-#include <factory/vertex_factory.h>
 #include <flight_controller.h>
 #include <entity.h>
 #include <vertex_manager.h>
+#include <renderable_factory.h>
 
 
 struct RenderTarget
@@ -42,6 +43,7 @@ private:
     std::vector<std::unique_ptr<Shader>> shaders;
     VertexManager vertexManager;
 
+    std::vector<std::unique_ptr<Renderable>> renderables;
     std::vector<RenderTarget> renderTargets;
 
     KeyboardController keyboardController;

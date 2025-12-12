@@ -6,10 +6,13 @@ CubeBuilder::CubeBuilder(VertexManager* vertexManager)
         : _vertexManager(vertexManager), _VAO(0), _VBO(0), _usage(GL_STATIC_DRAW), vertexCount(36), enableTextures(false), enableColors(false)
 {}
 
+// setters ------------
+
 VertexBuilder* CubeBuilder::addTexture(std::string &texturePath)
 {
     unsigned int texture;
     glGenTextures(1, &texture);
+    glActiveTexture(GL_TEXTURE0 + static_cast<GLint>(textures.size()));
     glBindTexture(GL_TEXTURE_2D, texture);
     
     int width, height, nrChannels;
@@ -26,6 +29,7 @@ VertexBuilder* CubeBuilder::addTexture(std::string &texturePath)
 
     stbi_image_free(data);
     glBindTexture(GL_TEXTURE_2D, 0);
+    glActiveTexture(0);
 
     textures.push_back(texture);
     enableTextures = true;
@@ -59,6 +63,14 @@ VertexBuilder* CubeBuilder::setUsage(GLenum usage)
     return this;
 }
 
+VertexBuilder* CubeBuilder::setShader(Shader* shader)
+{
+    _shader = shader;
+    return this;
+}
+
+
+// compute final renderable -------------
 
 int CubeBuilder::getVertexCount()
 {
@@ -189,8 +201,12 @@ std::vector<unsigned char> CubeBuilder::getData()
 
 std::unique_ptr<Renderable> CubeBuilder::build()
 {
+    // must have corresponding shader
+    if (_shader == nullptr) throw std::invalid_argument("cube_builder : shader not specified");
+
+    // set or create vertex attribute and buffer objects
     unsigned int VAO = _VAO == 0 ? _vertexManager->createAttributeObject() : _VAO;
-    unsigned int VBO = _VBO == 0 ? _vertexManager->createBufferObject() : _VBO;
+    unsigned int VBO = _VBO == 0 ? _vertexManager->createBufferObject(VAO) : _VBO;
     
     _vertexManager->addAttribute(VAO, 3, GL_FLOAT, GL_FALSE);  // position attribute
 
@@ -199,9 +215,15 @@ std::unique_ptr<Renderable> CubeBuilder::build()
     if (enableColors)
         _vertexManager->addAttribute(VAO, 3, GL_FLOAT, GL_FALSE);  // color attribute
 
+    // generate data
     auto data = getData();
 
-    Shader* shader;  // TODO: implement shader manager
+    // create renderable object
+    auto renderable = std::unique_ptr<Renderable>(_vertexManager->createRenderable(VBO, data, getVertexCount(), _usage, _shader));
 
-    return std::unique_ptr<Renderable>(_vertexManager->createRenderable(VBO, data, getVertexCount(), _usage, shader));
+    // add textures
+    for (unsigned int texture : textures)
+        renderable->addTexture(texture);
+    
+    return renderable;
 }

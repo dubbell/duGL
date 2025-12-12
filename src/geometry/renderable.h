@@ -10,6 +10,7 @@
 
 #include <iostream>
 #include <string>
+#include <map>
 
 #include <vmanager_interface.h>
 #include <shader.h>
@@ -26,16 +27,21 @@ private:
     IVertexManager* _vertexManager;
     Shader* _shader;
 
+    std::vector<unsigned int> textures;
+
 public:
     Renderable(GLint startIndex, GLsizei vertexCount, unsigned int VAO, unsigned int VBO, IVertexManager* vertexManager, Shader* shader);
 
     GLint getStartIndex();
-    void setStartIndex(GLint startIndex);
-
     GLsizei getVertexCount();
-
+    unsigned int getVAO();
+    unsigned int getVBO();
     Shader* getShader();
+    std::vector<unsigned int>& getTextures();
+    
+    void setStartIndex(GLint startIndex);
     void setShader(Shader* shader);
+    void addTexture(unsigned int texture);
 
     void render();
 };

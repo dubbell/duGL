@@ -45,27 +45,27 @@ void Application::stop()
 
 void Application::setupCubeScene()
 {
-    unsigned int VAO = vertexManager.createAttributeObject();
-    unsigned int VBO = vertexManager.createBufferObject(VAO);
+    Shader* cubeShader = shaders.emplace_back(std::make_unique<Shader>(
+        "assets/shaders/basic_texture.vert", 
+        "assets/shaders/basic_texture.frag")).get();
 
-    vertexManager.addAttribute(VAO, 3, GL_FLOAT, GL_FALSE);
-    vertexManager.addAttribute(VAO, 3, GL_FLOAT, GL_FALSE);
+    std::string texturePath = "assets/textures/container.jpg";
     
-    auto [cubeVertexCount, cubeData] = VertexFactory::getColoredCube();
-    auto [groundVertexCount, groundData] = VertexFactory::getGround();
-    
-    Shader* shader = shaders.emplace_back(std::make_unique<Shader>("assets/shaders/basic.vert", "assets/shaders/basic.frag")).get();
+    std::vector<std::vector<float>> cubeColors = {{ 0.5f, 0.5f, 0.5f }};
+    Renderable* cubeRenderable = renderables.emplace_back(RenderableFactory::cubeBuilder(&vertexManager)
+        ->addTexture(texturePath)
+        ->setShader(cubeShader)
+        ->build()).get();
 
-    Renderable* renderableCube = vertexManager.createRenderable(VBO, cubeData, cubeVertexCount, GL_STATIC_DRAW, shader);
-    Renderable* renderableGround = vertexManager.createRenderable(VBO, groundData, groundVertexCount, GL_STATIC_DRAW, shader);
+    unsigned int VAO = cubeRenderable->getVAO(), VBO = cubeRenderable->getVBO();
 
     vertexManager.loadAttributes(VAO);
     vertexManager.loadVertexData(VBO);
 
-    RenderTarget& renderTarget = renderTargets.emplace_back(VAO, VBO, shader, std::vector<Entity>{});
+    RenderTarget& renderTarget = renderTargets.emplace_back(VAO, VBO, cubeShader, std::vector<Entity>{});
 
-    glm::vec3 groundPosition(0.0f, -1.0f, 0.0f);
-    renderTarget.entities.emplace_back(Entity(renderableGround, groundPosition));
+    // glm::vec3 groundPosition(0.0f, -1.0f, 0.0f);
+    // renderTarget.entities.emplace_back(Entity(renderableGround, groundPosition));
 
     for (float x : {-5.0f, 5.0f})
     {
@@ -74,24 +74,67 @@ void Application::setupCubeScene()
             for (float z : {-5.0f, 5.0f})
             {
                 glm::vec3 cubePosition(x, y, z);
-                renderTarget.entities.emplace_back(Entity(renderableCube, cubePosition));
+                renderTarget.entities.emplace_back(Entity(cubeRenderable, cubePosition));
             }
         }
     }
 }
 
+// void Application::setupCubeScene()
+// {
+//     unsigned int VAO = vertexManager.createAttributeObject();
+//     unsigned int VBO = vertexManager.createBufferObject(VAO);
+
+//     vertexManager.addAttribute(VAO, 3, GL_FLOAT, GL_FALSE);
+//     vertexManager.addAttribute(VAO, 3, GL_FLOAT, GL_FALSE);
+    
+//     auto [cubeVertexCount, cubeData] = VertexFactory::getColoredCube();
+//     auto [groundVertexCount, groundData] = VertexFactory::getGround();
+    
+//     Shader* shader = shaders.emplace_back(std::make_unique<Shader>("assets/shaders/basic.vert", "assets/shaders/basic.frag")).get();
+
+//     Renderable* renderableCube = vertexManager.createRenderable(VBO, cubeData, cubeVertexCount, GL_STATIC_DRAW, shader);
+//     Renderable* renderableGround = vertexManager.createRenderable(VBO, groundData, groundVertexCount, GL_STATIC_DRAW, shader);
+
+//     vertexManager.loadAttributes(VAO);
+//     vertexManager.loadVertexData(VBO);
+
+//     RenderTarget& renderTarget = renderTargets.emplace_back(VAO, VBO, shader, std::vector<Entity>{});
+
+//     glm::vec3 groundPosition(0.0f, -1.0f, 0.0f);
+//     renderTarget.entities.emplace_back(Entity(renderableGround, groundPosition));
+
+//     for (float x : {-5.0f, 5.0f})
+//     {
+//         for (float y : {0.0f, 5.0f})
+//         {
+//             for (float z : {-5.0f, 5.0f})
+//             {
+//                 glm::vec3 cubePosition(x, y, z);
+//                 renderTarget.entities.emplace_back(Entity(renderableCube, cubePosition));
+//             }
+//         }
+//     }
+// }
+
 void Application::startMainLoop()
 {
+    std::vector<unsigned int> activeTextures(32);
+
     while (!glfwWindowShouldClose(window))
     {
+        // process input
         keyboardController.processKeyboardInput();
 
+        // clear buffers
         glClearColor(0.1f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+        // perspective transformations
         glm::mat4 viewMatrix = camera.getViewMatrix();
         glm::mat4 projectionMatrix = camera.getProjectionMatrix();
 
+        // render all objects
         for (auto& renderTarget : renderTargets)
         {
             glBindVertexArray(renderTarget.VAO);
@@ -101,7 +144,21 @@ void Application::startMainLoop()
             renderTarget.shader->setMatrix("view", viewMatrix);
             renderTarget.shader->setMatrix("projection", projectionMatrix);
 
-            for (auto& entity : renderTarget.entities) entity.render();
+            for (auto& entity : renderTarget.entities) 
+            {
+                auto textures = entity.getTextures();
+                for (size_t i = 0; i < textures.size(); i++)
+                {
+                    if (textures.at(i) != activeTextures.at(i))
+                    {
+                        activeTextures[i] = textures[i];
+                        glActiveTexture(GL_TEXTURE0 + static_cast<GLint>(i));
+                        glBindTexture(GL_TEXTURE_2D, textures.at(i));
+                    }
+                }
+
+                entity.render();
+            }
         }
 
         glBindVertexArray(0);

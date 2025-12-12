@@ -7,9 +7,11 @@
 #include <GLFW/glfw3.h>
 
 #include <vertex_manager.h>
+#include <shader.h>
 
 #include <iostream>
 #include <map>
+#include <stdexcept>
 
 
 
@@ -26,6 +28,7 @@ private:
 
     std::vector<std::vector<float>> colors;
     std::vector<unsigned int> textures;
+    Shader* _shader;
     
     int getVertexCount() override;
     std::vector<unsigned char> getData() override;
@@ -38,6 +41,7 @@ public:
     VertexBuilder* setVAO(unsigned int VAO) override;
     VertexBuilder* setVBO(unsigned int VBO) override;
     VertexBuilder* setUsage(GLenum usage) override;
+    VertexBuilder* setShader(Shader* shader) override;
 
     std::unique_ptr<Renderable> build() override;
 };

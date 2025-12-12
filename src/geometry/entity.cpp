@@ -17,6 +17,11 @@ glm::mat4 Entity::getModelTransform()
     return glm::translate(model, _position);
 }
 
+std:: vector<unsigned int>& Entity::getTextures()
+{
+    return _renderable->getTextures();
+}
+
 void Entity::render()
 {
     _renderable->getShader()->setMatrix("model", getModelTransform());

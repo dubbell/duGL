@@ -5,14 +5,11 @@ Renderable::Renderable(GLint startIndex, GLsizei vertexCount, unsigned int VAO, 
     : _startIndex(startIndex), _vertexCount(vertexCount), _VAO(VAO), _VBO(VBO), _vertexManager(vertexManager), _shader(shader)
 {}
 
+// getters ---------------
+
 GLint Renderable::getStartIndex()
 {
     return _startIndex;
-}
-
-void Renderable::setStartIndex(GLint startIndex)
-{
-    _startIndex = startIndex;
 }
 
 GLsizei Renderable::getVertexCount()
@@ -20,15 +17,46 @@ GLsizei Renderable::getVertexCount()
     return _vertexCount;
 }
 
+unsigned int Renderable::getVAO()
+{
+    return _VAO;
+}
+
+unsigned int Renderable::getVBO()
+{
+    return _VBO;
+}
+
 Shader* Renderable::getShader()
 {
     return _shader;
+}
+
+std::vector<unsigned int>& Renderable::getTextures()
+{
+    return textures;
+}
+
+
+
+// setters ---------------
+
+void Renderable::setStartIndex(GLint startIndex)
+{
+    _startIndex = startIndex;
 }
 
 void Renderable::setShader(Shader* shader)
 {
     _shader = shader;
 }
+
+void Renderable::addTexture(unsigned int texture)
+{
+    textures.push_back(texture);
+}
+
+// functional ----------
 
 void Renderable::render()
 {
