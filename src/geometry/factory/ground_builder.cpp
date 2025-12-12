@@ -18,20 +18,20 @@ std::vector<std::array<float, 3>> GroundBuilder::getVertexPositions()
 {
     return {
         {-100.0f, 0.0f, -100.0f},
-        {100.0f, 0.0f, -100.0f},
-        {100.0f, 0.0f, 100.0f},
+        { 100.0f, 0.0f, -100.0f},
+        { 100.0f, 0.0f,  100.0f},
         {-100.0f, 0.0f, -100.0f},
-        {100.0f, 0.0f, 100.0f},
-        {-100.0f, 0.0f, 100.0f}};
+        { 100.0f, 0.0f,  100.0f},
+        {-100.0f, 0.0f,  100.0f}};
 }
 
 std::vector<std::array<float, 2>> GroundBuilder::getVertexTextureCoords()
 {
     return {
-        {0.0f, 0.0f},
-        {1.0f, 0.0f},
-        {1.0f, 1.0f},
-        {0.0f, 0.0f},
-        {1.0f, 1.0f},
-        {0.0f, 1.0f}};
+        {-10.0f, -10.0f},
+        { 10.0f, -10.0f},
+        { 10.0f,  10.0f},
+        {-10.0f, -10.0f},
+        { 10.0f,  10.0f},
+        {-10.0f,  10.0f}};
 }
