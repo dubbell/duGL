@@ -45,14 +45,17 @@ void Application::stop()
 
 void Application::setupCubeScene()
 {
+    // shader for ground and cubes
     Shader* shader = shaders.emplace_back(std::make_unique<Shader>(
         "assets/shaders/basic_texture.vert", 
         "assets/shaders/basic_texture.frag")).get();
 
+    // textures for ground and cubes
     std::string containerTexturePath = "assets/textures/container.jpg";
     std::string wallTexturePath = "assets/textures/wall.jpg";
     
-    std::vector<std::vector<float>> cubeColors = {{ 0.5f, 0.5f, 0.5f }};
+    // create cube renderable
+    // std::vector<std::vector<float>> cubeColors = {{ 0.5f, 0.5f, 0.5f }};
     Renderable* cubeRenderable = renderables.emplace_back(RenderableFactory::cubeBuilder(&vertexManager)
         ->addTexture(containerTexturePath)
         ->setShader(shader)
@@ -60,6 +63,7 @@ void Application::setupCubeScene()
 
     unsigned int VAO = cubeRenderable->getVAO(), VBO = cubeRenderable->getVBO();
 
+    // create ground renderable
     Renderable* groundRenderable = renderables.emplace_back(RenderableFactory::groundBuilder(&vertexManager)
         ->addTexture(wallTexturePath)
         ->setShader(shader)
@@ -67,14 +71,13 @@ void Application::setupCubeScene()
         ->setVBO(VBO)
         ->build()).get();
 
+    // load attributes and vertices into GPU
     vertexManager.loadAttributes(VAO);
     vertexManager.loadVertexData(VBO);
 
-    RenderTarget& renderTarget = renderTargets.emplace_back(VAO, VBO, shader, std::vector<Entity>{});
-
     glm::vec3 groundPosition(0.0f, -1.0f, 0.0f);
-    renderTarget.entities.emplace_back(Entity(groundRenderable, groundPosition));
-
+    entityMap[VAO][VBO].emplace_back(Entity(groundRenderable, groundPosition));
+    
     for (float x : {-5.0f, 5.0f})
     {
         for (float y : {0.0f, 5.0f})
@@ -82,7 +85,7 @@ void Application::setupCubeScene()
             for (float z : {-5.0f, 5.0f})
             {
                 glm::vec3 cubePosition(x, y, z);
-                renderTarget.entities.emplace_back(Entity(cubeRenderable, cubePosition));
+                entityMap[VAO][VBO].emplace_back(Entity(cubeRenderable, cubePosition));
             }
         }
     }
@@ -99,37 +102,64 @@ void Application::startMainLoop()
         keyboardController.processKeyboardInput();
 
         // clear buffers
-        glClearColor(0.1f, 0.3f, 0.3f, 1.0f);
+        glClearColor(0.7f, 0.8f, 1.0f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         // perspective transformations
         glm::mat4 viewMatrix = camera.getViewMatrix();
         glm::mat4 projectionMatrix = camera.getProjectionMatrix();
 
-        // render all objects
-        for (auto& renderTarget : renderTargets)
+        unsigned int prevVAO = 0, prevVBO = 0;
+        Shader* prevShader = nullptr;
+
+        // loop through every VAO group
+        for (auto& [VAO, VBOmap] : entityMap)
         {
-            glBindVertexArray(renderTarget.VAO);
-            glBindBuffer(GL_ARRAY_BUFFER, renderTarget.VBO);
-
-            renderTarget.shader->use();
-            renderTarget.shader->setMatrix("view", viewMatrix);
-            renderTarget.shader->setMatrix("projection", projectionMatrix);
-
-            for (auto& entity : renderTarget.entities) 
+            if (VAO != prevVAO) 
             {
-                auto textures = entity.getTextures();
-                for (size_t i = 0; i < textures.size(); i++)
+                glBindVertexArray(VAO);
+                prevVAO = VAO;
+            }
+
+            // loop through every VBO group
+            for (auto& [VBO, entities] : VBOmap)
+            {
+                if (VBO != prevVBO) 
                 {
-                    if (textures.at(i) != activeTextures.at(i))
-                    {
-                        activeTextures[i] = textures[i];
-                        glActiveTexture(GL_TEXTURE0 + static_cast<GLint>(i));
-                        glBindTexture(GL_TEXTURE_2D, textures.at(i));
-                    }
+                    glBindBuffer(GL_ARRAY_BUFFER, VBO);
+                    prevVBO = VBO;
                 }
 
-                entity.render();
+                // loop through all entities in group
+                for (auto entity : entities)
+                {
+                    // set shader
+                    Shader* shader = entity.getShader();
+                    if (shader != prevShader)
+                    {
+                        shader->use();
+                        prevShader = shader;
+                    }
+
+                    // set perspective transforms
+                    shader->setMatrix("view", viewMatrix);
+                    shader->setMatrix("projection", projectionMatrix);
+
+                    // bind textures
+                    auto textures = entity.getTextures();
+                    for (size_t t_i = 0; t_i < textures.size(); t_i++)
+                    {
+                        if (textures[t_i] != activeTextures[t_i])
+                        {
+                            activeTextures[t_i] = textures[t_i];
+                            glActiveTexture(GL_TEXTURE0 + static_cast<GLint>(t_i));
+                            glBindTexture(GL_TEXTURE_2D, textures.at(t_i));
+                        }
+                    }
+
+                    // draw call
+                    entity.render();
+                }
             }
         }
 
