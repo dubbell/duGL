@@ -17,6 +17,7 @@ public:
     glm::vec3 getPosition();
     glm::mat4 getModelTransform();
     std::vector<unsigned int>& getTextures();
+    Shader* getShader();
 
     void render();
 };
