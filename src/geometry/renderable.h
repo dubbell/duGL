@@ -16,6 +16,13 @@
 #include <shader.h>
 
 
+struct Material
+{
+    glm::vec3 ambient;
+    glm::vec3 diffuse;
+    glm::vec3 specular;
+    float shininess;
+};
 
 class Renderable
 {
@@ -28,6 +35,7 @@ private:
     Shader* _shader;
 
     std::vector<unsigned int> textures;
+    Material _material;
 
 public:
     Renderable(GLint startIndex, GLsizei vertexCount, unsigned int VAO, unsigned int VBO, IVertexManager* vertexManager, Shader* shader);
@@ -38,10 +46,12 @@ public:
     unsigned int getVBO() const;
     Shader* getShader() const;
     const std::vector<unsigned int>& getTextures() const;
+    const Material& getMaterial() const;
     
     void setStartIndex(GLint startIndex);
     void setShader(Shader* shader);
     void addTexture(unsigned int texture);
+    void setMaterial(Material material);
 
     void render() const;
 };

@@ -137,8 +137,10 @@ void Application::startMainLoop()
                 // loop through and render all entities in group
                 for (const auto entity : entities)
                 {
-                    // set shader
                     Shader* shader = entity.getShader();
+                    auto material = entity.getMaterial();
+                    
+                    // set shader
                     if (shader != prevShader)
                     {
                         // use new shader program
@@ -153,7 +155,12 @@ void Application::startMainLoop()
                         shader->setVec3("lightPos", lightPos);
                         shader->setVec3("viewPos", camera.getPosition());
                     }
-
+                    
+                    // surface material
+                    shader->setVec3("material.ambient", material.ambient);
+                    shader->setVec3("material.diffuse", material.diffuse);
+                    shader->setVec3("material.specular", material.specular);
+                    shader->setFloat("material.shininess", material.shininess);
 
                     // bind textures
                     auto textures = entity.getTextures();

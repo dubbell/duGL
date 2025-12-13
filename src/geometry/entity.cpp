@@ -27,6 +27,11 @@ Shader* Entity::getShader() const
     return _renderable->getShader();
 }
 
+const Material& Entity::getMaterial() const
+{
+    return _renderable->getMaterial();
+}
+
 void Entity::render() const
 {
     _renderable->getShader()->setMat4("model", getModelTransform());

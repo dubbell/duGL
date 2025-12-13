@@ -37,6 +37,11 @@ const std::vector<unsigned int>& Renderable::getTextures() const
     return textures;
 }
 
+const Material& Renderable::getMaterial() const
+{
+    return _material;
+}
+
 
 
 // setters ---------------
@@ -54,6 +59,11 @@ void Renderable::setShader(Shader* shader)
 void Renderable::addTexture(unsigned int texture)
 {
     textures.push_back(texture);
+}
+
+void Renderable::setMaterial(Material material)
+{
+    _material = material;
 }
 
 // functional ----------

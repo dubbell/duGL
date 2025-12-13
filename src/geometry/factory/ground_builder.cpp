@@ -35,3 +35,13 @@ std::vector<std::array<float, 2>> GroundBuilder::getVertexTextureCoords()
         { 10.0f,  10.0f},
         {-10.0f,  10.0f}};
 }
+
+Material GroundBuilder::getMaterial()
+{
+    return {
+        { 0.4f, 0.3f, 0.3f },
+        { 0.262f, 0.095f, 0.061f },
+        { 0.35f, 0.35f, 0.35f },
+        4.0f
+    };
+}
