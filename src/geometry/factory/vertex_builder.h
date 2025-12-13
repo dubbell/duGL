@@ -41,8 +41,9 @@ protected:
     virtual std::vector<std::array<float, 3>> getVertexPositions() = 0;
     virtual std::vector<std::array<float, 2>> getVertexTextureCoords() = 0;
     virtual std::array<float, 3> getVertexColor(std::array<float, 3> position) = 0;
+    virtual Material getMaterial() = 0;
+    
     std::array<float, 3> getNormal(std::array<std::array<float, 3>, 3> positions);
-
     std::vector<unsigned char> getData();
 
 public:

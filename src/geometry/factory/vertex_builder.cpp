@@ -23,7 +23,7 @@ VertexBuilder::VertexBuilder(VertexManager* vertexManager, int numVertices)
 {}
 
 
-// setters -----------
+// setup -----------
 
 VertexBuilder* VertexBuilder::addTexture(std::string &texturePath)
 {
@@ -92,6 +92,8 @@ VertexBuilder* VertexBuilder::setShader(Shader* shader)
     return this;
 }
 
+
+// creation --------------
 
 std::array<float, 3> VertexBuilder::getNormal(std::array<std::array<float, 3>, 3> positions)
 {
@@ -189,6 +191,9 @@ std::unique_ptr<Renderable> VertexBuilder::build()
     // add textures
     for (unsigned int texture : textures)
         renderable->addTexture(texture);
+
+    // set material
+    renderable->setMaterial(getMaterial());
     
     return renderable;
 }
