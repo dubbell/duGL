@@ -14,12 +14,12 @@ private:
 public:
     Entity(Renderable* renderable, glm::vec3 &position);
 
-    glm::vec3 getPosition();
-    glm::mat4 getModelTransform();
-    std::vector<unsigned int>& getTextures();
-    Shader* getShader();
+    glm::vec3 getPosition() const;
+    glm::mat4 getModelTransform() const;
+    const std::vector<unsigned int>& getTextures() const;
+    Shader* getShader() const;
 
-    void render();
+    void render() const;
 };
 
 

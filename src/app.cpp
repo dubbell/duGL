@@ -59,6 +59,7 @@ void Application::setupCubeScene()
     Renderable* cubeRenderable = renderables.emplace_back(RenderableFactory::cubeBuilder(&vertexManager)
         ->addTexture(containerTexturePath)
         ->setShader(shader)
+        ->enableNormals()
         ->build()).get();
 
     unsigned int VAO = cubeRenderable->getVAO(), VBO = cubeRenderable->getVBO();
@@ -67,6 +68,7 @@ void Application::setupCubeScene()
     Renderable* groundRenderable = renderables.emplace_back(RenderableFactory::groundBuilder(&vertexManager)
         ->addTexture(wallTexturePath)
         ->setShader(shader)
+        ->enableNormals()
         ->setVAO(VAO)
         ->setVBO(VBO)
         ->build()).get();
@@ -96,6 +98,8 @@ void Application::startMainLoop()
 {
     std::vector<unsigned int> activeTextures(32);
 
+    glm::vec3 lightPos(10.0f, 20.0f, 10.0f);
+
     while (!glfwWindowShouldClose(window))
     {
         // process input
@@ -112,8 +116,8 @@ void Application::startMainLoop()
         unsigned int prevVAO = 0, prevVBO = 0;
         Shader* prevShader = nullptr;
 
-        // loop through every VAO group
-        for (auto& [VAO, VBOmap] : entityMap)
+        // loop through each VAO group
+        for (const auto& [VAO, VBOmap] : entityMap)
         {
             if (VAO != prevVAO) 
             {
@@ -121,8 +125,8 @@ void Application::startMainLoop()
                 prevVAO = VAO;
             }
 
-            // loop through every VBO group
-            for (auto& [VBO, entities] : VBOmap)
+            // loop through each VBO group
+            for (const auto& [VBO, entities] : VBOmap)
             {
                 if (VBO != prevVBO) 
                 {
@@ -130,34 +134,41 @@ void Application::startMainLoop()
                     prevVBO = VBO;
                 }
 
-                // loop through all entities in group
-                for (auto entity : entities)
+                // loop through and render all entities in group
+                for (const auto entity : entities)
                 {
                     // set shader
                     Shader* shader = entity.getShader();
                     if (shader != prevShader)
                     {
+                        // use new shader program
                         shader->use();
                         prevShader = shader;
+
+                        // set perspective transforms
+                        shader->setMat4("view", viewMatrix);
+                        shader->setMat4("projection", projectionMatrix);
+
+                        // lighting
+                        shader->setVec3("lightPos", lightPos);
+                        shader->setVec3("viewPos", camera.getPosition());
                     }
 
-                    // set perspective transforms
-                    shader->setMatrix("view", viewMatrix);
-                    shader->setMatrix("projection", projectionMatrix);
 
                     // bind textures
                     auto textures = entity.getTextures();
                     for (size_t t_i = 0; t_i < textures.size(); t_i++)
                     {
+                        // if texture is not bound, then make it active and bind it
                         if (textures[t_i] != activeTextures[t_i])
                         {
                             activeTextures[t_i] = textures[t_i];
-                            glActiveTexture(GL_TEXTURE0 + static_cast<GLint>(t_i));
+                            glActiveTexture(GL_TEXTURE0 + t_i);
                             glBindTexture(GL_TEXTURE_2D, textures.at(t_i));
                         }
                     }
 
-                    // draw call
+                    // entity draw call
                     entity.render();
                 }
             }
