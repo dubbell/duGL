@@ -7,32 +7,32 @@ Renderable::Renderable(GLint startIndex, GLsizei vertexCount, unsigned int VAO, 
 
 // getters ---------------
 
-GLint Renderable::getStartIndex()
+GLint Renderable::getStartIndex() const
 {
     return _startIndex;
 }
 
-GLsizei Renderable::getVertexCount()
+GLsizei Renderable::getVertexCount() const
 {
     return _vertexCount;
 }
 
-unsigned int Renderable::getVAO()
+unsigned int Renderable::getVAO() const
 {
     return _VAO;
 }
 
-unsigned int Renderable::getVBO()
+unsigned int Renderable::getVBO() const
 {
     return _VBO;
 }
 
-Shader* Renderable::getShader()
+Shader* Renderable::getShader() const
 {
     return _shader;
 }
 
-std::vector<unsigned int>& Renderable::getTextures()
+const std::vector<unsigned int>& Renderable::getTextures() const
 {
     return textures;
 }
@@ -58,7 +58,7 @@ void Renderable::addTexture(unsigned int texture)
 
 // functional ----------
 
-void Renderable::render()
+void Renderable::render() const
 {
     if (!_vertexManager->isLoaded(_VAO, _VBO))
     {

@@ -32,18 +32,18 @@ private:
 public:
     Renderable(GLint startIndex, GLsizei vertexCount, unsigned int VAO, unsigned int VBO, IVertexManager* vertexManager, Shader* shader);
 
-    GLint getStartIndex();
-    GLsizei getVertexCount();
-    unsigned int getVAO();
-    unsigned int getVBO();
-    Shader* getShader();
-    std::vector<unsigned int>& getTextures();
+    GLint getStartIndex() const;
+    GLsizei getVertexCount() const;
+    unsigned int getVAO() const;
+    unsigned int getVBO() const;
+    Shader* getShader() const;
+    const std::vector<unsigned int>& getTextures() const;
     
     void setStartIndex(GLint startIndex);
     void setShader(Shader* shader);
     void addTexture(unsigned int texture);
 
-    void render();
+    void render() const;
 };
 
 
