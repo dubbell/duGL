@@ -1,58 +1,36 @@
 #include <vertex_builder.h>
 
 
+// -------------- constructors ------------------
 
-
-VertexBuilder::VertexBuilder()
-        : _VAO(0), 
-        _VBO(0), 
-        _usage(GL_STATIC_DRAW), 
-        useTextures(false), 
-        useColors(false),
-        useNormals(false)
+VertexBuilder::VertexBuilder() 
+    : _VAO(0), _VBO(0),
+      _usage(GL_STATIC_DRAW), 
+      useColors(false),
+      useTextures(false),
+      useNormals(false),
+      _shininess(8.0f),
+      _diffuseMap(0),
+      _specularMap(0)
 {}
 
 VertexBuilder::VertexBuilder(VertexManager* vertexManager, int numVertices)
-        : _vertexManager(vertexManager), 
-        _VAO(0), _VBO(0), 
-        vertexCount(numVertices), 
-        _usage(GL_STATIC_DRAW), 
-        useTextures(false), 
-        useColors(false),
-        useNormals(false)
+    : _vertexManager(vertexManager), 
+      vertexCount(numVertices), 
+      _VAO(0), _VBO(0),
+      _usage(GL_STATIC_DRAW), 
+      useColors(false),
+      useTextures(false),
+      useNormals(false),
+      _shininess(8.0f),
+      _diffuseMap(0),
+      _specularMap(0)
 {}
 
 
-// setup -----------
+// ------------- setup -----------
 
-VertexBuilder* VertexBuilder::addTexture(std::string &texturePath)
-{
-    unsigned int texture;
-    glGenTextures(1, &texture);
-    glActiveTexture(GL_TEXTURE0 + static_cast<GLint>(textures.size()));
-    glBindTexture(GL_TEXTURE_2D, texture);
-    
-    int width, height, nrChannels;
-    unsigned char* data = stbi_load(texturePath.c_str(), &width, &height, &nrChannels, 0);
-    if (data)
-    {
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
-        glGenerateMipmap(GL_TEXTURE_2D);
-    }
-    else
-    {
-        std::cout << "Failed to load texture." << std::endl;
-    }
-
-    stbi_image_free(data);
-    glBindTexture(GL_TEXTURE_2D, 0);
-    glActiveTexture(0);
-
-    textures.push_back(texture);
-    useTextures = true;
-
-    return this;
-}
+// coloring ---------------
 
 VertexBuilder* VertexBuilder::addColors(std::vector<std::array<float, 3>> &newColors)
 {
@@ -61,6 +39,51 @@ VertexBuilder* VertexBuilder::addColors(std::vector<std::array<float, 3>> &newCo
 
     return this;
 }
+
+// texturing ------------------
+
+unsigned int VertexBuilder::createTextureMap(std::string& path)
+{
+    unsigned int textureMap;
+    glGenTextures(1, &textureMap);
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, textureMap);
+
+    int width, height, nrChannels;
+    unsigned char* data = stbi_load(path.c_str(), &width, &height, &nrChannels, 0);
+    if (data)
+    {
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, nrChannels == 3 ? GL_RGB : GL_RGBA, GL_UNSIGNED_BYTE, data);
+        glGenerateMipmap(GL_TEXTURE_2D);
+    }
+    else
+    {
+        std::cout << "Failed to load diffuse map: " + path << std::endl;
+    }
+
+    stbi_image_free(data);
+    glBindTexture(GL_TEXTURE_2D, 0);
+    glActiveTexture(0);
+
+    return textureMap;
+}
+
+VertexBuilder* VertexBuilder::addDiffuseMap(std::string& path)
+{
+    _diffuseMap = createTextureMap(path);
+    useTextures = true;
+    return this;
+}
+
+VertexBuilder* VertexBuilder::addSpecularMap(std::string& path)
+{
+    _specularMap = createTextureMap(path);
+    useTextures = true;
+    return this;
+}
+
+
+// other renderable attributes ------------
 
 VertexBuilder* VertexBuilder::enableNormals()
 {
@@ -92,8 +115,14 @@ VertexBuilder* VertexBuilder::setShader(Shader* shader)
     return this;
 }
 
+VertexBuilder* VertexBuilder::setShininess(float shininess)
+{
+    _shininess = shininess;
+    return this;
+}
 
-// creation --------------
+
+// ------------- creation --------------
 
 std::array<float, 3> VertexBuilder::getNormal(std::array<std::array<float, 3>, 3> positions)
 {
@@ -166,7 +195,7 @@ std::vector<unsigned char> VertexBuilder::getData()
 
 std::unique_ptr<Renderable> VertexBuilder::build()
 {
-    // must have corresponding shader
+    // must specify shader
     if (_shader == nullptr) throw std::invalid_argument("vertex_builder : shader not specified");
 
     // set or create vertex attribute and buffer objects
@@ -188,12 +217,8 @@ std::unique_ptr<Renderable> VertexBuilder::build()
     // create renderable object
     auto renderable = std::unique_ptr<Renderable>(_vertexManager->createRenderable(VBO, data, vertexCount, _usage, _shader));
 
-    // add textures
-    for (unsigned int texture : textures)
-        renderable->addTexture(texture);
-
     // set material
-    renderable->setMaterial(getMaterial());
+    renderable->setMaterial({ _diffuseMap, _specularMap, _shininess });
     
     return renderable;
 }

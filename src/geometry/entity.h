@@ -16,7 +16,6 @@ public:
 
     glm::vec3 getPosition() const;
     glm::mat4 getModelTransform() const;
-    const std::vector<unsigned int>& getTextures() const;
     Shader* getShader() const;
     const Material& getMaterial() const;
 

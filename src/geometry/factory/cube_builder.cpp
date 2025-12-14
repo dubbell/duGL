@@ -107,12 +107,3 @@ std::vector<std::array<float, 2>> CubeBuilder::getVertexTextureCoords()
         {0.0f, 1.0f}
     };
 }
-
-Material CubeBuilder::getMaterial()
-{
-    return {
-        { 0.4f, 0.4f, 0.3f },
-        { 0.662f, 0.5f, 0.5f },
-        { 0.5f, 0.5f, 0.5f },
-        32.0f};
-}

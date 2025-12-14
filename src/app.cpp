@@ -50,14 +50,17 @@ void Application::setupCubeScene()
         "assets/shaders/basic_texture.vert", 
         "assets/shaders/basic_texture.frag")).get();
 
-    // textures for ground and cubes
-    std::string containerTexturePath = "assets/textures/container.jpg";
-    std::string wallTexturePath = "assets/textures/wall.jpg";
+    std::string cubeDiffusePath = "assets/diffuse_maps/container2.png";
+    std::string cubeSpecularPath = "assets/specular_maps/container2_specular.png";
+
+    std::string groundDiffusePath = "assets/textures/wall.jpg";
     
     // create cube renderable
     // std::vector<std::vector<float>> cubeColors = {{ 0.5f, 0.5f, 0.5f }};
     Renderable* cubeRenderable = renderables.emplace_back(RenderableFactory::cubeBuilder(&vertexManager)
-        ->addTexture(containerTexturePath)
+        ->addDiffuseMap(cubeDiffusePath)
+        ->addSpecularMap(cubeSpecularPath)
+        ->setShininess(64.0f)
         ->setShader(shader)
         ->enableNormals()
         ->build()).get();
@@ -66,7 +69,7 @@ void Application::setupCubeScene()
 
     // create ground renderable
     Renderable* groundRenderable = renderables.emplace_back(RenderableFactory::groundBuilder(&vertexManager)
-        ->addTexture(wallTexturePath)
+        ->addDiffuseMap(groundDiffusePath)
         ->setShader(shader)
         ->enableNormals()
         ->setVAO(VAO)
@@ -94,11 +97,23 @@ void Application::setupCubeScene()
 }
 
 
+struct Light
+{
+    glm::vec3 position;
+    glm::vec3 ambient;
+    glm::vec3 diffuse;
+    glm::vec3 specular;
+};
+
 void Application::startMainLoop()
 {
     std::vector<unsigned int> activeTextures(32);
 
-    glm::vec3 lightPos(10.0f, 20.0f, 10.0f);
+    Light light = {
+        {10.0f, 20.0f, 10.0f},
+        {0.2f, 0.2f, 0.2f},
+        {0.5f, 0.5f, 0.5f},
+        {1.0f, 1.0f, 1.0f}};
 
     while (!glfwWindowShouldClose(window))
     {
@@ -137,10 +152,8 @@ void Application::startMainLoop()
                 // loop through and render all entities in group
                 for (const auto entity : entities)
                 {
-                    Shader* shader = entity.getShader();
-                    auto material = entity.getMaterial();
-                    
                     // set shader
+                    Shader* shader = entity.getShader();
                     if (shader != prevShader)
                     {
                         // use new shader program
@@ -152,28 +165,32 @@ void Application::startMainLoop()
                         shader->setMat4("projection", projectionMatrix);
 
                         // lighting
-                        shader->setVec3("lightPos", lightPos);
+                        shader->setVec3("light.position", light.position);
+                        shader->setVec3("light.ambient", light.ambient);
+                        shader->setVec3("light.diffuse", light.diffuse);
+                        shader->setVec3("light.specular", light.specular);
+                        
+                        // camera position
                         shader->setVec3("viewPos", camera.getPosition());
                     }
-                    
-                    // surface material
-                    shader->setVec3("material.ambient", material.ambient);
-                    shader->setVec3("material.diffuse", material.diffuse);
-                    shader->setVec3("material.specular", material.specular);
-                    shader->setFloat("material.shininess", material.shininess);
 
-                    // bind textures
-                    auto textures = entity.getTextures();
-                    for (size_t t_i = 0; t_i < textures.size(); t_i++)
-                    {
-                        // if texture is not bound, then make it active and bind it
-                        if (textures[t_i] != activeTextures[t_i])
-                        {
-                            activeTextures[t_i] = textures[t_i];
-                            glActiveTexture(GL_TEXTURE0 + t_i);
-                            glBindTexture(GL_TEXTURE_2D, textures.at(t_i));
-                        }
-                    }
+                    // surface material (it is here instead because entities can have the same shader but might not share material)
+                    auto material = entity.getMaterial();
+                    
+                    // set diffuse map
+                    shader->setInt("material.diffuse", 0);                                       // tell it to look for the diffuse map in GL_TEXTURE0
+                    glActiveTexture(GL_TEXTURE0);                                                // make GL_TEXTURE0 the active texture unit
+                    glBindTexture(GL_TEXTURE_2D, material.diffuseMap);                           // bind the unsigned int texture ID to the GL_TEXTURE0 2D target
+                    shader->setInt("material.diffuseFlag", material.diffuseMap == 0 ? 0 : 1);    // flag for whether the diffuse map should be rendered or not
+
+                    // set specular map
+                    shader->setInt("material.specular", 1);                                      // same as above but for GL_TEXTURE1
+                    glActiveTexture(GL_TEXTURE1);
+                    glBindTexture(GL_TEXTURE_2D, material.specularMap);
+                    shader->setInt("material.specularFlag", material.specularMap == 0 ? 0 : 1);
+                    
+                    // set shininess
+                    shader->setFloat("material.shininess", material.shininess);
 
                     // entity draw call
                     entity.render();

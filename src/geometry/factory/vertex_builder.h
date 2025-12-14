@@ -32,8 +32,10 @@ protected:
     bool useTextures, useColors, useNormals;
 
     std::vector<std::array<float, 3>> colors;
-    std::vector<unsigned int> textures;
+    unsigned int _diffuseMap;
+    unsigned int _specularMap;
     Shader* _shader;
+    float _shininess;
 
     VertexBuilder();
     VertexBuilder(VertexManager* vertexManager, int numVertices);
@@ -41,19 +43,21 @@ protected:
     virtual std::vector<std::array<float, 3>> getVertexPositions() = 0;
     virtual std::vector<std::array<float, 2>> getVertexTextureCoords() = 0;
     virtual std::array<float, 3> getVertexColor(std::array<float, 3> position) = 0;
-    virtual Material getMaterial() = 0;
     
     std::array<float, 3> getNormal(std::array<std::array<float, 3>, 3> positions);
+    unsigned int createTextureMap(std::string &path);
     std::vector<unsigned char> getData();
 
 public:
-    VertexBuilder* addTexture(std::string &texturePath);
     VertexBuilder* addColors(std::vector<std::array<float, 3>> &colors);
+    VertexBuilder* addDiffuseMap(std::string& path);
+    VertexBuilder* addSpecularMap(std::string& path);
     VertexBuilder* enableNormals();
     VertexBuilder* setVAO(unsigned int VAO);
     VertexBuilder* setVBO(unsigned int VBO);
     VertexBuilder* setUsage(GLenum usage);
     VertexBuilder* setShader(Shader* shader);
+    VertexBuilder* setShininess(float shininess);
 
     std::unique_ptr<Renderable> build();
 };
