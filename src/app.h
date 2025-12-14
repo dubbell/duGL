@@ -10,6 +10,8 @@
 #include <memory>
 #include <map>
 #include <string>
+#include <format>
+#include <algorithm>
 
 #include <camera.h>
 #include <keyboard.h>

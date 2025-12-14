@@ -60,7 +60,6 @@ void Application::setupCubeScene()
     Renderable* cubeRenderable = renderables.emplace_back(RenderableFactory::cubeBuilder(&vertexManager)
         ->addDiffuseMap(cubeDiffusePath)
         ->addSpecularMap(cubeSpecularPath)
-        ->setShininess(64.0f)
         ->setShader(shader)
         ->enableNormals()
         ->build()).get();
@@ -96,24 +95,43 @@ void Application::setupCubeScene()
     }
 }
 
+struct DirectionalLight
+{
+    glm::vec3 direction;
+    glm::vec3 ambient;
+    glm::vec3 diffuse;
+    glm::vec3 specular;
+};
 
-struct Light
+struct PointLight
 {
     glm::vec3 position;
     glm::vec3 ambient;
     glm::vec3 diffuse;
     glm::vec3 specular;
+
+    float constant;
+    float linear;
+    float quadratic;
 };
 
 void Application::startMainLoop()
 {
     std::vector<unsigned int> activeTextures(32);
 
-    Light light = {
-        {10.0f, 20.0f, 10.0f},
-        {0.2f, 0.2f, 0.2f},
-        {0.5f, 0.5f, 0.5f},
-        {1.0f, 1.0f, 1.0f}};
+    DirectionalLight directionalLight = {
+        {-0.2f, -1.0f, -0.3f},
+        { 0.2f,  0.2f,  0.2f},
+        { 0.5f,  0.5f,  0.5f},
+        { 1.0f,  1.0f,  1.0f}
+    };
+
+    std::vector<PointLight> pointLights = {{
+        {4.5f, 4.0f, 5.0f},
+        {0.6f, 0.6f, 0.3f},
+        {0.7f, 0.7f, 0.4f},
+        {1.0f, 1.0f, 1.0f},
+        1.0f, 0.09f, 0.032f}};
 
     while (!glfwWindowShouldClose(window))
     {
@@ -164,11 +182,28 @@ void Application::startMainLoop()
                         shader->setMat4("view", viewMatrix);
                         shader->setMat4("projection", projectionMatrix);
 
-                        // lighting
-                        shader->setVec3("light.position", light.position);
-                        shader->setVec3("light.ambient", light.ambient);
-                        shader->setVec3("light.diffuse", light.diffuse);
-                        shader->setVec3("light.specular", light.specular);
+                        // set single directional light
+                        shader->setVec3("directionalLight.direction", directionalLight.direction);
+                        shader->setVec3("directionalLight.ambient", directionalLight.ambient);
+                        shader->setVec3("directionalLight.diffuse", directionalLight.diffuse);
+                        shader->setVec3("directionalLight.specular", directionalLight.specular);
+
+                        // number of point lights
+                        int pointLightCount = static_cast<int>(pointLights.size());
+                        shader->setInt("pointLightCount", pointLightCount);
+
+                        // loop through all point lights (max 8 for now)
+                        for (int pl_i = 0; pl_i < std::min(pointLightCount, 8); pl_i++)
+                        {
+                            auto& pointLight = pointLights[pl_i];
+                            shader->setVec3(std::format("pointLights[{}].position", pl_i), pointLight.position);
+                            shader->setVec3(std::format("pointLights[{}].ambient", pl_i), pointLight.ambient);
+                            shader->setVec3(std::format("pointLights[{}].diffuse", pl_i), pointLight.diffuse);
+                            shader->setVec3(std::format("pointLights[{}].specular", pl_i), pointLight.specular);
+                            shader->setFloat(std::format("pointLights[{}].constant", pl_i), pointLight.constant);
+                            shader->setFloat(std::format("pointLights[{}].linear", pl_i), pointLight.linear);
+                            shader->setFloat(std::format("pointLights[{}].quadratic", pl_i), pointLight.quadratic);
+                        }
                         
                         // camera position
                         shader->setVec3("viewPos", camera.getPosition());
@@ -178,13 +213,14 @@ void Application::startMainLoop()
                     auto material = entity.getMaterial();
                     
                     // set diffuse map
-                    shader->setInt("material.diffuse", 0);                                       // tell it to look for the diffuse map in GL_TEXTURE0
-                    glActiveTexture(GL_TEXTURE0);                                                // make GL_TEXTURE0 the active texture unit
-                    glBindTexture(GL_TEXTURE_2D, material.diffuseMap);                           // bind the unsigned int texture ID to the GL_TEXTURE0 2D target
-                    shader->setInt("material.diffuseFlag", material.diffuseMap == 0 ? 0 : 1);    // flag for whether the diffuse map should be rendered or not
+                    shader->setInt("material.diffuse", 0);               // tell it to look for the diffuse map in GL_TEXTURE0
+                    glActiveTexture(GL_TEXTURE0);                        // make GL_TEXTURE0 the active texture unit
+                    glBindTexture(GL_TEXTURE_2D, material.diffuseMap);   // bind the unsigned int texture ID to the GL_TEXTURE0 2D target
+                    shader->setInt("material.diffuseFlag", 
+                                    material.diffuseMap == 0 ? 0 : 1);   // flag for whether the diffuse map should be rendered or not
 
                     // set specular map
-                    shader->setInt("material.specular", 1);                                      // same as above but for GL_TEXTURE1
+                    shader->setInt("material.specular", 1);              // same as above but for GL_TEXTURE1
                     glActiveTexture(GL_TEXTURE1);
                     glBindTexture(GL_TEXTURE_2D, material.specularMap);
                     shader->setInt("material.specularFlag", material.specularMap == 0 ? 0 : 1);
