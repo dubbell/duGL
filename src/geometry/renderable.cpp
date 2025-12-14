@@ -32,11 +32,6 @@ Shader* Renderable::getShader() const
     return _shader;
 }
 
-const std::vector<unsigned int>& Renderable::getTextures() const
-{
-    return textures;
-}
-
 const Material& Renderable::getMaterial() const
 {
     return _material;
@@ -54,11 +49,6 @@ void Renderable::setStartIndex(GLint startIndex)
 void Renderable::setShader(Shader* shader)
 {
     _shader = shader;
-}
-
-void Renderable::addTexture(unsigned int texture)
-{
-    textures.push_back(texture);
 }
 
 void Renderable::setMaterial(Material material)

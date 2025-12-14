@@ -18,9 +18,8 @@
 
 struct Material
 {
-    glm::vec3 ambient;
-    glm::vec3 diffuse;
-    glm::vec3 specular;
+    unsigned int diffuseMap;
+    unsigned int specularMap;
     float shininess;
 };
 
@@ -45,12 +44,10 @@ public:
     unsigned int getVAO() const;
     unsigned int getVBO() const;
     Shader* getShader() const;
-    const std::vector<unsigned int>& getTextures() const;
     const Material& getMaterial() const;
     
     void setStartIndex(GLint startIndex);
     void setShader(Shader* shader);
-    void addTexture(unsigned int texture);
     void setMaterial(Material material);
 
     void render() const;

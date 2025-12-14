@@ -23,7 +23,6 @@ protected:
     std::vector<std::array<float, 3>> getVertexPositions() override;
     std::vector<std::array<float, 2>> getVertexTextureCoords() override;
     std::array<float, 3> getVertexColor(std::array<float, 3> position) override;
-    Material getMaterial() override;
 
 public:
     CubeBuilder(VertexManager* vertexManager);
