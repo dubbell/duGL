@@ -4,9 +4,9 @@
 #include <memory>
 #include <vector>
 
-#include <keyboard_controllable.h>
-#include <mouse_controllable.h>
-#include <camera.h>
+#include "controllers/interfaces/keyboard_controllable.h"
+#include "controllers/interfaces/mouse_controllable.h"
+#include "view/camera.h"
 
 
 class FlightController : public KeyboardControllable, public MouseControllable

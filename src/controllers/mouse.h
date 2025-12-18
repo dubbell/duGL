@@ -6,7 +6,7 @@
 #include <memory>
 #include <set>
 
-#include <mouse_controllable.h>
+#include "controllers/interfaces/mouse_controllable.h"
 
 
 class MouseController

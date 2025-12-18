@@ -35,64 +35,15 @@ Application::Application(int width, int height)
     glfwSetFramebufferSizeCallback(window, Application::frameBufferSizeCallback);
     glfwSetCursorPosCallback(window, Application::cursorPosCallback);
     glfwSetWindowUserPointer(window, this);
+
+    Renderable model("assets/models/backpack/backpack.obj");
+    renderables.push_back(model);
 }
 
 void Application::stop()
 {
     glfwDestroyWindow(window);
     glfwTerminate();
-}
-
-void Application::setupCubeScene()
-{
-    // shader for ground and cubes
-    Shader* shader = shaders.emplace_back(std::make_unique<Shader>(
-        "assets/shaders/basic_texture.vert", 
-        "assets/shaders/basic_texture.frag")).get();
-
-    std::string cubeDiffusePath = "assets/diffuse_maps/container2.png";
-    std::string cubeSpecularPath = "assets/specular_maps/container2_specular.png";
-
-    std::string groundDiffusePath = "assets/textures/wall.jpg";
-    
-    // create cube renderable
-    // std::vector<std::vector<float>> cubeColors = {{ 0.5f, 0.5f, 0.5f }};
-    Renderable* cubeRenderable = renderables.emplace_back(RenderableFactory::cubeBuilder(&vertexManager)
-        ->addDiffuseMap(cubeDiffusePath)
-        ->addSpecularMap(cubeSpecularPath)
-        ->setShader(shader)
-        ->enableNormals()
-        ->build()).get();
-
-    unsigned int VAO = cubeRenderable->getVAO(), VBO = cubeRenderable->getVBO();
-
-    // create ground renderable
-    Renderable* groundRenderable = renderables.emplace_back(RenderableFactory::groundBuilder(&vertexManager)
-        ->addDiffuseMap(groundDiffusePath)
-        ->setShader(shader)
-        ->enableNormals()
-        ->setVAO(VAO)
-        ->setVBO(VBO)
-        ->build()).get();
-
-    // load attributes and vertices into GPU
-    vertexManager.loadAttributes(VAO);
-    vertexManager.loadVertexData(VBO);
-
-    glm::vec3 groundPosition(0.0f, -1.0f, 0.0f);
-    entityMap[VAO][VBO].emplace_back(Entity(groundRenderable, groundPosition));
-    
-    for (float x : {-5.0f, 5.0f})
-    {
-        for (float y : {0.0f, 5.0f})
-        {
-            for (float z : {-5.0f, 5.0f})
-            {
-                glm::vec3 cubePosition(x, y, z);
-                entityMap[VAO][VBO].emplace_back(Entity(cubeRenderable, cubePosition));
-            }
-        }
-    }
 }
 
 struct DirectionalLight
@@ -117,7 +68,7 @@ struct PointLight
 
 void Application::startMainLoop()
 {
-    std::vector<unsigned int> activeTextures(32);
+    Shader shader = Shader("assets/shaders/basic_texture.vert", "assets/shaders/basic_texture.frag");
 
     DirectionalLight directionalLight = {
         {-0.2f, -1.0f, -0.3f},
@@ -126,121 +77,165 @@ void Application::startMainLoop()
         { 1.0f,  1.0f,  1.0f}
     };
 
-    std::vector<PointLight> pointLights = {{
-        {4.5f, 4.0f, 5.0f},
-        {0.6f, 0.6f, 0.3f},
-        {0.7f, 0.7f, 0.4f},
-        {1.0f, 1.0f, 1.0f},
-        1.0f, 0.09f, 0.032f}};
-
     while (!glfwWindowShouldClose(window))
     {
-        // process input
         keyboardController.processKeyboardInput();
 
-        // clear buffers
         glClearColor(0.7f, 0.8f, 1.0f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        // perspective transformations
         glm::mat4 viewMatrix = camera.getViewMatrix();
         glm::mat4 projectionMatrix = camera.getProjectionMatrix();
 
-        unsigned int prevVAO = 0, prevVBO = 0;
-        Shader* prevShader = nullptr;
+        shader.use();
 
-        // loop through each VAO group
-        for (const auto& [VAO, VBOmap] : entityMap)
+        shader.setMat4("view", viewMatrix);
+        shader.setMat4("projection", projectionMatrix);
+        shader.setMat4("model", glm::mat4(1.0f));
+
+        shader.setVec3("viewPos", camera.getPosition());
+        
+        shader.setVec3("directionalLight.direction", directionalLight.direction);
+        shader.setVec3("directionalLight.ambient", directionalLight.ambient);
+        shader.setVec3("directionalLight.diffuse", directionalLight.diffuse);
+        shader.setVec3("directionalLight.specular", directionalLight.specular);
+        
+        for (auto& renderable : renderables)
         {
-            if (VAO != prevVAO) 
-            {
-                glBindVertexArray(VAO);
-                prevVAO = VAO;
-            }
-
-            // loop through each VBO group
-            for (const auto& [VBO, entities] : VBOmap)
-            {
-                if (VBO != prevVBO) 
-                {
-                    glBindBuffer(GL_ARRAY_BUFFER, VBO);
-                    prevVBO = VBO;
-                }
-
-                // loop through and render all entities in group
-                for (const auto entity : entities)
-                {
-                    // set shader
-                    Shader* shader = entity.getShader();
-                    if (shader != prevShader)
-                    {
-                        // use new shader program
-                        shader->use();
-                        prevShader = shader;
-
-                        // set perspective transforms
-                        shader->setMat4("view", viewMatrix);
-                        shader->setMat4("projection", projectionMatrix);
-
-                        // set single directional light
-                        shader->setVec3("directionalLight.direction", directionalLight.direction);
-                        shader->setVec3("directionalLight.ambient", directionalLight.ambient);
-                        shader->setVec3("directionalLight.diffuse", directionalLight.diffuse);
-                        shader->setVec3("directionalLight.specular", directionalLight.specular);
-
-                        // number of point lights
-                        int pointLightCount = static_cast<int>(pointLights.size());
-                        shader->setInt("pointLightCount", pointLightCount);
-
-                        // loop through all point lights (max 8 for now)
-                        for (int pl_i = 0; pl_i < std::min(pointLightCount, 8); pl_i++)
-                        {
-                            auto& pointLight = pointLights[pl_i];
-                            shader->setVec3(std::format("pointLights[{}].position", pl_i), pointLight.position);
-                            shader->setVec3(std::format("pointLights[{}].ambient", pl_i), pointLight.ambient);
-                            shader->setVec3(std::format("pointLights[{}].diffuse", pl_i), pointLight.diffuse);
-                            shader->setVec3(std::format("pointLights[{}].specular", pl_i), pointLight.specular);
-                            shader->setFloat(std::format("pointLights[{}].constant", pl_i), pointLight.constant);
-                            shader->setFloat(std::format("pointLights[{}].linear", pl_i), pointLight.linear);
-                            shader->setFloat(std::format("pointLights[{}].quadratic", pl_i), pointLight.quadratic);
-                        }
-                        
-                        // camera position
-                        shader->setVec3("viewPos", camera.getPosition());
-                    }
-
-                    // surface material (it is here instead because entities can have the same shader but might not share material)
-                    auto material = entity.getMaterial();
-                    
-                    // set diffuse map
-                    shader->setInt("material.diffuse", 0);               // tell it to look for the diffuse map in GL_TEXTURE0
-                    glActiveTexture(GL_TEXTURE0);                        // make GL_TEXTURE0 the active texture unit
-                    glBindTexture(GL_TEXTURE_2D, material.diffuseMap);   // bind the unsigned int texture ID to the GL_TEXTURE0 2D target
-                    shader->setInt("material.diffuseFlag", 
-                                    material.diffuseMap == 0 ? 0 : 1);   // flag for whether the diffuse map should be rendered or not
-
-                    // set specular map
-                    shader->setInt("material.specular", 1);              // same as above but for GL_TEXTURE1
-                    glActiveTexture(GL_TEXTURE1);
-                    glBindTexture(GL_TEXTURE_2D, material.specularMap);
-                    shader->setInt("material.specularFlag", material.specularMap == 0 ? 0 : 1);
-                    
-                    // set shininess
-                    shader->setFloat("material.shininess", material.shininess);
-
-                    // entity draw call
-                    entity.render();
-                }
-            }
+            renderable.draw(shader);
         }
 
-        glBindVertexArray(0);
-        glBindBuffer(GL_ARRAY_BUFFER, 0);
-        
         glfwSwapBuffers(window);
         glfwPollEvents();
     }
 }
+
+// void Application::startMainLoop()
+// {
+//     std::vector<unsigned int> activeTextures(32);
+
+//     DirectionalLight directionalLight = {
+//         {-0.2f, -1.0f, -0.3f},
+//         { 0.2f,  0.2f,  0.2f},
+//         { 0.5f,  0.5f,  0.5f},
+//         { 1.0f,  1.0f,  1.0f}
+//     };
+
+//     std::vector<PointLight> pointLights = {{
+//         {4.5f, 4.0f, 5.0f},
+//         {0.6f, 0.6f, 0.3f},
+//         {0.7f, 0.7f, 0.4f},
+//         {1.0f, 1.0f, 1.0f},
+//         1.0f, 0.09f, 0.032f}};
+
+//     while (!glfwWindowShouldClose(window))
+//     {
+//         // process input
+//         keyboardController.processKeyboardInput();
+
+//         // clear buffers
+//         glClearColor(0.7f, 0.8f, 1.0f, 1.0f);
+//         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+//         // perspective transformations
+//         glm::mat4 viewMatrix = camera.getViewMatrix();
+//         glm::mat4 projectionMatrix = camera.getProjectionMatrix();
+
+//         unsigned int prevVAO = 0, prevVBO = 0;
+//         Shader* prevShader = nullptr;
+
+//         // loop through each VAO group
+//         for (const auto& [VAO, VBOmap] : entityMap)
+//         {
+//             if (VAO != prevVAO) 
+//             {
+//                 glBindVertexArray(VAO);
+//                 prevVAO = VAO;
+//             }
+
+//             // loop through each VBO group
+//             for (const auto& [VBO, entities] : VBOmap)
+//             {
+//                 if (VBO != prevVBO) 
+//                 {
+//                     glBindBuffer(GL_ARRAY_BUFFER, VBO);
+//                     prevVBO = VBO;
+//                 }
+
+//                 // loop through and render all entities in group
+//                 for (const auto entity : entities)
+//                 {
+//                     // set shader
+//                     Shader* shader = entity.getShader();
+//                     if (shader != prevShader)
+//                     {
+//                         // use new shader program
+//                         shader->use();
+//                         prevShader = shader;
+
+//                         // set perspective transforms
+//                         shader->setMat4("view", viewMatrix);
+//                         shader->setMat4("projection", projectionMatrix);
+
+//                         // set single directional light
+//                         shader->setVec3("directionalLight.direction", directionalLight.direction);
+//                         shader->setVec3("directionalLight.ambient", directionalLight.ambient);
+//                         shader->setVec3("directionalLight.diffuse", directionalLight.diffuse);
+//                         shader->setVec3("directionalLight.specular", directionalLight.specular);
+
+//                         // number of point lights
+//                         int pointLightCount = static_cast<int>(pointLights.size());
+//                         shader->setInt("pointLightCount", pointLightCount);
+
+//                         // loop through all point lights (max 8 for now)
+//                         for (int pl_i = 0; pl_i < std::min(pointLightCount, 8); pl_i++)
+//                         {
+//                             auto& pointLight = pointLights[pl_i];
+//                             shader->setVec3(std::format("pointLights[{}].position", pl_i), pointLight.position);
+//                             shader->setVec3(std::format("pointLights[{}].ambient", pl_i), pointLight.ambient);
+//                             shader->setVec3(std::format("pointLights[{}].diffuse", pl_i), pointLight.diffuse);
+//                             shader->setVec3(std::format("pointLights[{}].specular", pl_i), pointLight.specular);
+//                             shader->setFloat(std::format("pointLights[{}].constant", pl_i), pointLight.constant);
+//                             shader->setFloat(std::format("pointLights[{}].linear", pl_i), pointLight.linear);
+//                             shader->setFloat(std::format("pointLights[{}].quadratic", pl_i), pointLight.quadratic);
+//                         }
+                        
+//                         // camera position
+//                         shader->setVec3("viewPos", camera.getPosition());
+//                     }
+
+//                     // surface material (it is here instead because entities can have the same shader but might not share material)
+//                     auto material = entity.getMaterial();
+                    
+//                     // set diffuse map
+//                     shader->setInt("material.diffuse", 0);               // tell it to look for the diffuse map in GL_TEXTURE0
+//                     glActiveTexture(GL_TEXTURE0);                        // make GL_TEXTURE0 the active texture unit
+//                     glBindTexture(GL_TEXTURE_2D, material.diffuseMap);   // bind the unsigned int texture ID to the GL_TEXTURE0 2D target
+//                     shader->setInt("material.diffuseFlag", 
+//                                     material.diffuseMap == 0 ? 0 : 1);   // flag for whether the diffuse map should be rendered or not
+
+//                     // set specular map
+//                     shader->setInt("material.specular", 1);              // same as above but for GL_TEXTURE1
+//                     glActiveTexture(GL_TEXTURE1);
+//                     glBindTexture(GL_TEXTURE_2D, material.specularMap);
+//                     shader->setInt("material.specularFlag", material.specularMap == 0 ? 0 : 1);
+                    
+//                     // set shininess
+//                     shader->setFloat("material.shininess", material.shininess);
+
+//                     // entity draw call
+//                     entity.render();
+//                 }
+//             }
+//         }
+
+//         glBindVertexArray(0);
+//         glBindBuffer(GL_ARRAY_BUFFER, 0);
+        
+//         glfwSwapBuffers(window);
+//         glfwPollEvents();
+//     }
+// }
 
 
 void Application::frameBufferSizeCallback(GLFWwindow* window, int width, int height)
