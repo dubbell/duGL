@@ -13,7 +13,6 @@ int main()
 {
     Application* application = new Application(1920, 1080);
 
-    application->setupCubeScene();
     application->startMainLoop();
     application->stop();
 

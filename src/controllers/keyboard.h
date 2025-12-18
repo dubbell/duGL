@@ -1,15 +1,17 @@
 #ifndef KEYBOARD_H
 #define KEYBOARD_H
 
+#include <GLFW/glfw3.h>
+
 #include <map>
 #include <vector>
 #include <set>
 #include <functional>
 #include <utility>
-#include <GLFW/glfw3.h>
+#include <memory>
 
-#include <keyboard_controllable.h>
-#include "camera.h"
+#include "controllers/interfaces/keyboard_controllable.h"
+#include "view/camera.h"
 
 
 class KeyboardController
