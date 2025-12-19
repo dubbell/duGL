@@ -1,7 +1,7 @@
 #include <app.h>
 
 
-Application::Application(int width, int height)
+Application::Application(int width, int height) : clearColor(0.7f, 0.8f, 1.0f, 1.0f)
 {
     glfwInit();
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
@@ -19,9 +19,10 @@ Application::Application(int width, int height)
     }
     glViewport(0, 0, width, height);
     glEnable(GL_DEPTH_TEST);
+    
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
     
-    camera.setAspectRatio(16.0f / 9.0f);
+    camera.setAspectRatio((float)width / (float)height);
 
     keyboardController.setWindow(window);
 
@@ -36,8 +37,16 @@ Application::Application(int width, int height)
     glfwSetCursorPosCallback(window, Application::cursorPosCallback);
     glfwSetWindowUserPointer(window, this);
 
-    Renderable model("assets/models/backpack/backpack.obj");
-    renderables.push_back(model);
+    Renderable* backpack_renderable = renderables.emplace_back(std::make_unique<Renderable>("assets/models/backpack/backpack.obj")).get();
+    
+    entities.emplace_back(std::make_unique<Entity>(backpack_renderable, glm::vec3(1.0f, 1.0f, 6.0f)));
+    entities.emplace_back(std::make_unique<Entity>(backpack_renderable, glm::vec3(-2.0f, 1.0f, 1.0f)));
+}
+
+void Application::clearBuffers()
+{
+    glClearColor(clearColor.r, clearColor.g, clearColor.b, clearColor.a);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
 
 void Application::stop()
@@ -46,63 +55,39 @@ void Application::stop()
     glfwTerminate();
 }
 
-struct DirectionalLight
-{
-    glm::vec3 direction;
-    glm::vec3 ambient;
-    glm::vec3 diffuse;
-    glm::vec3 specular;
-};
-
-struct PointLight
-{
-    glm::vec3 position;
-    glm::vec3 ambient;
-    glm::vec3 diffuse;
-    glm::vec3 specular;
-
-    float constant;
-    float linear;
-    float quadratic;
-};
-
 void Application::startMainLoop()
 {
     Shader shader = Shader("assets/shaders/basic_texture.vert", "assets/shaders/basic_texture.frag");
 
     DirectionalLight directionalLight = {
         {-0.2f, -1.0f, -0.3f},
-        { 0.2f,  0.2f,  0.2f},
+        { 0.0f,  0.0f,  0.0f},
         { 0.5f,  0.5f,  0.5f},
         { 1.0f,  1.0f,  1.0f}
     };
 
+    std::vector<PointLight> pointLights = {{
+        { 0.0f, 0.0f, 0.0f },
+        { 0.4f, 0.2f, 0.0f },
+        { 0.7f, 0.3f, 0.3f },
+        { 1.0f, 0.0f, 0.0f },
+        1.0f, 0.09f, 0.032f}};
+
     while (!glfwWindowShouldClose(window))
     {
-        keyboardController.processKeyboardInput();
-
-        glClearColor(0.7f, 0.8f, 1.0f, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-        glm::mat4 viewMatrix = camera.getViewMatrix();
-        glm::mat4 projectionMatrix = camera.getProjectionMatrix();
+        clearBuffers();  // clear color and depth buffer
+        
+        keyboardController.processKeyboardInput();  // user keyboard input
 
         shader.use();
-
-        shader.setMat4("view", viewMatrix);
-        shader.setMat4("projection", projectionMatrix);
-        shader.setMat4("model", glm::mat4(1.0f));
-
-        shader.setVec3("viewPos", camera.getPosition());
+        shader.setCamera(camera);
+        shader.setDirectionalLight(directionalLight);
+        shader.setPointLights(pointLights);
         
-        shader.setVec3("directionalLight.direction", directionalLight.direction);
-        shader.setVec3("directionalLight.ambient", directionalLight.ambient);
-        shader.setVec3("directionalLight.diffuse", directionalLight.diffuse);
-        shader.setVec3("directionalLight.specular", directionalLight.specular);
-        
-        for (auto& renderable : renderables)
+        for (const auto& entity : entities)
         {
-            renderable.draw(shader);
+            shader.setMat4("model", entity->getModelTransform());
+            entity->draw(shader);
         }
 
         glfwSwapBuffers(window);

@@ -17,8 +17,10 @@
 #include "controllers/keyboard.h"
 #include "controllers/mouse.h"
 #include "controllers/flight_controller.h"
-#include "pipeline/shader.h"
+#include "shading/shader.h"
+#include "shading/lighting.h"
 #include "model/renderable.h"
+#include "model/entity.h"
 
 
 class Application
@@ -29,23 +31,22 @@ private:
     Camera camera;
     glm::mat4 projectionMatrix;
 
-    std::vector<Renderable> renderables;
+    std::vector<std::unique_ptr<Renderable>> renderables;
+    std::vector<std::unique_ptr<Entity>> entities;
 
     std::vector<std::unique_ptr<Shader>> shaders;
-    // VertexManager vertexManager;
-
-    // std::vector<std::unique_ptr<Renderable>> renderables;
-    // std::map<unsigned int, std::map<unsigned int, std::vector<Entity>>> entityMap;
 
     KeyboardController keyboardController;
     MouseController mouseController;
 
+    glm::vec4 clearColor;
+    void clearBuffers();
+
 public:
     Application(int width, int height);
-    void stop();
-
-    void setupCubeScene();
+    
     void startMainLoop();
+    void stop();
 
     static void frameBufferSizeCallback(GLFWwindow*, int width, int height);
     static void cursorPosCallback(GLFWwindow* window, double xpos, double ypos);

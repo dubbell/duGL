@@ -17,23 +17,24 @@ struct DirectionalLight
 
 uniform DirectionalLight directionalLight;
 
-// struct PointLight
-// {
-//     vec3 position;
-//     vec3 ambient;
-//     vec3 diffuse;
-//     vec3 specular;
+struct PointLight
+{
+    vec3 position;
+    vec3 ambient;
+    vec3 diffuse;
+    vec3 specular;
 
-//     float constant;
-//     float linear;
-//     float quadratic;
-// };
+    float constant;
+    float linear;
+    float quadratic;
+};
 
-// #define MAX_LIGHTS 8
-// uniform PointLight pointLights[MAX_LIGHTS];
-// uniform int pointLightCount;
+#define MAX_LIGHTS 8
+uniform PointLight pointLights[MAX_LIGHTS];
+uniform int pointLightCount;
 
-struct Material 
+
+struct Material
 {
     sampler2D texture_diffuse1;
     sampler2D texture_diffuse2;
@@ -92,24 +93,24 @@ void main()
         specularTexture, 
         norm);
 
-    // for (int i = 0; i < min(pointLightCount, MAX_LIGHTS); i++)
-    // {
-    //     PointLight pointLight = pointLights[i];
-    //     vec3 pointLightDir = normalize(pointLight.position - FragPos);
-    //     float pointLightDistance = length(pointLight.position - FragPos);
-    //     float attenuation = 1.0 / (pointLight.constant + 
-    //                             pointLight.linear * pointLightDistance + 
-    //                             pointLight.quadratic * (pointLightDistance * pointLightDistance));
+    for (int i = 0; i < min(pointLightCount, MAX_LIGHTS); i++)
+    {
+        PointLight pointLight = pointLights[i];
+        vec3 pointLightDir = normalize(pointLight.position - FragPos);
+        float pointLightDistance = length(pointLight.position - FragPos);
+        float attenuation = 1.0 / (pointLight.constant + 
+                                pointLight.linear * pointLightDistance + 
+                                pointLight.quadratic * (pointLightDistance * pointLightDistance));
         
-    //     // add point light
-    //     result += computeLight(
-    //         pointLightDir, 
-    //         vDir, 
-    //         pointLight.ambient, 
-    //         pointLight.diffuse, 
-    //         pointLight.specular,
-    //         dText, sText, norm) * attenuation;
-    // }
+        // add point light
+        result += computeLight(
+            pointLightDir, 
+            viewDir, 
+            pointLight.ambient, 
+            pointLight.diffuse, 
+            pointLight.specular,
+            diffuseTexture, specularTexture, norm) * attenuation;
+    }
 
     FragColor = vec4(result, 1.0);
 } 

@@ -21,7 +21,6 @@ private:
 
     std::set<std::shared_ptr<KeyboardControllable>> observers;
     std::set<int> registeredKeys;
-    std::map<int, int> keyboardState;
     
 public:
     KeyboardController();
