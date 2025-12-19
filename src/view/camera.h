@@ -10,7 +10,7 @@
 #include <string>
 #include <format>
 
-#include <keyboard_controllable.h>
+#include "controllers/interfaces/keyboard_controllable.h"
 
 
 class Camera

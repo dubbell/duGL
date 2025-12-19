@@ -114,3 +114,40 @@ void Shader::setMat4(const std::string &name, glm::mat4 value) const
 {
     glUniformMatrix4fv(glGetUniformLocation(ID, name.c_str()), 1, GL_FALSE, glm::value_ptr(value));
 }
+
+void Shader::setCamera(Camera& camera) const
+{
+    setMat4("view", camera.getViewMatrix());
+    setMat4("projection", camera.getProjectionMatrix());
+    setVec3("viewPos", camera.getPosition());
+}
+
+void Shader::setDirectionalLight(DirectionalLight& directionalLight) const
+{
+    setVec3("directionalLight.direction", directionalLight.direction);
+    setVec3("directionalLight.ambient", directionalLight.ambient);
+    setVec3("directionalLight.diffuse", directionalLight.diffuse);
+    setVec3("directionalLight.specular", directionalLight.specular);
+}
+
+size_t MAX_POINT_LIGHTS = 8;  // max number of point lights for now
+
+void Shader::setPointLights(std::vector<PointLight>& pointLights) const
+{
+    setInt("pointLightCount", std::min(pointLights.size(), MAX_POINT_LIGHTS));
+
+    for (size_t p_i = 0; p_i < std::min(pointLights.size(), MAX_POINT_LIGHTS); p_i++)
+    {
+        const auto& pointLight = pointLights[p_i];
+
+        setVec3(std::format("pointLights[{}].position", p_i), pointLight.position);
+
+        setVec3(std::format("pointLights[{}].ambient", p_i), pointLight.ambient);
+        setVec3(std::format("pointLights[{}].diffuse", p_i), pointLight.diffuse);
+        setVec3(std::format("pointLights[{}].specular", p_i), pointLight.specular);
+        
+        setFloat(std::format("pointLights[{}].constant", p_i), pointLight.constant);
+        setFloat(std::format("pointLights[{}].linear", p_i), pointLight.linear);
+        setFloat(std::format("pointLights[{}].quadratic", p_i), pointLight.quadratic);
+    }
+}

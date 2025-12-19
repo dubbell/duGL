@@ -3,16 +3,14 @@
 
 KeyboardController::KeyboardController()
     : _window(nullptr),
-      observers(), 
-      registeredKeys(), 
-      keyboardState()
+      observers(),
+      registeredKeys()
 {}
 
 KeyboardController::KeyboardController(GLFWwindow* window) 
     : _window(window),
-      observers(), 
-      registeredKeys(), 
-      keyboardState()
+      observers(),
+      registeredKeys()
 {}
 
 void KeyboardController::setWindow(GLFWwindow* window)
@@ -42,6 +40,8 @@ void KeyboardController::unregisterObserver(std::shared_ptr<KeyboardControllable
 
 void KeyboardController::processKeyboardInput()
 {
+    std::map<int, int> keyboardState;
+
     // get input
     for (int key : registeredKeys)
         keyboardState[key] = glfwGetKey(_window, key);

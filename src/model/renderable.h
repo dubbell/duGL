@@ -9,8 +9,8 @@
 #include <string>
 #include <iostream>
 
-#include "pipeline/stb_image.h"
-#include "pipeline/shader.h"
+#include "utils/stb_image.h"
+#include "shading/shader.h"
 #include "mesh.h"
 
 

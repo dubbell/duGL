@@ -2,15 +2,18 @@
 #define SHADER_H
 
 #include <glad/gl.h>
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
 
 #include <string>
 #include <fstream>
 #include <sstream>
 #include <iostream>
+#include <format>
 
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtc/type_ptr.hpp>
+#include "shading/lighting.h"
+#include "view/camera.h"
 
 
 class Shader
@@ -37,6 +40,10 @@ public:
     void setFloat(const std::string &name, float value) const;
     void setVec3(const std::string &name, glm::vec3 value) const;
     void setMat4(const std::string &name, glm::mat4 value) const;
+
+    void setCamera(Camera& camera) const;
+    void setDirectionalLight(DirectionalLight& directionalLight) const;
+    void setPointLights(std::vector<PointLight>& pointLights) const;
 };
 
 #endif

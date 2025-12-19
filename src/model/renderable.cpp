@@ -86,7 +86,7 @@ std::vector<Texture> Renderable::loadMaterialTextures(aiMaterial* mat, aiTexture
         aiString str;
         mat->GetTexture(type, i, &str);
         bool skip = false;
-        // loop through already loaded textures to check if already loaded
+        // loop through already loaded textures to check if already loaded.
         // if it is, then just get the previously loaded texture instead
         for (unsigned int j = 0; j < textures_loaded.size(); j++)
         {
