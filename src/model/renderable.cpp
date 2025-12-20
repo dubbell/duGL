@@ -6,7 +6,7 @@ Renderable::Renderable(std::string path)
     loadModel(path);
 }
 
-void Renderable::draw(Shader& shader)
+void Renderable::draw(Shader* shader)
 {
     for (Mesh mesh : meshes) mesh.draw(shader);
 }

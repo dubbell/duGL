@@ -41,7 +41,7 @@ public:
     void setVec3(const std::string &name, glm::vec3 value) const;
     void setMat4(const std::string &name, glm::mat4 value) const;
 
-    void setCamera(Camera& camera) const;
+    void setPerspective(glm::mat4& view, glm::mat4& projection, glm::vec3& position) const;
     void setDirectionalLight(DirectionalLight& directionalLight) const;
     void setPointLights(std::vector<PointLight>& pointLights) const;
 };

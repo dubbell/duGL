@@ -21,6 +21,14 @@
 #include "shading/lighting.h"
 #include "model/renderable.h"
 #include "model/entity.h"
+#include "model/skybox.h"
+
+
+enum class ShaderType
+{
+    ObjectShader,
+    CubeMapShader
+};
 
 
 class Application
@@ -29,12 +37,13 @@ private:
     GLFWwindow* window;
 
     Camera camera;
-    glm::mat4 projectionMatrix;
+
+    Skybox skybox;
 
     std::vector<std::unique_ptr<Renderable>> renderables;
     std::vector<std::unique_ptr<Entity>> entities;
 
-    std::vector<std::unique_ptr<Shader>> shaders;
+    std::map<ShaderType, std::unique_ptr<Shader>> shaders;
 
     KeyboardController keyboardController;
     MouseController mouseController;

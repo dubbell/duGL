@@ -115,11 +115,11 @@ void Shader::setMat4(const std::string &name, glm::mat4 value) const
     glUniformMatrix4fv(glGetUniformLocation(ID, name.c_str()), 1, GL_FALSE, glm::value_ptr(value));
 }
 
-void Shader::setCamera(Camera& camera) const
+void Shader::setPerspective(glm::mat4& view, glm::mat4& projection, glm::vec3& position) const
 {
-    setMat4("view", camera.getViewMatrix());
-    setMat4("projection", camera.getProjectionMatrix());
-    setVec3("viewPos", camera.getPosition());
+    setMat4("view", view);
+    setMat4("projection", projection);
+    setVec3("viewPos", position);
 }
 
 void Shader::setDirectionalLight(DirectionalLight& directionalLight) const

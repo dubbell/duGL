@@ -2,7 +2,7 @@
 
 
 MouseController::MouseController()
-    : lastX(0.0f), lastY(0.0f), sensitivity(0.1f), firstMouse(true) 
+    : lastX(0.0f), lastY(0.0f), sensitivity(0.05f), firstMouse(true) 
 {}
 
 
