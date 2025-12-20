@@ -18,7 +18,7 @@ class Renderable
 {
 public:
     Renderable(std::string path);
-    void draw(Shader& shader);
+    void draw(Shader* shader);
 
 private:
     std::vector<Mesh> meshes;
