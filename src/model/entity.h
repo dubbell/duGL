@@ -18,6 +18,7 @@ public:
     void draw(Shader* shader);
 
     void setPosition(glm::vec3 position);
+    glm::vec3 getPosition() const;
 
     glm::mat4 getModelTransform();
 

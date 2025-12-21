@@ -6,12 +6,8 @@ Camera::Camera()
       velocity(0.0f, 0.0f, 0.0f), 
       maxSpeed(1.0f), 
       pitch(0.0f), 
-      yaw(0.0f),
-      fov(90.0f),
-      aspectRatio(4.0 / 3.0f)
-{
-    projectionMatrix = glm::perspective(glm::radians(fov), aspectRatio, 0.1f, 500.0f);
-};
+      yaw(0.0f)
+{};
 
 glm::mat3 Camera::getLocalBasis()
 {
@@ -78,18 +74,6 @@ void Camera::turnUp(float deltaPitch)
     else if (pitch > 89.0f) pitch = 89.0f;
 }
 
-void Camera::setFov(float FOV)
-{
-    fov = FOV;
-    projectionMatrix = glm::perspective(glm::radians(fov), aspectRatio, 0.1f, 500.0f);
-}
-
-void Camera::setAspectRatio(float AR)
-{
-    aspectRatio = AR;
-    projectionMatrix = glm::perspective(glm::radians(fov), aspectRatio, 0.1f, 500.0f);
-}
-
 
 glm::vec3 Camera::getPosition() const
 {
@@ -106,9 +90,4 @@ glm::mat4 Camera::getViewMatrix() const
     glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f);
 
     return glm::lookAt(position, position + front, up);
-}
-
-glm::mat4 Camera::getProjectionMatrix() const
-{
-    return projectionMatrix;
 }
