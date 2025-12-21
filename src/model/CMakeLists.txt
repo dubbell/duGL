@@ -1,4 +1,4 @@
-add_library(models STATIC mesh.cpp renderable.cpp entity.cpp skybox.cpp)
+add_library(models STATIC mesh.cpp renderable.cpp renderable_builder.cpp entity.cpp skybox.cpp)
 
 target_include_directories(models PUBLIC ..)
 

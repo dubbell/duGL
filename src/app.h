@@ -27,6 +27,7 @@
 #include "shading/uniform_buffer.h"
 #include "shading/ubo_templates.h"
 #include "model/renderable.h"
+#include "model/renderable_builder.h"
 #include "model/entity.h"
 #include "model/skybox.h"
 

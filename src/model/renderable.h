@@ -1,5 +1,5 @@
-#ifndef MODEL_H
-#define MODEL_H
+#ifndef RENDERABLE_H
+#define RENDERABLE_H
 
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
@@ -17,18 +17,12 @@
 class Renderable
 {
 public:
-    Renderable(std::string path);
+    Renderable(std::string directory, std::vector<Mesh> meshes);
     void draw(Shader* shader);
 
 private:
     std::vector<Mesh> meshes;
     std::string directory;
-    std::vector<Texture> textures_loaded;
-
-    void loadModel(std::string path);
-    void processNode(aiNode *node, const aiScene *scene);
-    Mesh processMesh(aiMesh *mesh, const aiScene *scene);
-    std::vector<Texture> loadMaterialTextures(aiMaterial *mat, aiTextureType type, std::string typeName);
 };
 
 #endif
