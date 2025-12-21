@@ -6,6 +6,11 @@
 #endif
 
 #include <GLFW/glfw3.h>
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
+#include <glm/gtx/norm.hpp>
+
 #include <string>
 #include <memory>
 #include <map>
@@ -32,13 +37,15 @@ enum class ShaderType
     CubeMapShader
 };
 
-
 class Application
 {
 private:
     GLFWwindow* window;
+    int screenWidth, screenHeight;
 
     Camera camera;
+    float fov, aspectRatio;
+    glm::mat4 projectionMatrix;
     UniformBuffer uboPerspective;
 
     Skybox skybox;
@@ -53,6 +60,8 @@ private:
 
     glm::vec4 clearColor;
     void clearBuffers();
+
+    glm::vec3 castRay(float screenX, float screenY, glm::mat4 viewMatrix);
 
 public:
     Application(int width, int height);

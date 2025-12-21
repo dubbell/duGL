@@ -20,6 +20,12 @@ void Entity::setPosition(glm::vec3 position)
 }
 
 
+glm::vec3 Entity::getPosition() const
+{
+    return position;
+}
+
+
 glm::mat4 Entity::getModelTransform()
 {
     return glm::translate(glm::mat4(1.0f), position);

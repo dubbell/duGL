@@ -2,7 +2,7 @@
 
 
 Application::Application(int width, int height) 
-    : clearColor(0.7f, 0.8f, 1.0f, 1.0f)
+    : clearColor(0.7f, 0.8f, 1.0f, 1.0f), screenWidth(width), screenHeight(height)
 {
     // window initialization
     glfwInit();
@@ -32,7 +32,9 @@ Application::Application(int width, int height)
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
     
     // set size of view volume
-    camera.setAspectRatio((float)width / (float)height);
+    fov = 90.0f;
+    aspectRatio = (float)width / (float)height;
+    projectionMatrix = glm::perspective(glm::radians(fov), aspectRatio, 0.1f, 500.0f);
 
     // necessary keyboard controller initialization step
     keyboardController.setWindow(window);
@@ -53,7 +55,7 @@ Application::Application(int width, int height)
     Renderable* backpack_renderable = renderables.emplace_back(std::make_unique<Renderable>("assets/models/backpack/backpack.obj")).get();
     
     entities.emplace_back(std::make_unique<Entity>(backpack_renderable, glm::vec3(1.0f, 1.0f, 6.0f)));
-    entities.emplace_back(std::make_unique<Entity>(backpack_renderable, glm::vec3(-2.0f, 1.0f, 1.0f)));
+    // entities.emplace_back(std::make_unique<Entity>(backpack_renderable, glm::vec3(-2.0f, 1.0f, 1.0f)));
 
     // shader for object renderables
     Shader* objectShader = shaders.emplace(ShaderType::ObjectShader, 
@@ -77,10 +79,41 @@ void Application::clearBuffers()
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
 
-void Application::stop()
+glm::vec3 Application::castRay(float screenX, float screenY, glm::mat4 viewMatrix)
 {
-    glfwDestroyWindow(window);
-    glfwTerminate();
+    glm::vec4 viewport(0.0f, 0.0f, (float)screenWidth, (float)screenHeight);
+
+    screenY = screenHeight - screenY;
+    
+    glm::vec3 nearPlanePoint = glm::unProject(
+        glm::vec3(screenX, screenY, 0.0f),
+        viewMatrix,
+        projectionMatrix,
+        viewport);
+    
+    glm::vec3 farPlanePoint = glm::unProject(
+        glm::vec3(screenX, screenY, 1.0f),
+        viewMatrix,
+        projectionMatrix,
+        viewport);
+
+    glm::vec3 direction =  glm::normalize(farPlanePoint - nearPlanePoint);
+
+    return direction;
+}
+
+bool checkRayIntersection(glm::vec3 target, float distance, glm::vec3 origin, glm::vec3 direction)
+{
+    glm::vec3 toTarget = target - origin;
+
+    float t = glm::dot(toTarget, direction);
+
+    // ray is cast in wrong direction
+    if (t < 0.0f) return false;
+
+    glm::vec3 closestPoint = origin + t * direction;
+
+    return glm::length2(closestPoint - target) <= (distance * distance);
 }
 
 void Application::startMainLoop()
@@ -109,7 +142,7 @@ void Application::startMainLoop()
         keyboardController.processKeyboardInput();  // user keyboard input
 
         // write to perspective UBO, shared among shaders
-        PerspectiveData perspectiveData = { camera.getViewMatrix(), camera.getProjectionMatrix() };
+        PerspectiveData perspectiveData = { camera.getViewMatrix(), projectionMatrix };
         uboPerspective.writeData(perspectiveData);
         
         // for rendering objects
@@ -122,6 +155,7 @@ void Application::startMainLoop()
         objectShader->setDirectionalLight(directionalLight);
         objectShader->setPointLights(pointLights);
         
+        // render all entities
         for (const auto& entity : entities)
         {
             objectShader->setMat4("model", entity->getModelTransform());
@@ -135,12 +169,18 @@ void Application::startMainLoop()
     }
 }
 
+void Application::stop()
+{
+    glfwDestroyWindow(window);
+    glfwTerminate();
+}
+
 
 void Application::frameBufferSizeCallback(GLFWwindow* window, int width, int height)
 {
     glViewport(0, 0, width, height);
     Application* application = static_cast<Application*>(glfwGetWindowUserPointer(window));
-    application->camera.setAspectRatio(float(width) / float(height));
+    application->aspectRatio = (float)width / (float)height;
 }
 
 void Application::cursorPosCallback(GLFWwindow* window, double xpos, double ypos)
