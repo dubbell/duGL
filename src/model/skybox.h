@@ -15,7 +15,7 @@ public:
     Skybox();
     void setShader(Shader* shader);
     void loadSkybox(const char* path);
-    void draw(glm::mat4 cameraView, glm::mat4 cameraProjection);
+    void draw();
 
 private:
     unsigned int VAO, VBO, textureId;

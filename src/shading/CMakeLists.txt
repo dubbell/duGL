@@ -1,4 +1,4 @@
-add_library(shading STATIC shader.cpp)
+add_library(shading STATIC shader.cpp uniform_buffer.cpp)
 
 target_include_directories(shading PUBLIC ..)
 

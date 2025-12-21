@@ -8,8 +8,12 @@ out vec3 Normal;
 out vec3 FragPos;
 
 uniform mat4 model;
-uniform mat4 view;
-uniform mat4 projection;
+
+layout (std140) uniform Perspective
+{
+    mat4 view;
+    mat4 projection;
+};
 
 void main()
 {
