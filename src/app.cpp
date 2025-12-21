@@ -52,7 +52,8 @@ Application::Application(int width, int height)
     glfwSetWindowUserPointer(window, this);
 
     // create objects to render
-    Renderable* backpack_renderable = renderables.emplace_back(std::make_unique<Renderable>("assets/models/backpack/backpack.obj")).get();
+    Renderable* backpack_renderable = renderables.emplace_back
+        (std::make_unique<Renderable>(RenderableBuilder("assets/models/backpack/backpack.obj").build())).get();
     
     entities.emplace_back(std::make_unique<Entity>(backpack_renderable, glm::vec3(1.0f, 1.0f, 6.0f)));
     // entities.emplace_back(std::make_unique<Entity>(backpack_renderable, glm::vec3(-2.0f, 1.0f, 1.0f)));
