@@ -1,7 +1,8 @@
 #include <app.h>
 
 
-Application::Application(int width, int height) : clearColor(0.7f, 0.8f, 1.0f, 1.0f)
+Application::Application(int width, int height) 
+    : clearColor(0.7f, 0.8f, 1.0f, 1.0f)
 {
     // window initialization
     glfwInit();
@@ -55,16 +56,19 @@ Application::Application(int width, int height) : clearColor(0.7f, 0.8f, 1.0f, 1
     entities.emplace_back(std::make_unique<Entity>(backpack_renderable, glm::vec3(-2.0f, 1.0f, 1.0f)));
 
     // shader for object renderables
-    shaders.emplace(ShaderType::ObjectShader, 
-        std::make_unique<Shader>("assets/shaders/basic_texture.vert", "assets/shaders/basic_texture.frag"));
+    Shader* objectShader = shaders.emplace(ShaderType::ObjectShader, 
+        std::make_unique<Shader>("assets/shaders/basic_texture.vert", "assets/shaders/basic_texture.frag")).first->second.get();
 
     // shader for cube map skybox
-    shaders.emplace(ShaderType::CubeMapShader,
-        std::make_unique<Shader>("assets/shaders/skybox.vert", "assets/shaders/skybox.frag"));
+    Shader* cubeMapShader = shaders.emplace(ShaderType::CubeMapShader,
+        std::make_unique<Shader>("assets/shaders/skybox.vert", "assets/shaders/skybox.frag")).first->second.get();
     
     // create skybox
     skybox.setShader(shaders[ShaderType::CubeMapShader].get());
     skybox.loadSkybox("assets/skyboxes/sea");
+
+    // create uniform buffer object
+    uboPerspective.create("Perspective", { objectShader, cubeMapShader }, sizeof(PerspectiveData), GL_DYNAMIC_DRAW);
 }
 
 void Application::clearBuffers()
@@ -101,15 +105,20 @@ void Application::startMainLoop()
     {
         clearBuffers();  // clear color and depth buffer
         
-        glfwPollEvents();  // use cursor input
+        glfwPollEvents();  // user cursor input
         keyboardController.processKeyboardInput();  // user keyboard input
 
-        glm::mat4 viewMatrix = camera.getViewMatrix();
-        glm::mat4 projectionMatrix = camera.getProjectionMatrix();
-        glm::vec3 cameraPosition = camera.getPosition();
-
+        // write to perspective UBO, shared among shaders
+        PerspectiveData perspectiveData = { camera.getViewMatrix(), camera.getProjectionMatrix() };
+        uboPerspective.writeData(perspectiveData);
+        
+        // for rendering objects
         objectShader->use();
-        objectShader->setPerspective(viewMatrix, projectionMatrix, cameraPosition);
+
+        // camera pos only used by object shader
+        objectShader->setVec3("viewPos", camera.getPosition());
+
+        // lighting
         objectShader->setDirectionalLight(directionalLight);
         objectShader->setPointLights(pointLights);
         
@@ -119,7 +128,8 @@ void Application::startMainLoop()
             entity->draw(objectShader);
         }
 
-        skybox.draw(viewMatrix, projectionMatrix);
+        // draw sky box
+        skybox.draw();
 
         glfwSwapBuffers(window);
     }

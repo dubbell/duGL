@@ -108,13 +108,11 @@ void Skybox::loadSkybox(const char* path)
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
 
-void Skybox::draw(glm::mat4 cameraView, glm::mat4 cameraProjection)
+void Skybox::draw()
 {
     glDepthFunc(GL_LEQUAL);
     
     shader->use();
-    shader->setMat4("view", glm::mat4(glm::mat3(cameraView)));
-    shader->setMat4("projection", cameraProjection);
     
     glBindVertexArray(VAO);
     glBindBuffer(GL_ARRAY_BUFFER, VBO);

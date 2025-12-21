@@ -19,6 +19,8 @@
 #include "controllers/flight_controller.h"
 #include "shading/shader.h"
 #include "shading/lighting.h"
+#include "shading/uniform_buffer.h"
+#include "shading/ubo_templates.h"
 #include "model/renderable.h"
 #include "model/entity.h"
 #include "model/skybox.h"
@@ -37,6 +39,7 @@ private:
     GLFWwindow* window;
 
     Camera camera;
+    UniformBuffer uboPerspective;
 
     Skybox skybox;
 
