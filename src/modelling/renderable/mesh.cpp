@@ -34,25 +34,28 @@ void Mesh::setupMesh()
     glBindVertexArray(0);
 }
 
-void Mesh::draw(Shader* shader)
+void Mesh::render(Shader* shader, bool bindTextures)
 {
-    unsigned int diffN = 1;
-    unsigned int specN = 1;
-
-    for (unsigned int i = 0; i < textures.size(); i++)
+    if (bindTextures)
     {
-        glActiveTexture(GL_TEXTURE0 + i);
-        std::string number;
-        std::string name = textures[i].type;
-        if (name == "texture_diffuse")
-            number = std::to_string(diffN++);
-        else if (name == "texture_specular")
-            number = std::to_string(specN++);
+        unsigned int diffN = 1;
+        unsigned int specN = 1;
 
-        shader->setInt(("material." + name + number).c_str(), i);
-        glBindTexture(GL_TEXTURE_2D, textures[i].id);
+        for (unsigned int i = 0; i < textures.size(); i++)
+        {
+            glActiveTexture(GL_TEXTURE0 + i);
+            std::string number;
+            std::string name = textures[i].type;
+            if (name == "texture_diffuse")
+                number = std::to_string(diffN++);
+            else if (name == "texture_specular")
+                number = std::to_string(specN++);
+
+            shader->setInt(("material." + name + number).c_str(), i);
+            glBindTexture(GL_TEXTURE_2D, textures[i].id);
+        }
+        glActiveTexture(GL_TEXTURE0);
     }
-    glActiveTexture(GL_TEXTURE0);
 
     glBindVertexArray(VAO);
     glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);

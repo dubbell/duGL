@@ -1,10 +1,6 @@
 #ifndef RENDERABLE_H
 #define RENDERABLE_H
 
-#include <assimp/Importer.hpp>
-#include <assimp/scene.h>
-#include <assimp/postprocess.h>
-
 #include <vector>
 #include <string>
 #include <iostream>
@@ -18,9 +14,14 @@ class Renderable
 {
 public:
     Renderable(std::string directory, std::vector<Mesh> meshes);
-    void draw(Shader* shader);
+    
+    void render();
+    void render(Shader* shader);
+
+    void setDefaultShader(Shader* shader);
 
 private:
+    Shader* defaultShader;
     std::vector<Mesh> meshes;
     std::string directory;
 };

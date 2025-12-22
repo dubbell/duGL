@@ -1,5 +1,5 @@
-#ifndef RENDERABLE_BUILDER_H
-#define RENDERABLE_BUILDER_H
+#ifndef MODEL_BUILDER_H
+#define MODEL_BUILDER_H
 
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
@@ -12,10 +12,10 @@
 #include "mesh.h"
 
 
-class RenderableBuilder
+class ModelBuilder
 {
 public:
-    RenderableBuilder(std::string path);
+    ModelBuilder(std::string path);
     Renderable build();
 
 private:
