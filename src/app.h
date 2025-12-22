@@ -26,10 +26,10 @@
 #include "shading/lighting.h"
 #include "shading/uniform_buffer.h"
 #include "shading/ubo_templates.h"
-#include "model/renderable.h"
-#include "model/renderable_builder.h"
-#include "model/entity.h"
-#include "model/skybox.h"
+#include "modelling/renderable/renderable.h"
+#include "modelling/renderable/model_builder.h"
+#include "modelling/entity/entity.h"
+#include "modelling/skybox.h"
 
 
 enum class ShaderType

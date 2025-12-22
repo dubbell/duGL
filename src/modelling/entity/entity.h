@@ -6,25 +6,26 @@
 #include <glm/gtc/type_ptr.hpp>
 
 #include "shading/shader.h"
-#include "model/renderable.h"
+#include "modelling/renderable/renderable.h"
 
 
 class Entity
 {
 public:
-    Entity(Renderable* renderable);
-    Entity(Renderable* renderable, glm::vec3 position);
+    Entity(Renderable* model);
+    Entity(Renderable* model, glm::vec3 position);
 
-    void draw(Shader* shader);
+    virtual void render();
 
     void setPosition(glm::vec3 position);
     glm::vec3 getPosition() const;
 
     glm::mat4 getModelTransform();
 
-private:
+protected:
     Renderable* renderable;
     glm::vec3 position;
 };
+
 
 #endif

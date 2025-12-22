@@ -45,15 +45,14 @@ Application::Application(int width, int height)
     // register user input observers
     mouseController.registerObserver(flightController);
     keyboardController.registerObserver(flightController);
-    for (int key : flightController->getActiveKeys())
-        keyboardController.registerKey(key);
+    
     glfwSetFramebufferSizeCallback(window, Application::frameBufferSizeCallback);
     glfwSetCursorPosCallback(window, Application::cursorPosCallback);
     glfwSetWindowUserPointer(window, this);
 
     // create objects to render
     Renderable* backpack_renderable = renderables.emplace_back
-        (std::make_unique<Renderable>(RenderableBuilder("assets/models/backpack/backpack.obj").build())).get();
+        (std::make_unique<Renderable>(ModelBuilder("assets/models/backpack/backpack.obj").build())).get();
     
     entities.emplace_back(std::make_unique<Entity>(backpack_renderable, glm::vec3(1.0f, 1.0f, 6.0f)));
     // entities.emplace_back(std::make_unique<Entity>(backpack_renderable, glm::vec3(-2.0f, 1.0f, 1.0f)));
@@ -61,6 +60,8 @@ Application::Application(int width, int height)
     // shader for object renderables
     Shader* objectShader = shaders.emplace(ShaderType::ObjectShader, 
         std::make_unique<Shader>("assets/shaders/basic_texture.vert", "assets/shaders/basic_texture.frag")).first->second.get();
+    
+    backpack_renderable->setDefaultShader(objectShader);
 
     // shader for cube map skybox
     Shader* cubeMapShader = shaders.emplace(ShaderType::CubeMapShader,
@@ -160,7 +161,7 @@ void Application::startMainLoop()
         for (const auto& entity : entities)
         {
             objectShader->setMat4("model", entity->getModelTransform());
-            entity->draw(objectShader);
+            entity->render();
         }
 
         // draw sky box

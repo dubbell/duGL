@@ -17,10 +17,13 @@
 class KeyboardController
 {
 private:
-    GLFWwindow* _window;
+    GLFWwindow* window;
 
     std::set<std::shared_ptr<KeyboardControllable>> observers;
+
     std::set<int> registeredKeys;
+    std::map<int, bool> registeredTogglableKeys;
+    std::map<int, int> registeredSingleTriggerKeys;
     
 public:
     KeyboardController();
@@ -30,6 +33,12 @@ public:
 
     void registerKey(int key);
     void unregisterKey(int key);
+
+    void registerTogglableKey(int key);
+    void unregisterTogglableKey(int key);
+
+    void registerSingleTriggerKey(int key);
+    void unregisterSingleTriggerKey(int key);
 
     void registerObserver(std::shared_ptr<KeyboardControllable> observer);
     void unregisterObserver(std::shared_ptr<KeyboardControllable> observer);
