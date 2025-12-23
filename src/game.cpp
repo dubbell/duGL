@@ -1,26 +1,9 @@
-#include <app.h>
+#include "game.h"
 
 
-Application::Application(int width, int height) 
-    : clearColor(0.7f, 0.8f, 1.0f, 1.0f), applicationState({ width, height, 90.f, false })
+Game::Game(int width, int height)
+    : Application(width, height), clearColor(0.7f, 0.8f, 1.0f, 1.0f), gameState({ 90.f, false })
 {
-    // window initialization
-    glfwInit();
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
-    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-
-    window = glfwCreateWindow(width, height, "duGL", NULL, NULL);
-    if (window == NULL) {
-        std::cout << "Failed to create GLFW window." << std::endl;
-    }
-    glfwMakeContextCurrent(window);
-    if (!gladLoadGL(glfwGetProcAddress))
-    {
-        std::cout << "Failed to initialize GLAD." << std::endl;
-    }
-    glViewport(0, 0, width, height);
-
     // enable depth testing
     glEnable(GL_DEPTH_TEST);
 
@@ -32,56 +15,65 @@ Application::Application(int width, int height)
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
     
     // set size of view volume
-    projectionMatrix = glm::perspective(glm::radians(applicationState.fov), (float)width / (float)height, 0.1f, 500.0f);
-
-    // necessary keyboard controller initialization step
-    keyboardController.setWindow(window);
+    projectionMatrix = glm::perspective(glm::radians(gameState.fov), (float)width / (float)height, 0.1f, 500.0f);
 
     // player
-    auto flightController = std::make_shared<FlightController>(window, &camera, &applicationState);
+    auto flightController = std::make_shared<FlightController>(window, &camera, &gameState);
 
     // register user input observers
     mouseController.registerObserver(flightController);
     keyboardController.registerObserver(flightController);
-    
-    glfwSetFramebufferSizeCallback(window, Application::frameBufferSizeCallback);
-    glfwSetCursorPosCallback(window, Application::cursorPosCallback);
-    glfwSetWindowUserPointer(window, this);
 
     // create objects to render
-    Renderable* backpack_renderable = renderables.emplace_back
-        (std::make_unique<Renderable>(ModelBuilder("assets/models/backpack/backpack.obj").build())).get();
+    Renderable* backpack_renderable = createRenderable("assets/models/backpack/backpack.obj");
     
-    entities.emplace_back(std::make_unique<Entity>(backpack_renderable, glm::vec3(1.0f, 1.0f, 6.0f)));
+    // create shader programs
+    Shader* objectShader = createShader(
+        "assets/shaders/basic_texture.vert", "assets/shaders/basic_texture.frag", ShaderType::ObjectShader);
+    Shader* outlineShader = createShader(
+        "assets/shaders/outline.vert", "assets/shaders/outline.frag", ShaderType::OutlineShader);
+    Shader* cubeMapShader = createShader(
+        "assets/shaders/skybox.vert", "assets/shaders/skybox.frag", ShaderType::CubeMapShader);
 
-    Shader* outlineShader = shaders.emplace(ShaderType::OutlineShader, 
-        std::make_unique<Shader>("assets/shaders/outline.vert", "assets/shaders/outline.frag")).first->second.get();
+    // create entities
+    createOutlinedEntity(backpack_renderable, glm::vec3(1.0f, 1.0f, 6.0f), outlineShader);
+    createOutlinedEntity(backpack_renderable, glm::vec3(-2.0f, 1.0f, 1.0f), outlineShader);
 
-    entities.emplace_back(std::make_unique<OutlinedEntity>(backpack_renderable, glm::vec3(-2.0f, 1.0f, 1.0f), outlineShader));
-
-    // shader for object renderables
-    Shader* objectShader = shaders.emplace(ShaderType::ObjectShader, 
-        std::make_unique<Shader>("assets/shaders/basic_texture.vert", "assets/shaders/basic_texture.frag")).first->second.get();
-
-    // shader for cube map skybox
-    Shader* cubeMapShader = shaders.emplace(ShaderType::CubeMapShader,
-        std::make_unique<Shader>("assets/shaders/skybox.vert", "assets/shaders/skybox.frag")).first->second.get();
-    
     // create skybox
     skybox.setShader(shaders[ShaderType::CubeMapShader].get());
     skybox.loadSkybox("assets/skyboxes/sea");
 
-    // create uniform buffer object
+    // create uniform buffer object for perspective transforms
     uboPerspective.create("Perspective", { objectShader, cubeMapShader }, sizeof(PerspectiveData), GL_DYNAMIC_DRAW);
 }
 
-void Application::clearBuffers()
+void Game::clearBuffers()
 {
     glClearColor(clearColor.r, clearColor.g, clearColor.b, clearColor.a);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 }
 
-glm::vec3 Application::castRay(float screenX, float screenY, glm::mat4 viewMatrix)
+Renderable* Game::createRenderable(const char* renderablePath)
+{
+    return renderables.emplace_back(std::make_unique<Renderable>(ModelBuilder(renderablePath).build())).get();
+}
+
+Entity* Game::createEntity(Renderable* renderable, glm::vec3 position)
+{
+    return entities.emplace_back(std::make_unique<Entity>(renderable, glm::vec3(1.0f, 1.0f, 6.0f))).get();
+}
+
+Entity* Game::createOutlinedEntity(Renderable* renderable, glm::vec3 position, Shader* outlineShader)
+{
+    return entities.emplace_back(std::make_unique<OutlinedEntity>(renderable, position, outlineShader)).get();
+}
+
+Shader* Game::createShader(const char* vertexShaderPath, const char* fragmentShaderPath, ShaderType shaderType)
+{
+    return shaders.emplace(shaderType, std::make_unique<Shader>(vertexShaderPath, fragmentShaderPath)).first->second.get();
+}
+
+glm::vec3 Game::castRay(float screenX, float screenY, glm::mat4 viewMatrix)
 {
     glm::vec4 viewport(0.0f, 0.0f, (float)applicationState.screenWidth, (float)applicationState.screenHeight);
 
@@ -118,7 +110,7 @@ bool checkRayIntersection(glm::vec3 target, float distance, glm::vec3 origin, gl
     return glm::length2(closestPoint - target) <= (distance * distance);
 }
 
-void Application::startMainLoop()
+void Game::startMainLoop()
 {
     Shader* objectShader = shaders[ShaderType::ObjectShader].get();
 
@@ -170,24 +162,8 @@ void Application::startMainLoop()
     }
 }
 
-void Application::stop()
-{
-    glfwDestroyWindow(window);
-    glfwTerminate();
-}
 
-
-void Application::frameBufferSizeCallback(GLFWwindow* window, int width, int height)
+void Game::frameBufferResizeCallback(int width, int height)
 {
-    glViewport(0, 0, width, height);
-    Application* application = static_cast<Application*>(glfwGetWindowUserPointer(window));
-    application->applicationState.screenWidth = width;
-    application->applicationState.screenHeight = height;
-    application->projectionMatrix = glm::perspective(glm::radians(application->applicationState.fov), (float)width / (float)height, 0.1f, 500.0f);
-}
-
-void Application::cursorPosCallback(GLFWwindow* window, double xpos, double ypos)
-{
-    Application* application = static_cast<Application*>(glfwGetWindowUserPointer(window));
-    application->mouseController.cursorPosCallback((float)xpos, (float)ypos);
+    projectionMatrix = glm::perspective(glm::radians(gameState.fov), (float)width / (float)height, 0.1f, 500.0f);
 }

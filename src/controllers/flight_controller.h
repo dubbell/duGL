@@ -17,10 +17,10 @@ private:
     Camera* camera;
 
     float speed;
-    ApplicationState* applicationState;
+    GameState* gameState;
 
 public:
-    FlightController(GLFWwindow* window, Camera* camera, ApplicationState* applicationState);
+    FlightController(GLFWwindow* window, Camera* camera, GameState* gameState);
 
     std::set<int> getActiveKeys() override;
     std::set<int> getActiveTogglableKeys() override;
