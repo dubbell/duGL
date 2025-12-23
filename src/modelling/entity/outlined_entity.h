@@ -7,10 +7,10 @@
 class OutlinedEntity : public Entity
 {
 public:
-    OutlinedEntity(Model* model, Shader* outlineShader);
-    OutlinedEntity(Model* model, glm::vec3 position, Shader* outlineShader);
+    OutlinedEntity(Renderable* renderable, Shader* outlineShader);
+    OutlinedEntity(Renderable* renderable, glm::vec3 position, Shader* outlineShader);
 
-    virtual void render() override;
+    virtual void render(Shader* shader) override;
 
 private:
     bool enableOutline;

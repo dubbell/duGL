@@ -18,6 +18,7 @@
 #include <format>
 #include <algorithm>
 
+#include "app_state.h"
 #include "view/camera.h"
 #include "controllers/keyboard.h"
 #include "controllers/mouse.h"
@@ -29,12 +30,14 @@
 #include "modelling/renderable/renderable.h"
 #include "modelling/renderable/model_builder.h"
 #include "modelling/entity/entity.h"
+#include "modelling/entity/outlined_entity.h"
 #include "modelling/skybox.h"
 
 
 enum class ShaderType
 {
     ObjectShader,
+    OutlineShader,
     CubeMapShader
 };
 
@@ -42,10 +45,9 @@ class Application
 {
 private:
     GLFWwindow* window;
-    int screenWidth, screenHeight;
+    ApplicationState applicationState;
 
     Camera camera;
-    float fov, aspectRatio;
     glm::mat4 projectionMatrix;
     UniformBuffer uboPerspective;
 

@@ -4,6 +4,7 @@
 #include <memory>
 #include <set>
 
+#include "app_state.h"
 #include "controllers/interfaces/keyboard_controllable.h"
 #include "controllers/interfaces/mouse_controllable.h"
 #include "view/camera.h"
@@ -16,10 +17,10 @@ private:
     Camera* camera;
 
     float speed;
-    bool freeCursor;
+    ApplicationState* applicationState;
 
 public:
-    FlightController(GLFWwindow* window, Camera* camera);
+    FlightController(GLFWwindow* window, Camera* camera, ApplicationState* applicationState);
 
     std::set<int> getActiveKeys() override;
     std::set<int> getActiveTogglableKeys() override;

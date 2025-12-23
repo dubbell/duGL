@@ -1,4 +1,4 @@
-add_library(entity STATIC entity.cpp)
+add_library(entity STATIC entity.cpp outlined_entity.cpp)
 
 target_include_directories(entity PUBLIC ..)
 
