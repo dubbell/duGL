@@ -2,7 +2,7 @@
 
 
 Application::Application(int width, int height) 
-    : clearColor(0.7f, 0.8f, 1.0f, 1.0f), screenWidth(width), screenHeight(height)
+    : clearColor(0.7f, 0.8f, 1.0f, 1.0f), applicationState({ width, height, 90.f, false })
 {
     // window initialization
     glfwInit();
@@ -32,15 +32,13 @@ Application::Application(int width, int height)
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
     
     // set size of view volume
-    fov = 90.0f;
-    aspectRatio = (float)width / (float)height;
-    projectionMatrix = glm::perspective(glm::radians(fov), aspectRatio, 0.1f, 500.0f);
+    projectionMatrix = glm::perspective(glm::radians(applicationState.fov), (float)width / (float)height, 0.1f, 500.0f);
 
     // necessary keyboard controller initialization step
     keyboardController.setWindow(window);
 
     // player
-    auto flightController = std::make_shared<FlightController>(window, &camera);
+    auto flightController = std::make_shared<FlightController>(window, &camera, &applicationState);
 
     // register user input observers
     mouseController.registerObserver(flightController);
@@ -55,13 +53,15 @@ Application::Application(int width, int height)
         (std::make_unique<Renderable>(ModelBuilder("assets/models/backpack/backpack.obj").build())).get();
     
     entities.emplace_back(std::make_unique<Entity>(backpack_renderable, glm::vec3(1.0f, 1.0f, 6.0f)));
-    // entities.emplace_back(std::make_unique<Entity>(backpack_renderable, glm::vec3(-2.0f, 1.0f, 1.0f)));
+
+    Shader* outlineShader = shaders.emplace(ShaderType::OutlineShader, 
+        std::make_unique<Shader>("assets/shaders/outline.vert", "assets/shaders/outline.frag")).first->second.get();
+
+    entities.emplace_back(std::make_unique<OutlinedEntity>(backpack_renderable, glm::vec3(-2.0f, 1.0f, 1.0f), outlineShader));
 
     // shader for object renderables
     Shader* objectShader = shaders.emplace(ShaderType::ObjectShader, 
         std::make_unique<Shader>("assets/shaders/basic_texture.vert", "assets/shaders/basic_texture.frag")).first->second.get();
-    
-    backpack_renderable->setDefaultShader(objectShader);
 
     // shader for cube map skybox
     Shader* cubeMapShader = shaders.emplace(ShaderType::CubeMapShader,
@@ -78,14 +78,14 @@ Application::Application(int width, int height)
 void Application::clearBuffers()
 {
     glClearColor(clearColor.r, clearColor.g, clearColor.b, clearColor.a);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 }
 
 glm::vec3 Application::castRay(float screenX, float screenY, glm::mat4 viewMatrix)
 {
-    glm::vec4 viewport(0.0f, 0.0f, (float)screenWidth, (float)screenHeight);
+    glm::vec4 viewport(0.0f, 0.0f, (float)applicationState.screenWidth, (float)applicationState.screenHeight);
 
-    screenY = screenHeight - screenY;
+    screenY = applicationState.screenHeight - screenY;
     
     glm::vec3 nearPlanePoint = glm::unProject(
         glm::vec3(screenX, screenY, 0.0f),
@@ -160,8 +160,7 @@ void Application::startMainLoop()
         // render all entities
         for (const auto& entity : entities)
         {
-            objectShader->setMat4("model", entity->getModelTransform());
-            entity->render();
+            entity->render(objectShader);
         }
 
         // draw sky box
@@ -182,7 +181,9 @@ void Application::frameBufferSizeCallback(GLFWwindow* window, int width, int hei
 {
     glViewport(0, 0, width, height);
     Application* application = static_cast<Application*>(glfwGetWindowUserPointer(window));
-    application->aspectRatio = (float)width / (float)height;
+    application->applicationState.screenWidth = width;
+    application->applicationState.screenHeight = height;
+    application->projectionMatrix = glm::perspective(glm::radians(application->applicationState.fov), (float)width / (float)height, 0.1f, 500.0f);
 }
 
 void Application::cursorPosCallback(GLFWwindow* window, double xpos, double ypos)

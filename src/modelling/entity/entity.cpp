@@ -8,9 +8,11 @@ Entity::Entity(Renderable* renderable) : renderable(renderable), position(0.0f, 
 Entity::Entity(Renderable* renderable, glm::vec3 position) : renderable(renderable), position(position) {}
 
 
-void Entity::render()
+void Entity::render(Shader* shader)
 {
-    renderable->render();
+    shader->use();
+    shader->setMat4("model", getModelTransform());
+    renderable->render(shader);
 }
 
 

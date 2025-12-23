@@ -1,8 +1,8 @@
 #include "flight_controller.h"
 
 
-FlightController::FlightController(GLFWwindow* window, Camera* camera) 
-    : window(window), camera(camera), speed(0.1f), freeCursor(false) {}
+FlightController::FlightController(GLFWwindow* window, Camera* camera, ApplicationState* applicationState) 
+    : window(window), camera(camera), applicationState(applicationState), speed(0.1f) {}
 
 
 std::set<int> FlightController::getActiveKeys()
@@ -72,14 +72,14 @@ void FlightController::processKeyboardInput(KeyboardState& keyboardState)
     // cursor capture
     if (keyboardState.singleTriggerKeys[GLFW_KEY_ESCAPE] == SINGLE_TRIGGER_KEY_PRESS)
     {
-        glfwSetInputMode(window, GLFW_CURSOR, freeCursor ? GLFW_CURSOR_DISABLED : GLFW_CURSOR_NORMAL);
-        freeCursor = !freeCursor;
+        glfwSetInputMode(window, GLFW_CURSOR, applicationState->freeCursor ? GLFW_CURSOR_DISABLED : GLFW_CURSOR_NORMAL);
+        applicationState->freeCursor = !applicationState->freeCursor;
     }
 }
 
 void FlightController::cursorPosCallback(float xOffset, float yOffset)
 {
-    if (!freeCursor)
+    if (!applicationState->freeCursor)
     {
         camera->turnRight(xOffset);
         camera->turnUp(yOffset);

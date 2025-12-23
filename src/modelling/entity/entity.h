@@ -15,7 +15,7 @@ public:
     Entity(Renderable* model);
     Entity(Renderable* model, glm::vec3 position);
 
-    virtual void render();
+    virtual void render(Shader* shader);
 
     void setPosition(glm::vec3 position);
     glm::vec3 getPosition() const;

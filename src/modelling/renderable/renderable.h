@@ -15,13 +15,9 @@ class Renderable
 public:
     Renderable(std::string directory, std::vector<Mesh> meshes);
     
-    void render();
     void render(Shader* shader);
 
-    void setDefaultShader(Shader* shader);
-
 private:
-    Shader* defaultShader;
     std::vector<Mesh> meshes;
     std::string directory;
 };
