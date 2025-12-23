@@ -1,4 +1,4 @@
-add_library(application STATIC app.cpp)
+add_library(application STATIC game.cpp)
 
 add_subdirectory(controllers)
 add_subdirectory(shading)

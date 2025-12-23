@@ -5,6 +5,10 @@
 struct ApplicationState
 {
     int screenWidth, screenHeight;
+};
+
+struct GameState
+{
     float fov;
     bool freeCursor;
 };
