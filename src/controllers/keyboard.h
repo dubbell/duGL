@@ -10,7 +10,7 @@
 #include <utility>
 #include <memory>
 
-#include "controllers/interfaces/keyboard_controllable.h"
+#include "observers/keyboard_observer.h"
 #include "view/camera.h"
 
 
@@ -19,7 +19,7 @@ class KeyboardController
 private:
     GLFWwindow* window;
 
-    std::set<std::shared_ptr<KeyboardControllable>> observers;
+    std::set<KeyboardObserver*> observers;
 
     std::set<int> registeredKeys;
     std::map<int, bool> registeredTogglableKeys;
@@ -40,8 +40,8 @@ public:
     void registerSingleTriggerKey(int key);
     void unregisterSingleTriggerKey(int key);
 
-    void registerObserver(std::shared_ptr<KeyboardControllable> observer);
-    void unregisterObserver(std::shared_ptr<KeyboardControllable> observer);
+    void registerObserver(KeyboardObserver* observer);
+    void unregisterObserver(KeyboardObserver* observer);
 
     void processKeyboardInput();
 };

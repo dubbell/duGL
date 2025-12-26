@@ -9,7 +9,6 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
-#include <glm/gtx/norm.hpp>
 
 #include <string>
 #include <memory>
@@ -17,10 +16,8 @@
 #include <string>
 #include <format>
 #include <algorithm>
-#include <concepts>
 
 #include "app.h"
-#include "app_state.h"
 #include "view/camera.h"
 #include "controllers/keyboard.h"
 #include "controllers/mouse.h"
@@ -43,13 +40,11 @@ enum class ShaderType
     CubeMapShader
 };
 
-class Game : public Application
+class ExampleGame : public Game
 {
 private:
-    GameState gameState;
+    FlightController flightController;
 
-    Camera camera;
-    glm::mat4 projectionMatrix;
     UniformBuffer uboPerspective;
 
     Skybox skybox;
@@ -64,16 +59,14 @@ private:
     Renderable* createRenderable(const char* renderablePath);
 
     Entity* createEntity(Renderable* renderable, glm::vec3 position);
-    Entity* createOutlinedEntity(Renderable* renderable, glm::vec3 position, Shader* outlineShader);
+    OutlinedEntity* createOutlinedEntity(Renderable* renderable, glm::vec3 position, Shader* outlineShader);
 
     Shader* createShader(const char* vertexShaderPath, const char* fragmentShaderPath, ShaderType type);
-
-    glm::vec3 castRay(float screenX, float screenY, glm::mat4 viewMatrix);
 
     virtual void frameBufferResizeCallback(int width, int height) override;
 
 public:
-    Game(int width, int height);
+    ExampleGame();
     void startMainLoop();
 };
 

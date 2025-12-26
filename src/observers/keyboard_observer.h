@@ -15,17 +15,17 @@ struct KeyboardState
     std::map<int, int> singleTriggerKeys;
 };
 
-class KeyboardControllable
+class KeyboardObserver
 {
 public:
-    KeyboardControllable() {}
+    KeyboardObserver() {}
 
     virtual std::set<int> getActiveKeys() = 0;
     virtual std::set<int> getActiveTogglableKeys() = 0;
     virtual std::set<int> getActiveSingleTriggerKeys() = 0;
 
     virtual void processKeyboardInput(KeyboardState& keyboardState) = 0;
-    virtual ~KeyboardControllable() = default;
+    virtual ~KeyboardObserver() = default;
 };
 
 #endif
