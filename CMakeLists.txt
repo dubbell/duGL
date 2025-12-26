@@ -46,3 +46,28 @@ add_custom_command(
     ARGS ${SHADER_SOURCE_DIR} ${SHADER_DEST_DIR}
     COMMENT "Copying assets directory to output folder."
 )
+
+
+set(IMGUI_DIR "lib/imgui")
+
+set(IMGUI_SOURCES
+    ${IMGUI_DIR}/imgui.cpp
+    ${IMGUI_DIR}/imgui_demo.cpp
+    ${IMGUI_DIR}/imgui_draw.cpp
+    ${IMGUI_DIR}/imgui_tables.cpp
+    ${IMGUI_DIR}/imgui_widgets.cpp
+    ${IMGUI_DIR}/backends/imgui_impl_glfw.cpp
+    ${IMGUI_DIR}/backends/imgui_impl_opengl3.cpp
+)
+
+add_library(imgui STATIC ${IMGUI_SOURCES})
+
+target_include_directories(imgui PUBLIC 
+    ${IMGUI_DIR} 
+    ${IMGUI_DIR}/backends
+)
+
+find_package(OpenGL REQUIRED)
+target_link_libraries(imgui PUBLIC project_dependencies)
+
+target_link_libraries(duGL PRIVATE imgui)
