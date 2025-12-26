@@ -1,35 +1,65 @@
 #include "mouse.h"
 
 
-MouseController::MouseController()
-    : lastX(0.0f), lastY(0.0f), sensitivity(0.05f), firstMouse(true) 
+MouseController::MouseController(PlayerInterface* screenCastInterface)
+    : screenCastInterface(screenCastInterface), lastX(0.0f), lastY(0.0f), sensitivity(0.05f), firstMouse(true)
 {}
 
 
-void MouseController::registerObserver(std::shared_ptr<MouseControllable> observer)
+void MouseController::registerOffsetObserver(MouseOffsetObserver* observer)
 {
-    observers.insert(observer);
+    mouseOffsetObservers.insert(observer);
 }
 
-void MouseController::unregisterObserver(std::shared_ptr<MouseControllable> observer)
+void MouseController::unregisterOffsetObserver(MouseOffsetObserver* observer)
 {
-    observers.erase(observer);
+    mouseOffsetObservers.erase(observer);
 }
 
-void MouseController::cursorPosCallback(float xpos, float ypos)
+void MouseController::registerScreenRayObserver(ScreenRayObserver* observer)
+{
+    screenRayObservers.insert(observer);
+}
+
+void MouseController::unregisterScreenRayObserver(ScreenRayObserver* observer)
+{
+    screenRayObservers.erase(observer);
+}
+
+void MouseController::handleCursorPosition(float xPos, float yPos)
 {
     if (firstMouse)
     {
-        lastX = xpos;
-        lastY = ypos;
+        lastX = xPos;
+        lastY = yPos;
         firstMouse = false;
     }
 
-    float xOffset = (xpos - lastX) * sensitivity;
-    float yOffset = (lastY - ypos) * sensitivity; 
-    lastX = xpos;
-    lastY = ypos;
+    float xOffset = (xPos - lastX) * sensitivity;
+    float yOffset = (lastY - yPos) * sensitivity; 
+    lastX = xPos;
+    lastY = yPos;
 
-    for (auto& observer : observers)
-        observer->cursorPosCallback(xOffset, yOffset);
+    for (auto& observer : mouseOffsetObservers)
+        observer->cursorOffsetCallback(xOffset, yOffset);
+}
+
+void MouseController::handleScreenRay(float xPos, float yPos)
+{
+    Camera* camera = screenCastInterface->getActiveCamera();
+    glm::mat4 view = camera->getViewMatrix();
+    glm::mat4 projection = camera->getProjectionMatrix();
+    auto [viewportWidth, viewportHeight] = screenCastInterface->getViewportSize();
+    
+    glm::vec3 origin = camera->getPosition();
+    glm::vec3 direction = castScreenRay(xPos, yPos, viewportWidth, viewportHeight, view, projection);
+
+    for (auto& observer : screenRayObservers)
+        observer->observeRay(origin, direction);
+}
+
+void MouseController::cursorPositionCallback(float xPos, float yPos)
+{
+    handleCursorPosition(xPos, yPos);
+    handleScreenRay(xPos, yPos);
 }

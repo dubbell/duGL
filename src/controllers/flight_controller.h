@@ -4,30 +4,28 @@
 #include <memory>
 #include <set>
 
-#include "app_state.h"
-#include "controllers/interfaces/keyboard_controllable.h"
-#include "controllers/interfaces/mouse_controllable.h"
+#include "observers/keyboard_observer.h"
+#include "observers/mouse_observer.h"
 #include "view/camera.h"
+#include "interfaces/player_interface.h"
 
 
-class FlightController : public KeyboardControllable, public MouseControllable
+class FlightController : public KeyboardObserver, public MouseOffsetObserver
 {
 private:
-    GLFWwindow* window;
-    Camera* camera;
+    PlayerInterface* playerInterface;
 
     float speed;
-    GameState* gameState;
 
 public:
-    FlightController(GLFWwindow* window, Camera* camera, GameState* gameState);
+    FlightController(PlayerInterface* playerInterface);
 
     std::set<int> getActiveKeys() override;
     std::set<int> getActiveTogglableKeys() override;
     std::set<int> getActiveSingleTriggerKeys() override;
 
     void processKeyboardInput(KeyboardState& keyboardState) override;
-    void cursorPosCallback(float xOffset, float yOffset) override;
+    void cursorOffsetCallback(float xOffset, float yOffset) override;
 };
 
 #endif

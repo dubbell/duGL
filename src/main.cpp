@@ -5,7 +5,7 @@
 
 int main()
 {
-    Game* game = new Game(1920, 1080);
+    ExampleGame* game = new ExampleGame();
 
     game->startMainLoop();
     game->stop();

@@ -4,15 +4,18 @@
 #include <glad/gl.h>
 #include <GLFW/glfw3.h>
 
+#include <utility>
+
 #include "controllers/mouse.h"
 #include "controllers/keyboard.h"
-#include "app_state.h"
+#include "interfaces/player_interface.h"
 
 
-class Application
+
+class Game : public PlayerInterface
 {
 public:
-    Application(int width, int height) : applicationState({ width, height })
+    Game() : viewportWidth(1920), viewportHeight(1080), freeCursor(false), mouseController(this)
     {
         // window initialization
         glfwInit();
@@ -20,7 +23,7 @@ public:
         glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
         glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-        window = glfwCreateWindow(width, height, "duGL", NULL, NULL);
+        window = glfwCreateWindow(viewportWidth, viewportHeight, "duGL", NULL, NULL);
         if (window == NULL) {
             std::cout << "Failed to create GLFW window." << std::endl;
         }
@@ -29,13 +32,16 @@ public:
         {
             std::cout << "Failed to initialize GLAD." << std::endl;
         }
-        glViewport(0, 0, width, height);
+        glViewport(0, 0, viewportWidth, viewportHeight);
 
         keyboardController.setWindow(window);
 
-        glfwSetFramebufferSizeCallback(window, Application::frameBufferResizeCallback_);
-        glfwSetCursorPosCallback(window, Application::cursorPosCallback_);
+        glfwSetFramebufferSizeCallback(window, Game::frameBufferResizeCallback_);
+        glfwSetCursorPosCallback(window, Game::cursorPosCallback_);
         glfwSetWindowUserPointer(window, this);
+
+        activeCamera = cameras.emplace_back(std::make_unique<Camera>()).get();
+        activeCamera->setAspectRatio((float)16 / 9);
     }
 
     void stop()
@@ -44,32 +50,59 @@ public:
         glfwTerminate();
     }
 
+    GLFWwindow* getWindow() override
+    {
+        return window;
+    }
+
+    bool getFreeCursor() override
+    {
+        return freeCursor;
+    }
+
+    void setFreeCursor(bool freeCursor) override
+    {
+        this->freeCursor = freeCursor;
+    }
+
+    std::pair<int, int> getViewportSize() override
+    {
+        return { viewportWidth, viewportHeight };
+    }
+
+    Camera* getActiveCamera() override
+    {
+        return activeCamera;
+    }
+    
 protected:
     GLFWwindow* window;
-    
-    ApplicationState applicationState;
+    int viewportWidth, viewportHeight;
+
+    std::vector<std::unique_ptr<Camera>> cameras;
+    Camera* activeCamera;
+
+    bool freeCursor;
     
     KeyboardController keyboardController;
     MouseController mouseController;
 
     virtual void frameBufferResizeCallback(int width, int height) {}
-    virtual void cursorPosCallback(float xpos, float ypos) {}
 
 private:
     static void frameBufferResizeCallback_(GLFWwindow* window, int width, int height)
     {
         glViewport(0, 0, width, height);
-        Application* application = static_cast<Application*>(glfwGetWindowUserPointer(window));
-        application->applicationState.screenWidth = width;
-        application->applicationState.screenHeight = height;
-        application->frameBufferResizeCallback(width, height);
+        Game* game = static_cast<Game*>(glfwGetWindowUserPointer(window));
+        game->viewportWidth = width;
+        game->viewportHeight = height;
+        game->frameBufferResizeCallback(width, height);
     }
 
     static void cursorPosCallback_(GLFWwindow* window, double xpos, double ypos)
     {
-        Application* application = static_cast<Application*>(glfwGetWindowUserPointer(window));
-        application->mouseController.cursorPosCallback((float)xpos, (float)ypos);
-        application->cursorPosCallback((float)xpos, (float)ypos);
+        Game* game = static_cast<Game*>(glfwGetWindowUserPointer(window));
+        game->mouseController.cursorPositionCallback((float)xpos, (float)ypos);
     }
 };
 

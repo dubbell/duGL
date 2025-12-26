@@ -10,7 +10,7 @@
 #include <string>
 #include <format>
 
-#include "controllers/interfaces/keyboard_controllable.h"
+#include "observers/keyboard_observer.h"
 
 
 class Camera
@@ -21,6 +21,11 @@ private:
 
     glm::vec3 position;
     glm::vec3 velocity;
+
+    float fov, aspectRatio, near, far;  // projection matrix parameters
+
+    bool viewInvalidated, projectionInvalidated;
+    glm::mat4 cachedViewMatrix, cachedProjectionMatrix;
 
     glm::mat3 getLocalBasis();
 
@@ -41,9 +46,17 @@ public:
     void turnRight(float deltaYaw);
     void turnUp(float deltaPitch);
 
-    glm::vec3 getPosition() const;
+    glm::vec3& getPosition();
 
-    glm::mat4 getViewMatrix() const;
+    void invalidateCachedViewMatrix();
+    glm::mat4& getViewMatrix();
+
+    void invalidateCachedProjectionMatrix();
+    glm::mat4& getProjectionMatrix();
+
+    void setFov(float fov);
+    void setAspectRatio(float aspectRatio);
+    void setRenderDistance(float near, float far);
 };
 
 #endif

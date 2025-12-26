@@ -6,25 +6,36 @@
 #include <memory>
 #include <set>
 
-#include "controllers/interfaces/mouse_controllable.h"
+#include "observers/mouse_observer.h"
+#include "interfaces/player_interface.h"
+#include "common.h"
 
 
 class MouseController
 {
 private:
-    std::set<std::shared_ptr<MouseControllable>> observers;
+    PlayerInterface* screenCastInterface;
+
+    std::set<ScreenRayObserver*> screenRayObservers;
+    std::set<MouseOffsetObserver*> mouseOffsetObservers;
 
     float lastX, lastY;
     float sensitivity;
     bool firstMouse;
 
+    void handleCursorPosition(float xPos, float yPos);
+    void handleScreenRay(float xPos, float yPos);
+
 public:
-    MouseController();
+    MouseController(PlayerInterface* screenCastInterface);
 
-    void registerObserver(std::shared_ptr<MouseControllable> observer);
-    void unregisterObserver(std::shared_ptr<MouseControllable> observer);
+    void registerOffsetObserver(MouseOffsetObserver* observer);
+    void unregisterOffsetObserver(MouseOffsetObserver* observer);
 
-    void cursorPosCallback(float xpos, float ypos);
+    void registerScreenRayObserver(ScreenRayObserver* observer);
+    void unregisterScreenRayObserver(ScreenRayObserver* observer);
+
+    void cursorPositionCallback(float xPos, float yPos);
 };
 
 

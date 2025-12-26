@@ -49,7 +49,7 @@ void KeyboardController::unregisterSingleTriggerKey(int key)
     registeredSingleTriggerKeys.erase(key);
 }
 
-void KeyboardController::registerObserver(std::shared_ptr<KeyboardControllable> observer)
+void KeyboardController::registerObserver(KeyboardObserver* observer)
 {
     observers.insert(observer);
 
@@ -69,7 +69,7 @@ void KeyboardController::registerObserver(std::shared_ptr<KeyboardControllable> 
     }
 }
 
-void KeyboardController::unregisterObserver(std::shared_ptr<KeyboardControllable> observer)
+void KeyboardController::unregisterObserver(KeyboardObserver* observer)
 {
     observers.erase(observer);
 }
