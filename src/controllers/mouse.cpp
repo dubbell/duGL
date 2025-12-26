@@ -61,5 +61,7 @@ void MouseController::handleScreenRay(float xPos, float yPos)
 void MouseController::cursorPositionCallback(float xPos, float yPos)
 {
     handleCursorPosition(xPos, yPos);
-    handleScreenRay(xPos, yPos);
+
+    if (screenCastInterface->getFreeCursor())
+        handleScreenRay(xPos, yPos);
 }
