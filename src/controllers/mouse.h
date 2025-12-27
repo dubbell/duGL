@@ -35,7 +35,7 @@ public:
     void registerScreenRayObserver(ScreenRayObserver* observer);
     void unregisterScreenRayObserver(ScreenRayObserver* observer);
 
-    void cursorPositionCallback(float xPos, float yPos);
+    void processMouseInput();
 };
 
 

@@ -104,7 +104,9 @@ void ExampleGame::startMainLoop()
         PerspectiveData perspectiveData = { activeCamera->getViewMatrix(), activeCamera->getProjectionMatrix() }; 
         uboPerspective.writeData(perspectiveData);
         
-        glfwPollEvents();  // user cursor input
+        glfwPollEvents();  // viewport resizing and GUI interaction
+
+        mouseController.processMouseInput();        // use mouse input
         keyboardController.processKeyboardInput();  // user keyboard input
 
         // user interface
