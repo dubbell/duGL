@@ -40,7 +40,6 @@ public:
         keyboardController.setWindow(window);
 
         glfwSetFramebufferSizeCallback(window, Game::frameBufferResizeCallback_);
-        glfwSetCursorPosCallback(window, Game::cursorPosCallback_);
         glfwSetWindowUserPointer(window, this);
 
         // enable MSAA in OpenGL
@@ -103,12 +102,6 @@ private:
         game->viewportWidth = width;
         game->viewportHeight = height;
         game->frameBufferResizeCallback(width, height);
-    }
-
-    static void cursorPosCallback_(GLFWwindow* window, double xpos, double ypos)
-    {
-        Game* game = static_cast<Game*>(glfwGetWindowUserPointer(window));
-        game->mouseController.cursorPositionCallback((float)xpos, (float)ypos);
     }
 };
 
