@@ -10,6 +10,27 @@ set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /MTd")
 add_compile_definitions(ASSIMP_STATIC)
 add_compile_definitions(GLM_ENABLE_EXPERIMENTAL)
 
+set(IMGUI_DIR "lib/imgui")
+
+set(IMGUI_SOURCES
+    ${IMGUI_DIR}/imgui.cpp
+    ${IMGUI_DIR}/imgui_demo.cpp
+    ${IMGUI_DIR}/imgui_draw.cpp
+    ${IMGUI_DIR}/imgui_tables.cpp
+    ${IMGUI_DIR}/imgui_widgets.cpp
+    ${IMGUI_DIR}/backends/imgui_impl_glfw.cpp
+    ${IMGUI_DIR}/backends/imgui_impl_opengl3.cpp
+)
+
+add_library(imgui STATIC ${IMGUI_SOURCES})
+
+target_include_directories(imgui PUBLIC 
+    ${IMGUI_DIR} 
+    ${IMGUI_DIR}/backends
+)
+
+find_package(OpenGL REQUIRED)
+
 add_library(project_dependencies INTERFACE)
 
 target_include_directories(project_dependencies INTERFACE
@@ -18,6 +39,8 @@ target_include_directories(project_dependencies INTERFACE
     ${CMAKE_CURRENT_SOURCE_DIR}/lib/glm
     ${CMAKE_CURRENT_SOURCE_DIR}/lib/assimp/include
 )
+
+target_link_libraries(project_dependencies INTERFACE imgui)
 
 add_subdirectory(src)
 
@@ -48,26 +71,3 @@ add_custom_command(
 )
 
 
-set(IMGUI_DIR "lib/imgui")
-
-set(IMGUI_SOURCES
-    ${IMGUI_DIR}/imgui.cpp
-    ${IMGUI_DIR}/imgui_demo.cpp
-    ${IMGUI_DIR}/imgui_draw.cpp
-    ${IMGUI_DIR}/imgui_tables.cpp
-    ${IMGUI_DIR}/imgui_widgets.cpp
-    ${IMGUI_DIR}/backends/imgui_impl_glfw.cpp
-    ${IMGUI_DIR}/backends/imgui_impl_opengl3.cpp
-)
-
-add_library(imgui STATIC ${IMGUI_SOURCES})
-
-target_include_directories(imgui PUBLIC 
-    ${IMGUI_DIR} 
-    ${IMGUI_DIR}/backends
-)
-
-find_package(OpenGL REQUIRED)
-target_link_libraries(imgui PUBLIC project_dependencies)
-
-target_link_libraries(duGL PRIVATE imgui)

@@ -4,6 +4,8 @@
 ExampleGame::ExampleGame()
     : clearColor(0.7f, 0.8f, 1.0f, 1.0f), flightController(this)
 {
+    initImGui(window);
+
     // enable depth testing
     glEnable(GL_DEPTH_TEST);
 
@@ -17,6 +19,20 @@ ExampleGame::ExampleGame()
     // register user input observers
     mouseController.registerOffsetObserver(&flightController);
     keyboardController.registerObserver(&flightController);
+
+    directionalLight = {
+        0.0f, 0.0f,
+        { 0.0f,  0.0f,  0.0f},
+        { 0.5f,  0.5f,  0.5f},
+        { 1.0f,  1.0f,  1.0f}
+    };
+
+    pointLights = {{
+        { 0.0f, 0.0f, 0.0f },
+        { 0.4f, 0.2f, 0.0f },
+        { 0.7f, 0.3f, 0.3f },
+        { 1.0f, 0.0f, 0.0f },
+        1.0f, 0.09f, 0.032f}};
 
     // create objects to render
     Renderable* backpack_renderable = createRenderable("assets/models/backpack/backpack.obj");
@@ -80,20 +96,6 @@ void ExampleGame::startMainLoop()
 {
     Shader* objectShader = shaders[ShaderType::ObjectShader].get();
 
-    DirectionalLight directionalLight = {
-        {-0.2f, -1.0f, -0.3f},
-        { 0.0f,  0.0f,  0.0f},
-        { 0.5f,  0.5f,  0.5f},
-        { 1.0f,  1.0f,  1.0f}
-    };
-
-    std::vector<PointLight> pointLights = {{
-        { 0.0f, 0.0f, 0.0f },
-        { 0.4f, 0.2f, 0.0f },
-        { 0.7f, 0.3f, 0.3f },
-        { 1.0f, 0.0f, 0.0f },
-        1.0f, 0.09f, 0.032f}};
-
     while (!glfwWindowShouldClose(window))
     {
         clearBuffers();  // clear color and depth buffer
@@ -104,6 +106,9 @@ void ExampleGame::startMainLoop()
         
         glfwPollEvents();  // user cursor input
         keyboardController.processKeyboardInput();  // user keyboard input
+
+        // user interface
+        createImGuiFrame();
         
         // for rendering objects
         objectShader->use();
@@ -124,8 +129,43 @@ void ExampleGame::startMainLoop()
         // draw sky box
         skybox.draw();
 
+        // draw gui
+        drawImGui();
+
+        // swap buffers
         glfwSwapBuffers(window);
     }
+}
+
+void ExampleGame::createImGuiFrame()
+{
+    ImGui_ImplOpenGL3_NewFrame();
+    ImGui_ImplGlfw_NewFrame();
+    ImGui::NewFrame();
+
+    ImGui::SeparatorText("Directional Light");
+
+    ImGui::SliderFloat("Yaw", &directionalLight.yaw, -180.0f, 180.0f);
+    ImGui::SliderFloat("Pitch", &directionalLight.pitch, -89.0f, 89.0f);
+    ImGui::SliderFloat3("Ambient", glm::value_ptr(directionalLight.ambient), 0.0f, 1.0f);
+    ImGui::SliderFloat3("Diffuse", glm::value_ptr(directionalLight.diffuse), 0.0f, 1.0f);
+    ImGui::SliderFloat3("Specular", glm::value_ptr(directionalLight.specular), 0.0f, 1.0f);
+
+
+    ImGui::SeparatorText("Entities");
+
+    int entityCount = 1;
+    for (auto& entity : entities)
+    {
+        ImGui::DragFloat3(std::format("Entity {}", entityCount).c_str(), glm::value_ptr(entity->getPosition()), 0.1f);
+        entityCount++;
+    }
+}
+
+void ExampleGame::drawImGui()
+{
+    ImGui::Render();
+    ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 }
 
 

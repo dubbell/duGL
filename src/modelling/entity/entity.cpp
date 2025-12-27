@@ -22,7 +22,7 @@ void Entity::setPosition(glm::vec3 position)
 }
 
 
-glm::vec3 Entity::getPosition() const
+glm::vec3& Entity::getPosition()
 {
     return position;
 }

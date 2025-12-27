@@ -23,6 +23,9 @@ public:
         glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
         glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
+        // anti-aliasing MSAA (tell GLFW to create larger buffer)
+        glfwWindowHint(GLFW_SAMPLES, 4);
+
         window = glfwCreateWindow(viewportWidth, viewportHeight, "duGL", NULL, NULL);
         if (window == NULL) {
             std::cout << "Failed to create GLFW window." << std::endl;
@@ -39,6 +42,9 @@ public:
         glfwSetFramebufferSizeCallback(window, Game::frameBufferResizeCallback_);
         glfwSetCursorPosCallback(window, Game::cursorPosCallback_);
         glfwSetWindowUserPointer(window, this);
+
+        // enable MSAA in OpenGL
+        glEnable(GL_MULTISAMPLE);
 
         activeCamera = cameras.emplace_back(std::make_unique<Camera>()).get();
         activeCamera->setAspectRatio((float)16 / 9);

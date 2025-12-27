@@ -10,6 +10,10 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
+#include "imgui.h"
+#include "imgui_impl_glfw.h"
+#include "imgui_impl_opengl3.h"
+
 #include <string>
 #include <memory>
 #include <map>
@@ -31,6 +35,7 @@
 #include "modelling/entity/entity.h"
 #include "modelling/entity/outlined_entity.h"
 #include "modelling/skybox.h"
+#include "gui/utils.h"
 
 
 enum class ShaderType
@@ -53,6 +58,9 @@ private:
     std::vector<std::unique_ptr<Entity>> entities;
     std::map<ShaderType, std::unique_ptr<Shader>> shaders;
 
+    DirectionalLight directionalLight;
+    std::vector<PointLight> pointLights;
+
     glm::vec4 clearColor;
     void clearBuffers();
 
@@ -64,6 +72,9 @@ private:
     Shader* createShader(const char* vertexShaderPath, const char* fragmentShaderPath, ShaderType type);
 
     virtual void frameBufferResizeCallback(int width, int height) override;
+
+    void createImGuiFrame();
+    void drawImGui();
 
 public:
     ExampleGame();

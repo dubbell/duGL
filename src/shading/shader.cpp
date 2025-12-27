@@ -124,7 +124,13 @@ void Shader::setPerspective(glm::mat4& view, glm::mat4& projection, glm::vec3& p
 
 void Shader::setDirectionalLight(DirectionalLight& directionalLight) const
 {
-    setVec3("directionalLight.direction", directionalLight.direction);
+    glm::vec3 direction = glm::normalize(glm::vec3(
+        cos(glm::radians(directionalLight.yaw)) * cos(glm::radians(directionalLight.pitch)),
+        sin(glm::radians(directionalLight.pitch)),
+        sin(glm::radians(directionalLight.yaw)) * cos(glm::radians(directionalLight.pitch))
+    ));
+
+    setVec3("directionalLight.direction", direction);
     setVec3("directionalLight.ambient", directionalLight.ambient);
     setVec3("directionalLight.diffuse", directionalLight.diffuse);
     setVec3("directionalLight.specular", directionalLight.specular);
