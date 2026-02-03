@@ -1,4 +1,4 @@
-#include "skybox.h"
+#include "dugl/skybox.h"
 
 
 Skybox::Skybox() {}

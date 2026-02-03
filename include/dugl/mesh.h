@@ -9,7 +9,7 @@
 #include <vector>
 #include <string>
 
-#include "shading/shader.h"
+#include "shader.h"
 
 
 struct Vertex

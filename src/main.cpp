@@ -1,6 +1,6 @@
 #include <iostream>
 
-#include "game.h"
+#include "dugl/game.h"
 
 
 int main()

@@ -1,4 +1,4 @@
-#include "renderable.h"
+#include "dugl/renderable.h"
 
 
 Renderable::Renderable(std::string directory, std::vector<Mesh> meshes)

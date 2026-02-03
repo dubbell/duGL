@@ -10,7 +10,7 @@
 #include <string>
 #include <format>
 
-#include "observers/keyboard_observer.h"
+#include "keyboard_observer.h"
 
 
 class Camera

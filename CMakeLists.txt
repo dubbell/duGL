@@ -34,6 +34,7 @@ find_package(OpenGL REQUIRED)
 add_library(project_dependencies INTERFACE)
 
 target_include_directories(project_dependencies INTERFACE
+    ${CMAKE_CURRENT_SOURCE_DIR}/include
     ${CMAKE_CURRENT_SOURCE_DIR}/lib/glfw/include
     ${CMAKE_CURRENT_SOURCE_DIR}/lib/glad/include
     ${CMAKE_CURRENT_SOURCE_DIR}/lib/glm

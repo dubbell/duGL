@@ -1,4 +1,4 @@
-#include "uniform_buffer.h"
+#include "dugl/uniform_buffer.h"
 
 
 UniformBuffer::UniformBuffer() {}

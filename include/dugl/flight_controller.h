@@ -4,10 +4,10 @@
 #include <memory>
 #include <set>
 
-#include "observers/keyboard_observer.h"
-#include "observers/mouse_observer.h"
-#include "view/camera.h"
-#include "interfaces/player_interface.h"
+#include "keyboard_observer.h"
+#include "mouse_observer.h"
+#include "camera.h"
+#include "player_interface.h"
 
 
 class FlightController : public KeyboardObserver, public MouseOffsetObserver

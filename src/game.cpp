@@ -1,4 +1,4 @@
-#include "game.h"
+#include "dugl/game.h"
 
 
 ExampleGame::ExampleGame()
@@ -106,7 +106,7 @@ void ExampleGame::startMainLoop()
         
         glfwPollEvents();  // viewport resizing and GUI interaction
 
-        mouseController.processMouseInput();        // use mouse input
+        mouseController.processMouseInput();        // user mouse input
         keyboardController.processKeyboardInput();  // user keyboard input
 
         // user interface
