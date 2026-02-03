@@ -12,8 +12,8 @@
 #include <iostream>
 #include <format>
 
-#include "shading/lighting.h"
-#include "view/camera.h"
+#include "lighting.h"
+#include "camera.h"
 
 
 class Shader

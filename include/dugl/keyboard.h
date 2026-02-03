@@ -10,8 +10,8 @@
 #include <utility>
 #include <memory>
 
-#include "observers/keyboard_observer.h"
-#include "view/camera.h"
+#include "keyboard_observer.h"
+#include "camera.h"
 
 
 class KeyboardController

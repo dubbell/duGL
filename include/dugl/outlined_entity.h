@@ -4,7 +4,7 @@
 
 #include "common.h"
 #include "entity.h"
-#include "observers/mouse_observer.h"
+#include "mouse_observer.h"
 
 
 class OutlinedEntity : public Entity, public ScreenRayObserver

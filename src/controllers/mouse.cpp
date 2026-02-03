@@ -1,4 +1,4 @@
-#include "mouse.h"
+#include "dugl/mouse.h"
 
 
 MouseController::MouseController(PlayerInterface* screenCastInterface)

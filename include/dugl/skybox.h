@@ -5,8 +5,8 @@
 
 #include <glad/gl.h>
 
-#include "utils/stb_image.h"
-#include "shading/shader.h"
+#include "stb_image.h"
+#include "shader.h"
 
 
 class Skybox

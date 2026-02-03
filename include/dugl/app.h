@@ -6,9 +6,9 @@
 
 #include <utility>
 
-#include "controllers/mouse.h"
-#include "controllers/keyboard.h"
-#include "interfaces/player_interface.h"
+#include "dugl/mouse.h"
+#include "dugl/keyboard.h"
+#include "dugl/player_interface.h"
 
 
 

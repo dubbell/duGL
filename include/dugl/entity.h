@@ -5,8 +5,8 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
-#include "shading/shader.h"
-#include "modelling/renderable/renderable.h"
+#include "shader.h"
+#include "renderable.h"
 
 
 class Entity

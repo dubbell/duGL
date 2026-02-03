@@ -5,8 +5,8 @@
 #include <string>
 #include <iostream>
 
-#include "utils/stb_image.h"
-#include "shading/shader.h"
+#include "stb_image.h"
+#include "shader.h"
 #include "mesh.h"
 
 

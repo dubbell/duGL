@@ -6,8 +6,8 @@
 #include <memory>
 #include <set>
 
-#include "observers/mouse_observer.h"
-#include "interfaces/player_interface.h"
+#include "mouse_observer.h"
+#include "player_interface.h"
 #include "common.h"
 
 
