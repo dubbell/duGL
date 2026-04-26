@@ -1,5 +1,11 @@
 # duGL
 
-First attempt at a basic game engine with OpenGL.
+First attempt at an OpenGL rendering engine. 
 
-Requires Python 3 for generating GLAD. Other dependencies are installed automatically when generating the CMake buildsystem.
+Prerequisites: 
+- Python 3 (for generating GLAD). 
+- C++20 or newer.
+- CMake 3.26 or newer.
+- A GPU with OpenGL support.
+
+Other dependencies are automatically installed with CMake scripts when generating the buildsystem. Works when built with Microsoft Visual Studio, but other environments are probably also fine.
