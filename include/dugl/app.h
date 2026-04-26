@@ -1,6 +1,7 @@
 #ifndef APP_H
 #define APP_H
 
+#define GLAD_GL_IMPLEMENTATION
 #include <glad/gl.h>
 #include <GLFW/glfw3.h>
 
@@ -9,7 +10,6 @@
 #include "dugl/mouse.h"
 #include "dugl/keyboard.h"
 #include "dugl/player_interface.h"
-
 
 
 class Game : public PlayerInterface

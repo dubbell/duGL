@@ -1,4 +1,5 @@
 #include "dugl/skybox.h"
+#include "stb_image.h"
 
 
 Skybox::Skybox() {}
