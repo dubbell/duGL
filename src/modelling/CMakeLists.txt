@@ -1,8 +1,8 @@
-add_library(modelling STATIC skybox.cpp)
-
-add_subdirectory(renderable)
-add_subdirectory(entity)
-
-target_include_directories(modelling PUBLIC ..)
-
-target_link_libraries(modelling PUBLIC project_dependencies shading model entity)
+add_library(modelling STATIC 
+	skybox.cpp 
+	entity/entity.cpp entity/outlined_entity.cpp
+	renderable/mesh.cpp renderable/model_builder.cpp renderable/renderable.cpp)
+target_link_libraries(modelling 
+	PUBLIC  assimp glfw
+	PRIVATE shading stb)
+target_include_directories(modelling PUBLIC ${PROJECT_SOURCE_DIR}/include)

@@ -2,10 +2,8 @@
 #define SKYBOX_H
 
 #include <string>
-
 #include <glad/gl.h>
 
-#include "stb_image.h"
 #include "shader.h"
 
 

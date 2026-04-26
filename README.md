@@ -1,3 +1,5 @@
 # duGL
 
-First attempt at a basic game engine with OpenGL. Dependencies like GLM/GLAD/GLFW will have to be installed manually in `lib` until I can be bothered to write an install script.
+First attempt at a basic game engine with OpenGL.
+
+Requires Python 3 for generating GLAD. Other dependencies are installed automatically when generating the CMake buildsystem.

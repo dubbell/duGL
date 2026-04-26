@@ -19,7 +19,7 @@ public:
     Renderable build();
 
 private:
-    Assimp::Importer import;
+    Assimp::Importer importer;
     const aiScene* scene;
     std::string path, directory;
     std::vector<Mesh> meshes;

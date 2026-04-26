@@ -1,16 +1,18 @@
 #include "dugl/model_builder.h"
 
 
+#define STB_IMAGE_IMPLEMENTATION
+#include "stb_image.h"
 
 ModelBuilder::ModelBuilder(std::string path) : path(path), directory(path.substr(0, path.find_last_of('/')))
 {
     // read file, only triangles (aiProcess_Triangulate option)
-    scene = import.ReadFile(path, aiProcess_Triangulate | aiProcess_FlipUVs);
+    scene = importer.ReadFile(path, aiProcess_Triangulate | aiProcess_FlipUVs);
 
     // check for errors, incomplete data, etc.
     if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode)
     {
-        std::cout << "Assimp error: " << import.GetErrorString() << std::endl;
+        std::cout << "Assimp error: " << importer.GetErrorString() << std::endl;
     }
 }
 
