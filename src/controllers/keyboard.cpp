@@ -1,4 +1,4 @@
-#include "dugl/keyboard.h"
+#include "dugl/controllers/keyboard.h"
 
 
 KeyboardController::KeyboardController()

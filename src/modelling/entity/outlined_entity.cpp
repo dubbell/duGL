@@ -1,5 +1,7 @@
-#include "dugl/outlined_entity.h"
-
+#include "dugl/modelling/outlined_entity.h"
+#include "dugl/utils/common.h"
+#include "dugl/shading/shader.h"
+#include "dugl/utils/glad_include.h"
 
 
 OutlinedEntity::OutlinedEntity(Renderable* renderable, Shader* outlineShader) 

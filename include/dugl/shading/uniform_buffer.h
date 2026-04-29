@@ -1,13 +1,10 @@
-#ifndef UNIFORM_BUFFER_H
-#define UNIFORM_BUFFER_H
+#pragma once
 
-#include <string>
-#include <vector>
-#include <stdexcept>
-
+#include "dugl/utils/glad_include.h"
 #include "shader.h"
 
-
+#include <vector>
+#include <stdexcept>
 
 
 class UniformBuffer
@@ -29,9 +26,6 @@ public:
 
 private:
     static inline size_t bufferCount = 0;
-
     unsigned int UBO;
     GLsizeiptr bufferSize;
 };
-
-#endif

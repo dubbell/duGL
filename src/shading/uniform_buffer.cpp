@@ -1,7 +1,7 @@
-#include "dugl/uniform_buffer.h"
+#include "dugl/shading/uniform_buffer.h"
 
 
-UniformBuffer::UniformBuffer() {}
+UniformBuffer::UniformBuffer() : UBO(0), bufferSize(0) {}
 
 void UniformBuffer::create(const char* uboName, std::vector<Shader*> shaders, GLsizeiptr bufferSize, GLenum usage)
 {

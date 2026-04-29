@@ -1,9 +1,7 @@
-#ifndef MODEL_BUILDER_H
-#define MODEL_BUILDER_H
+#pragma once
 
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
-#include <assimp/postprocess.h>
 
 #include <string>
 #include <stack>
@@ -29,5 +27,3 @@ private:
     std::vector<Texture> loadMaterialTextures(aiMaterial* mat, aiTextureType type, std::string typeName);
     Mesh processMesh(aiMesh* mesh, const aiScene* scene);
 };
-
-#endif

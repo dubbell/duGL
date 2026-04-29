@@ -1,7 +1,6 @@
-#ifndef INIT_H
-#define INIT_H
+#pragma once
+#include "dugl/utils/glfw_include.h"
 
-#include "GLFW/glfw3.h"
 #include "imgui.h"
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_opengl3.h"
@@ -19,5 +18,3 @@ inline void initImGui(GLFWwindow* window)
     ImGui_ImplGlfw_InitForOpenGL(window, true);
     ImGui_ImplOpenGL3_Init();
 }
-
-#endif

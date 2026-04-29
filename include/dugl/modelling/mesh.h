@@ -1,15 +1,9 @@
-#ifndef MESH_H
-#define MESH_H
-
-#include <glad/gl.h>
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtc/type_ptr.hpp>
+#pragma once
 
 #include <vector>
 #include <string>
 
-#include "shader.h"
+#include "dugl/shading/shader.h"
 
 
 struct Vertex
@@ -40,5 +34,3 @@ private:
     unsigned int VAO, VBO, EBO;
     void setupMesh();
 };
-
-#endif

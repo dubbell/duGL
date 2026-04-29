@@ -1,5 +1,6 @@
-#include "dugl/mouse.h"
-
+#include "dugl/controllers/mouse.h"
+#include "dugl/utils/common.h"
+#include "dugl/view/camera.h"
 
 MouseController::MouseController(PlayerInterface* screenCastInterface)
     : screenCastInterface(screenCastInterface), lastX(0.0f), lastY(0.0f), sensitivity(0.05f), firstMouse(true)

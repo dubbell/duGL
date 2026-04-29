@@ -1,10 +1,9 @@
-#include "dugl/game.h"
+#include "dugl/env/simple_env.h"
 
-#include <iostream>
 
 int main()
 {
-    ExampleGame* game = new ExampleGame();
+    Environment* game = new ExampleEnvironment();
 
     game->startMainLoop();
     game->stop();

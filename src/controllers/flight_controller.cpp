@@ -1,4 +1,4 @@
-#include "dugl/flight_controller.h"
+#include "dugl/controllers/flight_controller.h"
 
 
 FlightController::FlightController(PlayerInterface* playerInterface) 

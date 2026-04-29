@@ -1,5 +1,4 @@
-#ifndef KEYBOARD_CONTROLLABLE_H
-#define KEYBOARD_CONTROLLABLE_H
+#pragma once
 
 #include <map>
 #include <set>
@@ -27,5 +26,3 @@ public:
     virtual void processKeyboardInput(KeyboardState& keyboardState) = 0;
     virtual ~KeyboardObserver() = default;
 };
-
-#endif

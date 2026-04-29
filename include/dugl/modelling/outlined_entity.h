@@ -1,10 +1,7 @@
-#ifndef OUTLINED_ENTITY_H
-#define OUTLINED_ENTITY_H
+#pragma once
 
-
-#include "common.h"
 #include "entity.h"
-#include "mouse_observer.h"
+#include "dugl/controllers/mouse_observer.h"
 
 
 class OutlinedEntity : public Entity, public ScreenRayObserver
@@ -21,5 +18,3 @@ private:
     float outlineThickness;
     Shader* outlineShader;
 };
-
-#endif

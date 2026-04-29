@@ -1,41 +1,16 @@
-#ifndef GAME_H
-#define GAME_H
+#pragma once
 
 #ifndef GLFW_INCLUDE_NONE
 #define GLFW_INCLUDE_NONE
 #endif
 
-#include <GLFW/glfw3.h>
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtc/type_ptr.hpp>
-
-#include <imgui.h>
-#include <imgui_impl_glfw.h>
-#include <imgui_impl_opengl3.h>
-
-#include <string>
-#include <memory>
-#include <map>
-#include <string>
-#include <format>
-#include <algorithm>
-
-#include "app.h"
-#include "camera.h"
-#include "keyboard.h"
-#include "mouse.h"
-#include "flight_controller.h"
-#include "shader.h"
-#include "lighting.h"
-#include "uniform_buffer.h"
-#include "ubo_templates.h"
-#include "renderable.h"
-#include "model_builder.h"
-#include "entity.h"
-#include "outlined_entity.h"
-#include "skybox.h"
-#include "utils.h"
+#include "env.h"
+#include "dugl/controllers/flight_controller.h"
+#include "dugl/shading/uniform_buffer.h"
+#include "dugl/modelling/entity.h"
+#include "dugl/modelling/outlined_entity.h"
+#include "dugl/modelling/renderable.h"
+#include "dugl/modelling/skybox.h"
 
 
 enum class ShaderType
@@ -45,7 +20,7 @@ enum class ShaderType
     CubeMapShader
 };
 
-class ExampleGame : public Game
+class ExampleEnvironment : public Environment
 {
 private:
     FlightController flightController;
@@ -77,9 +52,7 @@ private:
     void drawImGui();
 
 public:
-    ExampleGame();
-    void startMainLoop();
+    ExampleEnvironment();
+
+    void startMainLoop() override;
 };
-
-
-#endif

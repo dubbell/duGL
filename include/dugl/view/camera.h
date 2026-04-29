@@ -1,16 +1,8 @@
-#ifndef CAMERA_H
-#define CAMERA_H
+#pragma once
 
 #include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtc/type_ptr.hpp>
-#include <GLFW/glfw3.h>
 
-#include <iostream>
-#include <string>
-#include <format>
-
-#include "keyboard_observer.h"
+#include "dugl/controllers/keyboard_observer.h"
 
 
 class Camera
@@ -58,5 +50,3 @@ public:
     void setAspectRatio(float aspectRatio);
     void setRenderDistance(float near, float far);
 };
-
-#endif

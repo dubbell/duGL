@@ -1,17 +1,10 @@
-#ifndef KEYBOARD_H
-#define KEYBOARD_H
-
-#include <GLFW/glfw3.h>
+#pragma once
+#include "dugl/utils/glfw_include.h"
 
 #include <map>
-#include <vector>
 #include <set>
-#include <functional>
-#include <utility>
-#include <memory>
 
 #include "keyboard_observer.h"
-#include "camera.h"
 
 
 class KeyboardController
@@ -45,6 +38,3 @@ public:
 
     void processKeyboardInput();
 };
-
-
-#endif

@@ -1,4 +1,9 @@
-#include "dugl/model_builder.h"
+#include "dugl/modelling/model_builder.h"
+
+#include <assimp/postprocess.h>
+#include "dugl/utils/glad_include.h"
+
+#include <iostream>
 
 
 #define STB_IMAGE_IMPLEMENTATION
