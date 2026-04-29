@@ -1,5 +1,7 @@
-#include "dugl/entity.h"
+#include "dugl/modelling/entity.h"
+#include "dugl/shading/shader.h"
 
+#include <glm/gtc/matrix_transform.hpp>
 
 
 Entity::Entity(Renderable* renderable) : renderable(renderable), position(0.0f, 0.0f, 0.0f) {}

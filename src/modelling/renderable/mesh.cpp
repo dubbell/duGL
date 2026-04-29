@@ -1,4 +1,6 @@
-#include "dugl/mesh.h"
+#include "dugl/modelling/mesh.h"
+#include "dugl/shading/shader.h"
+#include "dugl/utils/glad_include.h"
 
 
 Mesh::Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std::vector<Texture> textures)

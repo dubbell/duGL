@@ -1,11 +1,9 @@
-#ifndef COMMON_H
-#define COMMON_H
+#pragma once
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtx/norm.hpp>
-
 
 
 inline glm::vec3 castScreenRay(float screenX, float screenY, int viewportWidth, int viewportHeight, glm::mat4 viewMatrix, glm::mat4 projectionMatrix)
@@ -44,8 +42,3 @@ inline bool checkRayIntersection(glm::vec3 target, float distance, glm::vec3 ori
 
     return glm::length2(closestPoint - target) <= (distance * distance);
 }
-
-
-
-
-#endif

@@ -1,4 +1,6 @@
-#include "dugl/camera.h"
+#include "dugl/view/camera.h"
+
+#include <glm/gtc/matrix_transform.hpp>
 
 
 Camera::Camera()

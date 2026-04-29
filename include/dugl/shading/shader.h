@@ -1,19 +1,10 @@
-#ifndef SHADER_H
-#define SHADER_H
+#pragma once
 
-#include <glad/gl.h>
 #include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtc/type_ptr.hpp>
 
 #include <string>
-#include <fstream>
-#include <sstream>
-#include <iostream>
-#include <format>
 
 #include "lighting.h"
-#include "camera.h"
 
 
 class Shader
@@ -45,5 +36,3 @@ public:
     void setDirectionalLight(DirectionalLight& directionalLight) const;
     void setPointLights(std::vector<PointLight>& pointLights) const;
 };
-
-#endif

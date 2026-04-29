@@ -1,5 +1,9 @@
-#include "dugl/skybox.h"
-#include "stb_image.h"
+#include "dugl/modelling/skybox.h"
+#include "dugl/utils/glad_include.h"
+
+#include <stb_image.h>
+
+#include <iostream>
 
 
 Skybox::Skybox() {}

@@ -1,4 +1,12 @@
-#include "dugl/shader.h"
+#include "dugl/shading/shader.h"
+#include "dugl/utils/glad_include.h"
+
+#include <glm/gtc/type_ptr.hpp>
+
+#include <sstream>
+#include <fstream>
+#include <iostream>
+#include <format>
 
 
 Shader::Shader(const char* vertexPath, const char* fragmentPath)

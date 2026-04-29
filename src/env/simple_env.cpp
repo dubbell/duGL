@@ -1,8 +1,16 @@
-#include "dugl/game.h"
+#include "dugl/env/simple_env.h"
+#include "dugl/utils/imgui_adapter.h"
+#include "dugl/modelling/model_builder.h"
+#include "dugl/shading/ubo_templates.h"
+
+#include <glm/gtc/type_ptr.hpp>
+
+#include <memory>
+#include <format>
+#include <algorithm>
 
 
-ExampleGame::ExampleGame()
-    : clearColor(0.7f, 0.8f, 1.0f, 1.0f), flightController(this)
+ExampleEnvironment::ExampleEnvironment() : clearColor(0.7f, 0.8f, 1.0f, 1.0f), flightController(this)
 {
     initImGui(window);
 
@@ -63,23 +71,23 @@ ExampleGame::ExampleGame()
     uboPerspective.create("Perspective", { objectShader, cubeMapShader }, sizeof(PerspectiveData), GL_DYNAMIC_DRAW);
 }
 
-void ExampleGame::clearBuffers()
+void ExampleEnvironment::clearBuffers()
 {
     glClearColor(clearColor.r, clearColor.g, clearColor.b, clearColor.a);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 }
 
-Renderable* ExampleGame::createRenderable(const char* renderablePath)
+Renderable* ExampleEnvironment::createRenderable(const char* renderablePath)
 {
     return renderables.emplace_back(std::make_unique<Renderable>(ModelBuilder(renderablePath).build())).get();
 }
 
-Entity* ExampleGame::createEntity(Renderable* renderable, glm::vec3 position)
+Entity* ExampleEnvironment::createEntity(Renderable* renderable, glm::vec3 position)
 {
     return entities.emplace_back(std::make_unique<Entity>(renderable, glm::vec3(1.0f, 1.0f, 6.0f))).get();
 }
 
-OutlinedEntity* ExampleGame::createOutlinedEntity(Renderable* renderable, glm::vec3 position, Shader* outlineShader)
+OutlinedEntity* ExampleEnvironment::createOutlinedEntity(Renderable* renderable, glm::vec3 position, Shader* outlineShader)
 {
     auto outlinedEntity = std::make_unique<OutlinedEntity>(renderable, position, outlineShader);
     OutlinedEntity* ptr = outlinedEntity.get();
@@ -87,12 +95,12 @@ OutlinedEntity* ExampleGame::createOutlinedEntity(Renderable* renderable, glm::v
     return ptr;
 }
 
-Shader* ExampleGame::createShader(const char* vertexShaderPath, const char* fragmentShaderPath, ShaderType shaderType)
+Shader* ExampleEnvironment::createShader(const char* vertexShaderPath, const char* fragmentShaderPath, ShaderType shaderType)
 {
     return shaders.emplace(shaderType, std::make_unique<Shader>(vertexShaderPath, fragmentShaderPath)).first->second.get();
 }
 
-void ExampleGame::startMainLoop()
+void ExampleEnvironment::startMainLoop()
 {
     Shader* objectShader = shaders[ShaderType::ObjectShader].get();
 
@@ -139,7 +147,7 @@ void ExampleGame::startMainLoop()
     }
 }
 
-void ExampleGame::createImGuiFrame()
+void ExampleEnvironment::createImGuiFrame()
 {
     ImGui_ImplOpenGL3_NewFrame();
     ImGui_ImplGlfw_NewFrame();
@@ -164,14 +172,13 @@ void ExampleGame::createImGuiFrame()
     }
 }
 
-void ExampleGame::drawImGui()
+void ExampleEnvironment::drawImGui()
 {
     ImGui::Render();
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 }
 
-
-void ExampleGame::frameBufferResizeCallback(int width, int height)
+void ExampleEnvironment::frameBufferResizeCallback(int width, int height)
 {
     activeCamera->setAspectRatio((float)width / (float)height);
     viewportWidth = width;

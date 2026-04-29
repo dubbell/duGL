@@ -1,7 +1,5 @@
-#ifndef WINDOW_INTERFACE
-#define WINDOW_INTERFACE
-
-#include <GLFW/glfw3.h>
+#pragma once
+#include "dugl/utils/glfw_include.h"
 
 #include <utility>
 
@@ -16,5 +14,3 @@ public:
 
     virtual ~WindowInterface() = default;
 };
-
-#endif

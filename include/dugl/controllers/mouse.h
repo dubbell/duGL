@@ -1,14 +1,9 @@
-#ifndef MOUSE_H
-#define MOUSE_H
+#pragma once
 
-
-#include <GLFW/glfw3.h>
-#include <memory>
 #include <set>
 
 #include "mouse_observer.h"
-#include "player_interface.h"
-#include "common.h"
+#include "dugl/interfaces/player_interface.h"
 
 
 class MouseController
@@ -37,6 +32,3 @@ public:
 
     void processMouseInput();
 };
-
-
-#endif

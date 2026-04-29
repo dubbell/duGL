@@ -1,11 +1,9 @@
-#ifndef RENDERABLE_H
-#define RENDERABLE_H
+#pragma once
 
 #include <vector>
 #include <string>
-#include <iostream>
 
-#include "shader.h"
+#include "dugl/shading/shader.h"
 #include "mesh.h"
 
 
@@ -20,5 +18,3 @@ private:
     std::vector<Mesh> meshes;
     std::string directory;
 };
-
-#endif

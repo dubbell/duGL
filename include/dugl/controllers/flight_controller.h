@@ -1,13 +1,11 @@
-#ifndef FLIGHT_CONTROLLER_H
-#define FLIGHT_CONTROLLER_H
+#pragma once
 
 #include <memory>
 #include <set>
 
 #include "keyboard_observer.h"
 #include "mouse_observer.h"
-#include "camera.h"
-#include "player_interface.h"
+#include "dugl/interfaces/player_interface.h"
 
 
 class FlightController : public KeyboardObserver, public MouseOffsetObserver
@@ -27,5 +25,3 @@ public:
     void processKeyboardInput(KeyboardState& keyboardState) override;
     void cursorOffsetCallback(float xOffset, float yOffset) override;
 };
-
-#endif

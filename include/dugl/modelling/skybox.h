@@ -1,10 +1,6 @@
-#ifndef SKYBOX_H
-#define SKYBOX_H
+#pragma once
 
-#include <string>
-#include <glad/gl.h>
-
-#include "shader.h"
+#include "dugl/shading/shader.h"
 
 
 class Skybox
@@ -19,5 +15,3 @@ private:
     unsigned int VAO, VBO, textureId;
     Shader* shader;
 };
-
-#endif

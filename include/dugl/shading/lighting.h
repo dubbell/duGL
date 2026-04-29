@@ -1,9 +1,4 @@
-#ifndef LIGHTING_H
-#define LIGHTING_H
-
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtc/type_ptr.hpp>
+#pragma once
 
 
 struct DirectionalLight
@@ -26,6 +21,3 @@ struct PointLight
     float linear;
     float quadratic;
 };
-
-
-#endif

@@ -23,7 +23,7 @@ include(scripts/stb.cmake)
 
 # Internal dependencies.
 add_subdirectory(src)
-target_link_libraries(${PROJECT_NAME} PUBLIC application controllers modelling shading view)
+target_link_libraries(${PROJECT_NAME} PUBLIC env controllers modelling shading view)
 
 # Configure asset directories and variables.
 include(scripts/assets.cmake)
