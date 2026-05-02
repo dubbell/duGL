@@ -19,11 +19,10 @@ include(scripts/JoltPhysics.cmake)
 include(scripts/assimp.cmake)
 include(scripts/imgui.cmake)
 include(scripts/stb.cmake)
-#target_link_libraries(${PROJECT_NAME} PRIVATE OpenGL::GL glad glfw glm::glm JoltPhysics assimp stb)
 
 # Internal dependencies.
 add_subdirectory(src)
-target_link_libraries(${PROJECT_NAME} PUBLIC env controllers modelling shading view)
+target_link_libraries(${PROJECT_NAME} PUBLIC env controllers modelling shading view async)
 
 # Configure asset directories and variables.
 include(scripts/assets.cmake)

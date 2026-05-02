@@ -17,7 +17,7 @@ public:
     Environment();
     virtual ~Environment() = default;
 
-    virtual void startMainLoop() = 0;
+    virtual void start() = 0;
     void stop();
 
     GLFWwindow* getWindow() override;
