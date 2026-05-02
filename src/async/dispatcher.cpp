@@ -8,6 +8,7 @@ using namespace std;
 
 AsyncDispatcher::AsyncDispatcher(uint maxJobs, uint maxBarriers, int numThreads)
 {
+	JobSystemWithBarrier::Init(maxBarriers);
 	jobList.Init(maxJobs, maxJobs);
 	for (std::atomic<Job*>& job : queue) {
 		job = nullptr;
@@ -20,9 +21,9 @@ AsyncDispatcher::~AsyncDispatcher()
 	StopThreads();
 }
 
-AsyncDispatcher::submitJob(const char* name, function<void()> func, uint32 numDependencies = 0)
+void AsyncDispatcher::submitJob(const char* name, function<void()> func, uint32 numDependencies)
 {
-	CreateJob(const char* name, JPH::Color::sRed, numDependencies);
+	CreateJob(name, JPH::Color::sRed, func, numDependencies);
 }
 
 // Below are the internal workings of the AsyncDispatcher, implementing

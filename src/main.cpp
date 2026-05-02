@@ -5,7 +5,7 @@ int main()
 {
     Environment* env = new ExampleEnvironment();
 
-    env->startMainLoop();
+    env->start();
     env->stop();
 
     return 0;
