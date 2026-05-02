@@ -100,7 +100,7 @@ Shader* ExampleEnvironment::createShader(const char* vertexShaderPath, const cha
     return shaders.emplace(shaderType, std::make_unique<Shader>(vertexShaderPath, fragmentShaderPath)).first->second.get();
 }
 
-void ExampleEnvironment::startMainLoop()
+void ExampleEnvironment::start()
 {
     Shader* objectShader = shaders[ShaderType::ObjectShader].get();
 

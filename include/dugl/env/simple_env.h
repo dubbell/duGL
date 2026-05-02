@@ -54,5 +54,5 @@ private:
 public:
     ExampleEnvironment();
 
-    void startMainLoop() override;
+    void start() override;
 };

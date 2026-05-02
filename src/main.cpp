@@ -3,10 +3,10 @@
 
 int main()
 {
-    Environment* game = new ExampleEnvironment();
+    Environment* env = new ExampleEnvironment();
 
-    game->startMainLoop();
-    game->stop();
+    env->startMainLoop();
+    env->stop();
 
     return 0;
 }
