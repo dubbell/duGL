@@ -25,7 +25,7 @@ namespace BroadPhaseLayers
 {
 	static constexpr JPH::BroadPhaseLayer NON_MOVING(0);
 	static constexpr JPH::BroadPhaseLayer MOVING(1);
-	static constexpr uint NUM_LAYERS(2);
+	static constexpr JPH::uint NUM_LAYERS(2);
 };
 
 // Maps objects to broad phase layers.
@@ -35,6 +35,9 @@ public:
 	ObjectToBroadPhaseMapper();
 	JPH::uint GetNumBroadPhaseLayers() const override;
 	JPH::BroadPhaseLayer GetBroadPhaseLayer(JPH::ObjectLayer objectLayer) const override;
+#if defined(JPH_EXTERNAL_PROFILE) || defined(JPH_PROFILE_ENABLED)
+	const char* GetBroadPhaseLayerName(JPH::BroadPhaseLayer inLayer) const override;
+#endif
 private:
 	JPH::BroadPhaseLayer objectToBroadPhase[Layers::NUM_LAYERS];
 };
@@ -57,8 +60,8 @@ public:
 class BasicContactListener : public JPH::ContactListener
 {
 public:
-	ValidateResult OnContactValidate(const JPH::Body& body1, const JPH::Body& body2, JPH::RVec3Arg inBaseOffset, const JPH::CollideShapeResult& colShapeResult);
+	JPH::ValidateResult OnContactValidate(const JPH::Body& body1, const JPH::Body& body2, JPH::RVec3Arg inBaseOffset, const JPH::CollideShapeResult& colShapeResult) override;
 	void OnContactAdded(const JPH::Body& body1, const JPH::Body& body2, const JPH::ContactManifold& manifold, JPH::ContactSettings& settings) override;
-	void OnContactPersisted(const JPH::Body& body1, const Body& body2, const JPH::ContactManifold& manifold, JPH::ContactSettings& settings) override;
+	void OnContactPersisted(const JPH::Body& body1, const JPH::Body& body2, const JPH::ContactManifold& manifold, JPH::ContactSettings& settings) override;
 	void OnContactRemoved(const JPH::SubShapeIDPair& subShapePair) override;
 };

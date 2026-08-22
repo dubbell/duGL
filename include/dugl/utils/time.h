@@ -1,11 +1,13 @@
 #pragma once
 
+#include <chrono>
+
 
 class Stopwatch
 {
 private:
 	using clock = std::chrono::steady_clock;
-	using instant = std::chrono::steadyclock::timepoint;
+	using instant = clock::time_point;
 
 	instant lastTime;
 

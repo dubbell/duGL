@@ -1,21 +1,9 @@
 #include "dugl/physics/common.h"
 
+#include <iostream>
+
 
 using namespace JPH;
-
-namespace Layers
-{
-	static constexpr ObjectLayer NON_MOVING = 0;
-	static constexpr ObjectLayer MOVING = 1;
-	static constexpr ObjectLayer NUM_LAYERS = 2;
-};
-
-namespace BroadPhaseLayers
-{
-	static constexpr BroadPhaseLayer NON_MOVING(0);
-	static constexpr BroadPhaseLayer MOVING(1);
-	static constexpr uint NUM_LAYERS(2);
-};
 
 
 ObjectToBroadPhaseMapper::ObjectToBroadPhaseMapper()
@@ -33,6 +21,17 @@ BroadPhaseLayer ObjectToBroadPhaseMapper::GetBroadPhaseLayer(ObjectLayer objectL
 {
 	return objectToBroadPhase[objectLayer];
 }
+
+#if defined(JPH_EXTERNAL_PROFILE) || defined(JPH_PROFILE_ENABLED)
+const char* ObjectToBroadPhaseMapper::GetBroadPhaseLayerName(BroadPhaseLayer inLayer) const
+{
+	switch ((JPH::BroadPhaseLayer::Type)inLayer) {
+		case (JPH::BroadPhaseLayer::Type)BroadPhaseLayers::NON_MOVING: return "NON_MOVING";
+		case (JPH::BroadPhaseLayer::Type)BroadPhaseLayers::MOVING:     return "MOVING";
+		default:                                                       return "INVALID";
+	}
+}
+#endif
 
 
 bool ObjectCollisionFilter::ShouldCollide(ObjectLayer objectLayer1, ObjectLayer objectLayer2) const

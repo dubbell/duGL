@@ -7,7 +7,7 @@
 
 inline void initJolt()
 {
-	RegisterDefaultAllocator();
-	Factory::sInstance = new Factory();
-	RegisterTypes();
+	JPH::RegisterDefaultAllocator();
+	JPH::Factory::sInstance = new JPH::Factory();
+	JPH::RegisterTypes();
 }
