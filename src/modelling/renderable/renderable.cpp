@@ -7,5 +7,7 @@ Renderable::Renderable(std::string directory, std::vector<Mesh> meshes)
 
 void Renderable::render(Shader* shader)
 {
-    for (Mesh mesh : meshes) mesh.render(shader, true);
+    for (Mesh& mesh : meshes) {
+        mesh.render(shader, true);
+    }
 }

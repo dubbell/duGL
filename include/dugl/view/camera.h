@@ -38,13 +38,13 @@ public:
     void turnRight(float deltaYaw);
     void turnUp(float deltaPitch);
 
-    glm::vec3& getPosition();
+    const glm::vec3& getPosition();
 
     void invalidateCachedViewMatrix();
-    glm::mat4& getViewMatrix();
+    const glm::mat4& getViewMatrix();
 
     void invalidateCachedProjectionMatrix();
-    glm::mat4& getProjectionMatrix();
+    const glm::mat4& getProjectionMatrix();
 
     void setFov(float fov);
     void setAspectRatio(float aspectRatio);

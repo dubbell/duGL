@@ -10,7 +10,7 @@ Camera::Camera()
       pitch(0.0f), 
       yaw(0.0f),
       fov(90.0f),
-      aspectRatio(4 / 3),
+      aspectRatio(4.0f / 3.0f),
       near(0.1f),
       far(500.0f),
       viewInvalidated(true),
@@ -88,12 +88,12 @@ void Camera::turnUp(float deltaPitch)
 }
 
 
-glm::vec3& Camera::getPosition()
+const glm::vec3& Camera::getPosition()
 {
     return position;
 }
 
-glm::mat4& Camera::getViewMatrix()
+const glm::mat4& Camera::getViewMatrix()
 {
     if (viewInvalidated)
     {
@@ -116,7 +116,7 @@ void Camera::invalidateCachedViewMatrix()
     viewInvalidated = true;
 }
 
-glm::mat4& Camera::getProjectionMatrix()
+const glm::mat4& Camera::getProjectionMatrix()
 {
     if (projectionInvalidated)
     {
