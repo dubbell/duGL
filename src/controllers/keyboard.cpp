@@ -74,7 +74,7 @@ void KeyboardController::unregisterObserver(KeyboardObserver* observer)
     observers.erase(observer);
 }
 
-void KeyboardController::processKeyboardInput()
+void KeyboardController::processInput()
 {
     KeyboardState keyboardState;
 

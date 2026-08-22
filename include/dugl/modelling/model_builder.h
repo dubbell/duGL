@@ -10,12 +10,8 @@
 #include "mesh.h"
 
 
-class ModelBuilder
+class RenderableBuilder
 {
-public:
-    ModelBuilder(std::string path);
-    Renderable build();
-
 private:
     Assimp::Importer importer;
     const aiScene* scene;
@@ -23,6 +19,11 @@ private:
     std::vector<Mesh> meshes;
     std::vector<Texture> loadedTextures;
 
+public:
+    RenderableBuilder(std::string path);
+    Renderable build();
+
+private:
     void processNode(aiNode* node, const aiScene* scene);
     std::vector<Texture> loadMaterialTextures(aiMaterial* mat, aiTextureType type, std::string typeName);
     Mesh processMesh(aiMesh* mesh, const aiScene* scene);

@@ -36,5 +36,5 @@ public:
     void registerObserver(KeyboardObserver* observer);
     void unregisterObserver(KeyboardObserver* observer);
 
-    void processKeyboardInput();
+    void processInput();
 };

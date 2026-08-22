@@ -6,7 +6,6 @@
 class PerspectiveInterface
 {
 public:
-    virtual Camera* getActiveCamera() = 0;
-
     virtual ~PerspectiveInterface() = default;
+    virtual Camera* getActiveCamera() = 0;
 };

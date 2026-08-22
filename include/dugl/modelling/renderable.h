@@ -9,12 +9,11 @@
 
 class Renderable
 {
-public:
-    Renderable(std::string directory, std::vector<Mesh> meshes);
-    
-    void render(Shader* shader);
-
 private:
     std::vector<Mesh> meshes;
     std::string directory;
+
+public:
+    Renderable(std::string directory, std::vector<Mesh> meshes);
+    void render(Shader* shader);
 };

@@ -79,7 +79,7 @@ void ExampleEnvironment::clearBuffers()
 
 Renderable* ExampleEnvironment::createRenderable(const char* renderablePath)
 {
-    return renderables.emplace_back(std::make_unique<Renderable>(ModelBuilder(renderablePath).build())).get();
+    return renderables.emplace_back(std::make_unique<Renderable>(RenderableBuilder(renderablePath).build())).get();
 }
 
 Entity* ExampleEnvironment::createEntity(Renderable* renderable, glm::vec3 position)
@@ -114,8 +114,8 @@ void ExampleEnvironment::start()
         
         glfwPollEvents();  // viewport resizing and GUI interaction
 
-        mouseController.processMouseInput();        // user mouse input
-        keyboardController.processKeyboardInput();  // user keyboard input
+        mouseController.processInput();     // user mouse input
+        keyboardController.processInput();  // user keyboard input
 
         // user interface
         createImGuiFrame();

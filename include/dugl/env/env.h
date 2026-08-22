@@ -13,32 +13,39 @@
 
 class Environment : public PlayerInterface
 {
+    template<typename T> using vector = std::vector<T>;
+    template<typename T> using unique_ptr = std::unique_ptr<T>;
+    template<typename T, typename U> using pair = std::pair<T, U>;
+
+protected:
+    GLFWwindow* window;
+    int viewportWidth;
+    int viewportHeight;
+
+    vector<unique_ptr<Camera>> cameras;
+    Camera* activeCamera;
+
+    bool freeCursor;
+
+    KeyboardController keyboardController;
+    MouseController mouseController;
+
 public:
     Environment();
     virtual ~Environment() = default;
 
+    /// Starts the main loop of the environment.
     virtual void start() = 0;
     void stop();
 
     GLFWwindow* getWindow() override;
-    std::pair<int, int> getViewportSize() override;
+    pair<int, int> getViewportSize() override;
     Camera* getActiveCamera() override;
 
     bool getFreeCursor() override;
     void setFreeCursor(bool freeCursor) override;
     
 protected:
-    GLFWwindow* window;
-    int viewportWidth;
-    int viewportHeight;
-
-    std::vector<std::unique_ptr<Camera>> cameras;
-    Camera* activeCamera;
-
-    bool freeCursor;
-    
-    KeyboardController keyboardController;
-    MouseController mouseController;
 
     virtual void frameBufferResizeCallback(int width, int height) = 0;
 

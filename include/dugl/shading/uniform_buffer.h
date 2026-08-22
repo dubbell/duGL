@@ -9,6 +9,12 @@
 
 class UniformBuffer
 {
+private:
+    static inline size_t bufferCount = 0;
+    
+    unsigned int UBO;
+    GLsizeiptr bufferSize;
+
 public:
     UniformBuffer();
     
@@ -23,9 +29,4 @@ public:
         glBufferSubData(GL_UNIFORM_BUFFER, 0, bufferSize, &data);
         glBindBuffer(GL_UNIFORM_BUFFER, 0);
     }
-
-private:
-    static inline size_t bufferCount = 0;
-    unsigned int UBO;
-    GLsizeiptr bufferSize;
 };

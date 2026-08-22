@@ -9,7 +9,7 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
 
-ModelBuilder::ModelBuilder(std::string path) : path(path), directory(path.substr(0, path.find_last_of('/')))
+RenderableBuilder::RenderableBuilder(std::string path) : path(path), directory(path.substr(0, path.find_last_of('/')))
 {
     // read file, only triangles (aiProcess_Triangulate option)
     scene = importer.ReadFile(path, aiProcess_Triangulate | aiProcess_FlipUVs);
@@ -21,13 +21,13 @@ ModelBuilder::ModelBuilder(std::string path) : path(path), directory(path.substr
     }
 }
 
-Renderable ModelBuilder::build()
+Renderable RenderableBuilder::build()
 {
     processNode(scene->mRootNode, scene);
     return Renderable(directory, meshes);
 }
 
-void ModelBuilder::processNode(aiNode* node, const aiScene* scene)
+void RenderableBuilder::processNode(aiNode* node, const aiScene* scene)
 {
     // loop through and process each mesh in the node
     for (unsigned int i = 0; i < node->mNumMeshes; i++)
@@ -77,7 +77,7 @@ unsigned int textureFromFile(std::string filename, std::string directory)
     return texture;
 }
 
-std::vector<Texture> ModelBuilder::loadMaterialTextures(aiMaterial* mat, aiTextureType type, std::string typeName)
+std::vector<Texture> RenderableBuilder::loadMaterialTextures(aiMaterial* mat, aiTextureType type, std::string typeName)
 {
     std::vector<Texture> textures;
     for (unsigned int i = 0; i < mat->GetTextureCount(type); i++)
@@ -110,7 +110,7 @@ std::vector<Texture> ModelBuilder::loadMaterialTextures(aiMaterial* mat, aiTextu
     return textures;
 }
 
-Mesh ModelBuilder::processMesh(aiMesh* mesh, const aiScene* scene)
+Mesh RenderableBuilder::processMesh(aiMesh* mesh, const aiScene* scene)
 {
     std::vector<Vertex> vertices;
     std::vector<unsigned int> indices;

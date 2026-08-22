@@ -59,7 +59,7 @@ void MouseController::handleScreenRay(float xPos, float yPos)
         observer->observeRay(origin, direction);
 }
 
-void MouseController::processMouseInput()
+void MouseController::processInput()
 {
     double xPos, yPos;
     glfwGetCursorPos(screenCastInterface->getWindow(), &xPos, &yPos);

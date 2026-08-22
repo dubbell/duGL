@@ -22,6 +22,10 @@ enum class ShaderType
 
 class ExampleEnvironment : public Environment
 {
+    template<typename T> using vector = std::vector<T>;
+    template<typename T> using unique_ptr = std::unique_ptr<T>;
+    template<typename T, typename U> using map = std::map<T, U>;
+
 private:
     FlightController flightController;
 
@@ -29,30 +33,29 @@ private:
 
     Skybox skybox;
 
-    std::vector<std::unique_ptr<Renderable>> renderables;
-    std::vector<std::unique_ptr<Entity>> entities;
-    std::map<ShaderType, std::unique_ptr<Shader>> shaders;
+    vector<unique_ptr<Renderable>> renderables;
+    vector<unique_ptr<Entity>> entities;
+    map<ShaderType, unique_ptr<Shader>> shaders;
 
     DirectionalLight directionalLight;
-    std::vector<PointLight> pointLights;
+    vector<PointLight> pointLights;
 
     glm::vec4 clearColor;
-    void clearBuffers();
 
+public:
+    ExampleEnvironment();
+    void start() override;
+
+private:
     Renderable* createRenderable(const char* renderablePath);
-
     Entity* createEntity(Renderable* renderable, glm::vec3 position);
     OutlinedEntity* createOutlinedEntity(Renderable* renderable, glm::vec3 position, Shader* outlineShader);
 
     Shader* createShader(const char* vertexShaderPath, const char* fragmentShaderPath, ShaderType type);
 
-    virtual void frameBufferResizeCallback(int width, int height) override;
-
     void createImGuiFrame();
     void drawImGui();
+    void clearBuffers();
 
-public:
-    ExampleEnvironment();
-
-    void start() override;
+    virtual void frameBufferResizeCallback(int width, int height) override;
 };

@@ -6,6 +6,10 @@
 
 class Entity
 {
+protected:
+    Renderable* renderable;
+    glm::vec3 position;
+
 public:
     Entity(Renderable* model);
     Entity(Renderable* model, glm::vec3 position);
@@ -16,8 +20,4 @@ public:
     glm::vec3& getPosition();
 
     glm::mat4 getModelTransform();
-
-protected:
-    Renderable* renderable;
-    glm::vec3 position;
 };
