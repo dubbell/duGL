@@ -12,7 +12,7 @@ private:
     glm::vec3 position;
     glm::vec3 velocity;
 
-    float fov, aspectRatio, near, far;  // projection matrix parameters
+    float fov, aspectRatio, volumeNear, volumeFar;  // projection matrix parameters
 
     bool viewInvalidated, projectionInvalidated;
     glm::mat4 cachedViewMatrix, cachedProjectionMatrix;
@@ -46,5 +46,5 @@ public:
 
     void setFov(float fov);
     void setAspectRatio(float aspectRatio);
-    void setRenderDistance(float near, float far);
+    void setRenderDistance(float volumeNear, float volumeFar);
 };

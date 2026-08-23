@@ -76,7 +76,7 @@ Renderable* ExampleEnvironment::createRenderable(const char* renderablePath)
 
 Entity* ExampleEnvironment::createEntity(Renderable* renderable, glm::vec3 position)
 {
-    return entities.emplace_back(std::make_unique<Entity>(renderable, glm::vec3(1.0f, 1.0f, 6.0f))).get();
+    return entities.emplace_back(std::make_unique<Entity>(renderable, position)).get();
 }
 
 OutlinedEntity* ExampleEnvironment::createOutlinedEntity(Renderable* renderable, glm::vec3 position, Shader* outlineShader)

@@ -11,10 +11,12 @@ Camera::Camera()
       yaw(0.0f),
       fov(90.0f),
       aspectRatio(4.0f / 3.0f),
-      near(0.1f),
-      far(500.0f),
+      volumeNear(0.1f),
+      volumeFar(500.0f),
       viewInvalidated(true),
-      projectionInvalidated(true)
+      projectionInvalidated(true),
+      cachedProjectionMatrix(0.0f),
+      cachedViewMatrix(0.0f)
 {};
 
 glm::mat3 Camera::getLocalBasis()
@@ -146,10 +148,10 @@ void Camera::setAspectRatio(float aspectRatio)
     invalidateCachedProjectionMatrix();
 }
 
-void Camera::setRenderDistance(float near, float far)
+void Camera::setRenderDistance(float volumeNear, float volumeFar)
 {
-    this->near = near;
-    this->far = far;
+    this->volumeNear = volumeNear;
+    this->volumeFar = volumeFar;
 
     invalidateCachedProjectionMatrix();
 }
