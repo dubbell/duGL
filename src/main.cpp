@@ -8,5 +8,7 @@ int main()
     env->start();
     env->stop();
 
+    delete env;
+
     return 0;
 }
