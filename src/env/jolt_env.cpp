@@ -48,7 +48,7 @@ void JoltedEnvironment::start()
         keyboardController.processInput();  // user keyboard input
 
         // Simulate physics.
-        physicsSystem.Update(dt, 1, &tempAllocator, &dispatcher);
+        physicsSystem.Update(dt, 1, &tempAllocator, &dispatcher.getJobSystem());
 
         update(dt);
         
