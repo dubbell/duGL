@@ -1,13 +1,17 @@
 #include "dugl/env/env.h"
 #include "dugl/utils/glfw_include.h"
 
-#include <iostream>
+#include <stdexcept>
 
 
 Environment::Environment() : viewportWidth(1920), viewportHeight(1080), freeCursor(false), mouseController(this)
 {
     // window initialization
-    glfwInit();
+    if (!glfwInit())
+    {
+        throw std::runtime_error("Failed to initialize GLFW.");
+    }
+
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
@@ -16,14 +20,21 @@ Environment::Environment() : viewportWidth(1920), viewportHeight(1080), freeCurs
     glfwWindowHint(GLFW_SAMPLES, 4);
 
     window = glfwCreateWindow(viewportWidth, viewportHeight, "duGL", NULL, NULL);
-    if (window == NULL) {
-        std::cout << "Failed to create GLFW window." << std::endl;
+    if (window == NULL)
+    {
+        glfwTerminate();
+        throw std::runtime_error("Failed to create GLFW window.");
     }
+
     glfwMakeContextCurrent(window);
     if (!gladLoadGL(glfwGetProcAddress))
     {
-        std::cout << "Failed to initialize GLAD." << std::endl;
+        glfwDestroyWindow(window);
+        window = nullptr;
+        glfwTerminate();
+        throw std::runtime_error("Failed to initialize GLAD.");
     }
+
     glViewport(0, 0, viewportWidth, viewportHeight);
 
     keyboardController.setWindow(window);
@@ -40,8 +51,20 @@ Environment::Environment() : viewportWidth(1920), viewportHeight(1080), freeCurs
 
 void Environment::stop()
 {
-    glfwDestroyWindow(window);
-    glfwTerminate();
+    if (window != nullptr)
+    {
+        glfwDestroyWindow(window);
+        window = nullptr;
+        glfwTerminate();
+    }
+}
+
+Environment::~Environment()
+{
+    // Deriving classes own GL resources (shaders, meshes, textures, ...) as members, which are
+    // destroyed before this destructor body runs. The GL context must outlive that teardown, so
+    // it's released here rather than earlier.
+    stop();
 }
 
 GLFWwindow* Environment::getWindow()

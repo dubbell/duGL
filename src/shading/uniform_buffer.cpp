@@ -1,5 +1,7 @@
 #include "dugl/shading/uniform_buffer.h"
 
+#include <format>
+
 
 UniformBuffer::UniformBuffer() : UBO(0), bufferSize(0) {}
 
@@ -16,6 +18,11 @@ void UniformBuffer::create(const char* uboName, std::vector<Shader*> shaders, GL
     {
         // get block index of `uboName`
         unsigned int uniformBlockIndex = glGetUniformBlockIndex(shader->ID, uboName);
+        if (uniformBlockIndex == GL_INVALID_INDEX)
+        {
+            throw std::runtime_error(std::format(
+                "Shader program {} has no uniform block named '{}'.", shader->ID, uboName));
+        }
         // bind the block index to the `bufferCount` binding point
         glUniformBlockBinding(shader->ID, uniformBlockIndex, bufferCount);
     }

@@ -100,7 +100,7 @@ void Skybox::init(const char* path, Shader* shader)
         }
         else
         {
-            std::cout << "Failed to load cubemap data: " << faces[i] << std::endl;
+            std::cerr << "Warning: failed to load cubemap face '" << faces[i] << "'; that face will be blank." << std::endl;
         }
         
         stbi_image_free(data);

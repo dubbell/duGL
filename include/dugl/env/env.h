@@ -28,7 +28,7 @@ protected:
 
 public:
     Environment();
-    virtual ~Environment() = default;
+    virtual ~Environment();
 
     /// Starts the main loop of the environment.
     virtual void start() = 0;

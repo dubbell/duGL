@@ -5,8 +5,8 @@
 
 #include <sstream>
 #include <fstream>
-#include <iostream>
 #include <format>
+#include <stdexcept>
 
 
 Shader::Shader(const char* vertexPath, const char* fragmentPath)
@@ -35,36 +35,39 @@ Shader::Shader(const char* vertexPath, const char* fragmentPath)
         vertexCode = vShaderStream.str();
         fragmentCode = fShaderStream.str();
     }
-    catch(const std::ifstream::failure e)
+    catch (const std::ifstream::failure& e)
     {
-        std::cout << "ERROR::SHADER::FILE_NOT_SUCCESSFULLY_READ" << std::endl;
-        std::cout << e.what() << std::endl;
+        throw std::runtime_error(std::format(
+            "Failed to read shader file(s) '{}', '{}': {}", vertexPath, fragmentPath, e.what()));
     }
+
     const char* vShaderCode = vertexCode.c_str();
     const char* fShaderCode = fragmentCode.c_str();
 
-    unsigned int vertex, fragment;
     int success;
     char infoLog[512];
 
-    vertex = glCreateShader(GL_VERTEX_SHADER);
+    unsigned int vertex = glCreateShader(GL_VERTEX_SHADER);
     glShaderSource(vertex, 1, &vShaderCode, NULL);
     glCompileShader(vertex);
     glGetShaderiv(vertex, GL_COMPILE_STATUS, &success);
     if (!success)
     {
-        glGetShaderInfoLog(vertex, 512, NULL, infoLog);
-        std::cout << "ERROR::SHADER::VERTEX::COMPILATION_FAILED\n" << infoLog << std::endl;
+        glGetShaderInfoLog(vertex, sizeof(infoLog), NULL, infoLog);
+        glDeleteShader(vertex);
+        throw std::runtime_error(std::format("Vertex shader '{}' failed to compile:\n{}", vertexPath, infoLog));
     }
-    
-    fragment = glCreateShader(GL_FRAGMENT_SHADER);
+
+    unsigned int fragment = glCreateShader(GL_FRAGMENT_SHADER);
     glShaderSource(fragment, 1, &fShaderCode, NULL);
     glCompileShader(fragment);
     glGetShaderiv(fragment, GL_COMPILE_STATUS, &success);
     if (!success)
     {
-        glGetShaderInfoLog(fragment, 512, NULL, infoLog);
-        std::cout << "ERROR::SHADER::VERTEX::COMPILATION_FAILED\n" << infoLog << std::endl;
+        glGetShaderInfoLog(fragment, sizeof(infoLog), NULL, infoLog);
+        glDeleteShader(vertex);
+        glDeleteShader(fragment);
+        throw std::runtime_error(std::format("Fragment shader '{}' failed to compile:\n{}", fragmentPath, infoLog));
     }
 
     ID = glCreateProgram();
@@ -73,14 +76,19 @@ Shader::Shader(const char* vertexPath, const char* fragmentPath)
     glLinkProgram(ID);
 
     glGetProgramiv(ID, GL_LINK_STATUS, &success);
-    if (!success)
-    {
-        glGetProgramInfoLog(ID, 512, NULL, infoLog);
-        std::cout << "ERROR::SHADER::PROGRAM::LINKING_FAILED\n" << infoLog << std::endl;
-    }
 
+    // shaders are flagged for deletion but not actually freed until detached from the program,
+    // so this is safe to do unconditionally, whether or not linking succeeded
     glDeleteShader(vertex);
     glDeleteShader(fragment);
+
+    if (!success)
+    {
+        glGetProgramInfoLog(ID, sizeof(infoLog), NULL, infoLog);
+        glDeleteProgram(ID);
+        throw std::runtime_error(std::format(
+            "Shader program ('{}', '{}') failed to link:\n{}", vertexPath, fragmentPath, infoLog));
+    }
 }
 
 Shader::Shader(Shader&& other) noexcept : ID(other.ID)

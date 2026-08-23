@@ -1,14 +1,29 @@
 #include "dugl/env/simple_env.h"
 
+#include <exception>
+#include <iostream>
+
 
 int main()
 {
-    Environment* env = new ExampleEnvironment();
+    try
+    {
+        Environment* env = new ExampleEnvironment();
 
-    env->start();
-    env->stop();
+        env->start();
 
-    delete env;
+        delete env;
+    }
+    catch (const std::exception& e)
+    {
+        std::cerr << "Fatal error: " << e.what() << std::endl;
+        return 1;
+    }
+    catch (...)
+    {
+        std::cerr << "Fatal error: an unknown exception was thrown." << std::endl;
+        return 1;
+    }
 
     return 0;
 }

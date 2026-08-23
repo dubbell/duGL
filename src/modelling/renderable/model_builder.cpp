@@ -4,6 +4,8 @@
 #include "dugl/utils/glad_include.h"
 
 #include <iostream>
+#include <format>
+#include <stdexcept>
 
 
 #define STB_IMAGE_IMPLEMENTATION
@@ -17,7 +19,7 @@ RenderableBuilder::RenderableBuilder(std::string path) : path(path), directory(p
     // check for errors, incomplete data, etc.
     if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode)
     {
-        std::cout << "Assimp error: " << importer.GetErrorString() << std::endl;
+        throw std::runtime_error(std::format("Failed to load model '{}': {}", path, importer.GetErrorString()));
     }
 }
 
@@ -67,7 +69,7 @@ unsigned int textureFromFile(std::string filename, std::string directory)
     }
     else
     {
-        std::cout << "Failed to load texture: " << path << std::endl;
+        std::cerr << "Warning: failed to load texture '" << path << "'; using an untextured slot instead." << std::endl;
     }
 
 
