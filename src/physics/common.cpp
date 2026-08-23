@@ -2,8 +2,16 @@
 
 #include <iostream>
 
-
-using namespace JPH;
+using JPH::uint;
+using JPH::BroadPhaseLayer;
+using JPH::ObjectLayer;
+using JPH::ValidateResult;
+using JPH::Body;
+using JPH::RVec3Arg;
+using JPH::CollideShapeResult;
+using JPH::ContactManifold;
+using JPH::ContactSettings;
+using JPH::SubShapeIDPair;
 
 
 ObjectToBroadPhaseMapper::ObjectToBroadPhaseMapper()

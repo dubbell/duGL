@@ -2,8 +2,10 @@
 
 #include <iostream>
 
-using namespace dugl;
-using namespace std;
+using dugl::uint;
+using dugl::AsyncDispatcher;
+using std::function;
+using std::min;
 
 
 AsyncDispatcher::AsyncDispatcher(uint maxJobs, uint maxBarriers, int numThreads)

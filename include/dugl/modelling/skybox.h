@@ -7,9 +7,9 @@
 class Skybox
 {
 private:
-    uint VAO = 0; 
-    uint VBO = 0;
-    uint textureId = 0;
+    dugl::uint VAO = 0;
+    dugl::uint VBO = 0;
+    dugl::uint textureId = 0;
     Shader* shader;
 
 public:

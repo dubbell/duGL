@@ -24,7 +24,7 @@ struct Texture
 class Mesh
 {
 private:
-    uint VAO, VBO, EBO;
+    dugl::uint VAO, VBO, EBO;
 
 public:
     std::vector<Vertex> vertices;
