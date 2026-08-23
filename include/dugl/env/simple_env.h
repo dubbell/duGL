@@ -10,6 +10,7 @@
 #include "dugl/modelling/entity.h"
 #include "dugl/modelling/outlined_entity.h"
 #include "dugl/modelling/renderable.h"
+#include "dugl/modelling/renderable_builder.h"
 #include "dugl/modelling/skybox.h"
 
 
@@ -43,7 +44,8 @@ public:
     void start() override;
 
 private:
-    Renderable* createRenderable(const char* renderablePath);
+    Renderable* createRenderable(RenderableBuilder& builder);
+    Renderable* createRenderable(RenderableBuilder&& builder) { return createRenderable(builder); }
     Entity* createEntity(Renderable* renderable, glm::vec3 position);
     OutlinedEntity* createOutlinedEntity(Renderable* renderable, glm::vec3 position, Shader* outlineShader);
 

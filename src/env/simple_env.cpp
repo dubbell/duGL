@@ -39,7 +39,7 @@ ExampleEnvironment::ExampleEnvironment() : clearColor(0.7f, 0.8f, 1.0f, 1.0f), f
         1.0f, 0.09f, 0.032f}};
 
     // create objects to render
-    Renderable* backpack_renderable = createRenderable("assets/models/backpack/backpack.obj");
+    Renderable* backpack_renderable = createRenderable(ModelBuilder("assets/models/backpack/backpack.obj"));
     
     // create shader programs
     Shader* objectShader = createShader(
@@ -69,9 +69,9 @@ void ExampleEnvironment::clearBuffers()
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 }
 
-Renderable* ExampleEnvironment::createRenderable(const char* renderablePath)
+Renderable* ExampleEnvironment::createRenderable(RenderableBuilder& builder)
 {
-    return renderables.emplace_back(std::make_unique<Renderable>(RenderableBuilder(renderablePath).build())).get();
+    return renderables.emplace_back(std::make_unique<Renderable>(builder.build())).get();
 }
 
 Entity* ExampleEnvironment::createEntity(Renderable* renderable, glm::vec3 position)

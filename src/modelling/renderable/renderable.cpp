@@ -1,8 +1,7 @@
 #include "dugl/modelling/renderable.h"
 
 
-Renderable::Renderable(std::string directory, std::vector<Mesh> meshes)
-    : directory(directory), meshes(std::move(meshes))
+Renderable::Renderable(std::vector<Mesh> meshes) : meshes(std::move(meshes))
 {}
 
 void Renderable::render(Shader* shader)
