@@ -31,7 +31,10 @@ if(NOT pip_result EQUAL 0)
 endif()
 
 execute_process(
+	# --reproducible uses the OpenGL spec bundled with the pinned glad-generator version instead
+	# of fetching the latest one from Khronos, so generated bindings don't drift between builds.
 	COMMAND ${GLAD_PYTHON} -m glad
+		--reproducible
 		--out-path ${CMAKE_BINARY_DIR}/glad
 		--api gl:core=4.6
 		c

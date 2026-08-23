@@ -6,8 +6,6 @@ endif()
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
-#set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /MT")
-#set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /MTd")
 add_compile_definitions(ASSIMP_STATIC)
 add_compile_definitions(GLM_ENABLE_EXPERIMENTAL)
 add_compile_definitions(NOMINMAX)

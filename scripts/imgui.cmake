@@ -1,8 +1,10 @@
 
+# Pinned to a specific commit on the `docking` branch (rather than the branch itself) so the
+# build is reproducible instead of picking up whatever that branch's HEAD happens to be.
 FetchContent_Declare(
 	imgui
 	GIT_REPOSITORY https://github.com/ocornut/imgui.git
-	GIT_TAG docking
+	GIT_TAG fd13a1e8923a0a7077b404fc36fd063b25a0c0b5
 	GIT_SHALLOW TRUE)
 FetchContent_MakeAvailable(imgui)
 
