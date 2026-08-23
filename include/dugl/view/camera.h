@@ -2,8 +2,6 @@
 
 #include <glm/glm.hpp>
 
-#include "dugl/controllers/keyboard_observer.h"
-
 
 class Camera
 {
