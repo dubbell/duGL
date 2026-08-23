@@ -22,10 +22,6 @@ enum class ShaderType
 
 class ExampleEnvironment : public Environment
 {
-    template<typename T> using vector = std::vector<T>;
-    template<typename T> using unique_ptr = std::unique_ptr<T>;
-    template<typename T, typename U> using map = std::map<T, U>;
-
 private:
     FlightController flightController;
 
@@ -33,12 +29,12 @@ private:
 
     Skybox skybox;
 
-    vector<unique_ptr<Renderable>> renderables;
-    vector<unique_ptr<Entity>> entities;
-    map<ShaderType, unique_ptr<Shader>> shaders;
+    std::vector<std::unique_ptr<Renderable>> renderables;
+    std::vector<std::unique_ptr<Entity>> entities;
+    std::map<ShaderType, std::unique_ptr<Shader>> shaders;
 
     DirectionalLight directionalLight;
-    vector<PointLight> pointLights;
+    std::vector<PointLight> pointLights;
 
     glm::vec4 clearColor;
 

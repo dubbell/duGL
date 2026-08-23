@@ -13,16 +13,12 @@
 
 class Environment : public PlayerInterface
 {
-    template<typename T> using vector = std::vector<T>;
-    template<typename T> using unique_ptr = std::unique_ptr<T>;
-    template<typename T, typename U> using pair = std::pair<T, U>;
-
 protected:
     GLFWwindow* window;
     int viewportWidth;
     int viewportHeight;
 
-    vector<unique_ptr<Camera>> cameras;
+    std::vector<std::unique_ptr<Camera>> cameras;
     Camera* activeCamera;
 
     bool freeCursor;
@@ -39,7 +35,7 @@ public:
     void stop();
 
     GLFWwindow* getWindow() override;
-    pair<int, int> getViewportSize() override;
+    std::pair<int, int> getViewportSize() override;
     Camera* getActiveCamera() override;
 
     bool getFreeCursor() override;
