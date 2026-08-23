@@ -5,10 +5,16 @@
 #include <string>
 
 #include "lighting.h"
+#include "material.h"
+#include "dugl/modelling/vertex_layout.h"
 
 
 class Shader
 {
+private:
+    // vertex attribute locations this program reads, queried from the linked program
+    VertexAttributeMask requiredAttributes;
+
 public:
     unsigned int ID;
 
@@ -26,13 +32,22 @@ public:
 
     void use();
 
+    VertexAttributeMask getRequiredAttributes() const { return requiredAttributes; }
+
     void setBool(const std::string &name, bool value) const;
     void setInt(const std::string &name, int value) const;
     void setFloat(const std::string &name, float value) const;
     void setVec3(const std::string &name, glm::vec3 value) const;
     void setMat4(const std::string &name, glm::mat4 value) const;
 
+    // sets the material's factors and binds its maps, substituting neutral defaults for
+    // maps the material doesn't have
+    void setMaterial(const Material& material) const;
+
     void setPerspective(glm::mat4& view, glm::mat4& projection, glm::vec3& position) const;
     void setDirectionalLight(DirectionalLight& directionalLight) const;
     void setPointLights(std::vector<PointLight>& pointLights) const;
+
+private:
+    void queryRequiredAttributes();
 };

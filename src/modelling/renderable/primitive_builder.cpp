@@ -1,17 +1,17 @@
 #include "dugl/modelling/primitive_builder.h"
 
 
-PrimitiveBuilder::PrimitiveBuilder(std::vector<Texture> textures) : textures(std::move(textures))
+PrimitiveBuilder::PrimitiveBuilder(Material material) : material(material)
 {}
 
-void PrimitiveBuilder::setTextures(std::vector<Texture> textures)
+void PrimitiveBuilder::setMaterial(Material material)
 {
-    this->textures = std::move(textures);
+    this->material = material;
 }
 
-void PrimitiveBuilder::addMesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices)
+void PrimitiveBuilder::addMesh(std::vector<StaticVertex> vertices, std::vector<unsigned int> indices)
 {
-    meshes.push_back(Mesh(std::move(vertices), std::move(indices), textures));
+    meshes.push_back(Mesh(std::move(vertices), std::move(indices), material));
 }
 
 

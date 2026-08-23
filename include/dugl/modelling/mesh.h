@@ -1,37 +1,40 @@
 #pragma once
 
 #include <vector>
-#include <string>
 
 #include "dugl/shading/shader.h"
+#include "dugl/shading/material.h"
 #include "dugl/common.h"
+#include "vertex_layout.h"
 
 
-struct Vertex
+// The vertex format for non-deformable geometries.
+struct StaticVertex
 {
     glm::vec3 position;
     glm::vec3 normal;
     glm::vec2 texCoord;
 };
 
-struct Texture
-{
-    unsigned int id;
-    std::string type;
-    std::string path;
-};
+constexpr VertexAttributeMask STATIC_VERTEX_ATTRIBUTES =
+    attributeMask(VertexAttribute::Position) |
+    attributeMask(VertexAttribute::Normal) |
+    attributeMask(VertexAttribute::TexCoord);
 
 class Mesh
 {
 private:
     dugl::uint VAO, VBO, EBO;
 
-public:
-    std::vector<Vertex> vertices;
-    std::vector<unsigned int> indices;
-    std::vector<Texture> textures;
+    // the attribute locations this mesh's vertex format supplies
+    VertexAttributeMask attributes;
 
-    Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std::vector<Texture> textures);
+public:
+    std::vector<StaticVertex> vertices;
+    std::vector<unsigned int> indices;
+    Material material;
+
+    Mesh(std::vector<StaticVertex> vertices, std::vector<unsigned int> indices, Material material);
     ~Mesh();
 
     // enable move functionality
@@ -43,7 +46,8 @@ public:
     Mesh& operator=(const Mesh&) = delete;
 
     void render(Shader* shader, bool bindTextures);
-    
+
 private:
     void setupMesh();
+    void checkShaderCompatibility(Shader* shader) const;
 };

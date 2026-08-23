@@ -7,6 +7,7 @@
 #include <fstream>
 #include <format>
 #include <stdexcept>
+#include <algorithm>
 
 
 Shader::Shader(const char* vertexPath, const char* fragmentPath)
@@ -89,9 +90,54 @@ Shader::Shader(const char* vertexPath, const char* fragmentPath)
         throw std::runtime_error(std::format(
             "Shader program ('{}', '{}') failed to link:\n{}", vertexPath, fragmentPath, infoLog));
     }
+
+    queryRequiredAttributes();
 }
 
-Shader::Shader(Shader&& other) noexcept : ID(other.ID)
+// a matrix attribute occupies one location per column, an array one per element
+static dugl::uint attributeLocationSpan(unsigned int type, int size)
+{
+    dugl::uint columns = 1;
+    switch (type)
+    {
+        case GL_FLOAT_MAT2: columns = 2; break;
+        case GL_FLOAT_MAT3: columns = 3; break;
+        case GL_FLOAT_MAT4: columns = 4; break;
+        default: break;
+    }
+
+    return columns * (dugl::uint)std::max(size, 1);
+}
+
+void Shader::queryRequiredAttributes()
+{
+    requiredAttributes = 0;
+
+    int attributeCount = 0, maxNameLength = 0;
+    glGetProgramiv(ID, GL_ACTIVE_ATTRIBUTES, &attributeCount);
+    glGetProgramiv(ID, GL_ACTIVE_ATTRIBUTE_MAX_LENGTH, &maxNameLength);
+
+    std::string name(std::max(maxNameLength, 1), '\0');
+
+    for (int i = 0; i < attributeCount; i++)
+    {
+        int size = 0;
+        unsigned int type = 0;
+        glGetActiveAttrib(ID, i, (int)name.size(), nullptr, &size, &type, name.data());
+
+        int location = glGetAttribLocation(ID, name.c_str());
+
+        // built-ins such as gl_VertexID are reported as active but aren't fed from a buffer
+        if (location < 0) continue;
+
+        for (dugl::uint span = attributeLocationSpan(type, size), j = 0; j < span; j++)
+        {
+            requiredAttributes |= VertexAttributeMask{1} << (location + j);
+        }
+    }
+}
+
+Shader::Shader(Shader&& other) noexcept : requiredAttributes(other.requiredAttributes), ID(other.ID)
 {
     other.ID = 0;
 }
@@ -105,6 +151,7 @@ Shader& Shader::operator=(Shader&& other) noexcept
         }
 
         ID = other.ID;
+        requiredAttributes = other.requiredAttributes;
         other.ID = 0;
     }
     return *this;
@@ -145,6 +192,27 @@ void Shader::setVec3(const std::string& name, glm::vec3 value) const
 void Shader::setMat4(const std::string &name, glm::mat4 value) const
 {
     glUniformMatrix4fv(glGetUniformLocation(ID, name.c_str()), 1, GL_FALSE, glm::value_ptr(value));
+}
+
+// texture units the material's maps are bound to
+static const int DIFFUSE_MAP_UNIT = 0;
+static const int SPECULAR_MAP_UNIT = 1;
+
+void Shader::setMaterial(const Material& material) const
+{
+    setVec3("material.diffuseColor", material.diffuseColor);
+    setVec3("material.specularColor", material.specularColor);
+    setFloat("material.shininess", material.shininess);
+
+    glActiveTexture(GL_TEXTURE0 + DIFFUSE_MAP_UNIT);
+    glBindTexture(GL_TEXTURE_2D, material.diffuseMap != 0 ? material.diffuseMap : defaultTextures::white());
+    setInt("material.diffuseMap", DIFFUSE_MAP_UNIT);
+
+    glActiveTexture(GL_TEXTURE0 + SPECULAR_MAP_UNIT);
+    glBindTexture(GL_TEXTURE_2D, material.specularMap != 0 ? material.specularMap : defaultTextures::white());
+    setInt("material.specularMap", SPECULAR_MAP_UNIT);
+
+    glActiveTexture(GL_TEXTURE0);
 }
 
 void Shader::setPerspective(glm::mat4& view, glm::mat4& projection, glm::vec3& position) const

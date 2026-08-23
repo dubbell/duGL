@@ -36,11 +36,12 @@ uniform int pointLightCount;
 
 struct Material
 {
-    sampler2D texture_diffuse1;
-    sampler2D texture_diffuse2;
-    sampler2D texture_diffuse3;
-    sampler2D texture_specular1;
-    sampler2D texture_specular2;
+    vec3 diffuseColor;
+    vec3 specularColor;
+    float shininess;
+
+    sampler2D diffuseMap;
+    sampler2D specularMap;
 };
 
 uniform Material material;
@@ -51,20 +52,20 @@ vec3 computeLight(
     vec3 viewDir, 
     vec3 lightAmbient, 
     vec3 lightDiffuse, 
-    vec3 lightSpecular, 
-    vec3 diffuseTexture, 
-    vec3 specularTexture, 
+    vec3 lightSpecular,
+    vec3 diffuseColor,
+    vec3 specularColor,
     vec3 norm)
 {
-    vec3 ambient = lightAmbient * diffuseTexture;
+    vec3 ambient = lightAmbient * diffuseColor;
 
     float diff = max(dot(norm, lightDir), 0.0);
-    vec3 diffuse = diff * lightDiffuse * diffuseTexture;
+    vec3 diffuse = diff * lightDiffuse * diffuseColor;
 
     vec3 reflectDir = reflect(-lightDir, norm);
-    float spec = pow(max(dot(viewDir, reflectDir), 0.0), 16);
-    vec3 specular = spec * lightSpecular * specularTexture;
-    
+    float spec = pow(max(dot(viewDir, reflectDir), 0.0), material.shininess);
+    vec3 specular = spec * lightSpecular * specularColor;
+
     return ambient + diffuse + specular;
 }
 
@@ -73,13 +74,8 @@ void main()
 {
     vec3 viewDir = normalize(viewPos - FragPos);
     vec2 flippedTexCoord = vec2(TexCoord.x, 1.0 - TexCoord.y);
-    vec3 diffuseTexture = (
-        vec3(texture(material.texture_diffuse1, flippedTexCoord)) + 
-        vec3(texture(material.texture_diffuse2, flippedTexCoord)) + 
-        vec3(texture(material.texture_diffuse3, flippedTexCoord))) / 3.0;
-    vec3 specularTexture = (
-        vec3(texture(material.texture_specular1, flippedTexCoord)) +
-        vec3(texture(material.texture_specular2, flippedTexCoord))) / 2.0;
+    vec3 diffuseColor = material.diffuseColor * texture(material.diffuseMap, flippedTexCoord).rgb;
+    vec3 specularColor = material.specularColor * texture(material.specularMap, flippedTexCoord).rgb;
     vec3 norm = normalize(Normal);
 
     // start with directional light
@@ -89,8 +85,8 @@ void main()
         directionalLight.ambient, 
         directionalLight.diffuse, 
         directionalLight.specular,
-        diffuseTexture, 
-        specularTexture, 
+        diffuseColor,
+        specularColor,
         norm);
 
     for (int i = 0; i < min(pointLightCount, MAX_LIGHTS); i++)
@@ -109,7 +105,7 @@ void main()
             pointLight.ambient, 
             pointLight.diffuse, 
             pointLight.specular,
-            diffuseTexture, specularTexture, norm) * attenuation;
+            diffuseColor, specularColor, norm) * attenuation;
     }
 
     FragColor = vec4(result, 1.0);

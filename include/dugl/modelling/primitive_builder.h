@@ -7,20 +7,22 @@
 
 
 // Base for builders that generate their geometry procedurally instead of loading it.
+// A primitive defaults to a plain white material, so giving one a solid colour is just
+// setting a material whose diffuseColor is that colour and which has no maps.
 class PrimitiveBuilder : public RenderableBuilder
 {
 protected:
-    std::vector<Texture> textures;
+    Material material;
 
 public:
-    void setTextures(std::vector<Texture> textures);
+    void setMaterial(Material material);
 
 protected:
     PrimitiveBuilder() = default;
-    PrimitiveBuilder(std::vector<Texture> textures);
+    PrimitiveBuilder(Material material);
 
-    // appends one mesh made of the given geometry, textured with this builder's texture set
-    void addMesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices);
+    // appends one mesh made of the given geometry, shaded with this builder's material
+    void addMesh(std::vector<StaticVertex> vertices, std::vector<unsigned int> indices);
 };
 
 

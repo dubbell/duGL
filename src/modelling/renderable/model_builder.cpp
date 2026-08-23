@@ -13,8 +13,10 @@
 
 ModelBuilder::ModelBuilder(std::string path) : path(path), directory(path.substr(0, path.find_last_of('/')))
 {
-    // read file, only triangles (aiProcess_Triangulate option)
-    scene = importer.ReadFile(path, aiProcess_Triangulate | aiProcess_FlipUVs);
+    // Read file, only triangles (aiProcess_Triangulate option). Normals are part of the
+    // vertex format, so have assimp derive them for meshes that ship without any
+    // (aiProcess_GenSmoothNormals leaves meshes that already have them alone)
+    scene = importer.ReadFile(path, aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_GenSmoothNormals);
 
     // check for errors, incomplete data, etc.
     if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode)
@@ -78,51 +80,78 @@ unsigned int textureFromFile(std::string filename, std::string directory)
     return texture;
 }
 
-std::vector<Texture> ModelBuilder::loadMaterialTextures(aiMaterial* mat, aiTextureType type, std::string typeName)
+// Loads the first map of the given type, or 0 if the material has none. A material can
+// declare several maps of one type, but only the first is used; blending multiple maps of
+// the same type is a material-graph feature, not something a single factor can express.
+dugl::uint ModelBuilder::loadTexture(aiMaterial* mat, aiTextureType type)
 {
-    std::vector<Texture> textures;
-    for (unsigned int i = 0; i < mat->GetTextureCount(type); i++)
+    if (mat->GetTextureCount(type) == 0) return 0;
+
+    aiString str;
+    mat->GetTexture(type, 0, &str);
+
+    // reuse the texture if this image file has already been loaded for another material
+    for (const Texture& loaded : loadedTextures)
     {
-        aiString str;
-        mat->GetTexture(type, i, &str);
-        bool skip = false;
-        // loop through already loaded textures to check if already loaded.
-        // if it is, then just get the previously loaded texture instead
-        for (unsigned int j = 0; j < loadedTextures.size(); j++)
-        {
-            if (std::strcmp(loadedTextures[j].path.data(), str.C_Str()) == 0)
-            {
-                textures.push_back(loadedTextures[j]);
-                skip = true;
-                break;
-            }
-        }
-        if (!skip)
-        {
-            Texture texture;
-            texture.id = textureFromFile(str.C_Str(), directory);
-            texture.type = typeName;
-            texture.path = str.C_Str();
-            textures.push_back(texture);
-            loadedTextures.push_back(texture);
-        }
+        if (loaded.path == str.C_Str()) return loaded.id;
     }
 
-    return textures;
+    Texture texture = { textureFromFile(str.C_Str(), directory), str.C_Str() };
+    loadedTextures.push_back(texture);
+
+    return texture.id;
+}
+
+Material ModelBuilder::loadMaterial(aiMaterial* mat)
+{
+    Material material;
+
+    // factors are optional in most formats; keep the defaults for whatever isn't specified
+    aiColor3D color;
+    if (mat->Get(AI_MATKEY_COLOR_DIFFUSE, color) == AI_SUCCESS)
+    {
+        material.diffuseColor = { color.r, color.g, color.b };
+    }
+    if (mat->Get(AI_MATKEY_COLOR_SPECULAR, color) == AI_SUCCESS)
+    {
+        material.specularColor = { color.r, color.g, color.b };
+    }
+
+    float shininess;
+    // a zero exponent would make the specular term constant over the whole surface
+    if (mat->Get(AI_MATKEY_SHININESS, shininess) == AI_SUCCESS && shininess > 0.0f)
+    {
+        material.shininess = shininess;
+    }
+
+    material.diffuseMap = loadTexture(mat, aiTextureType_DIFFUSE);
+    material.specularMap = loadTexture(mat, aiTextureType_SPECULAR);
+
+    return material;
 }
 
 Mesh ModelBuilder::processMesh(aiMesh* mesh, const aiScene* scene)
 {
-    std::vector<Vertex> vertices;
+    std::vector<StaticVertex> vertices;
     std::vector<unsigned int> indices;
-    std::vector<Texture> textures;
+    Material material;
+
+    // a mesh isn't required to carry normals or texture coordinates, and assimp leaves those
+    // arrays null when it has none. Every vertex still has to fill the whole vertex format,
+    // so substitute defaults rather than reading through a null array.
+    bool hasNormals = mesh->HasNormals();
+    bool hasTexCoords = mesh->HasTextureCoords(0);
 
     for (unsigned int i = 0; i < mesh->mNumVertices; i++)
     {
-        Vertex vertex = {
+        StaticVertex vertex = {
             { mesh->mVertices[i].x, mesh->mVertices[i].y, mesh->mVertices[i].z },
-            { mesh->mNormals[i].x, mesh->mNormals[i].y, mesh->mNormals[i].z },
-            { mesh->mTextureCoords[0][i].x, mesh->mTextureCoords[0][i].y }};
+            hasNormals
+                ? glm::vec3(mesh->mNormals[i].x, mesh->mNormals[i].y, mesh->mNormals[i].z)
+                : glm::vec3(0.0f, 1.0f, 0.0f),  // an arbitrary unit normal; lighting stays defined
+            hasTexCoords
+                ? glm::vec2(mesh->mTextureCoords[0][i].x, mesh->mTextureCoords[0][i].y)
+                : glm::vec2(0.0f, 0.0f)};
         vertices.push_back(vertex);
     }
 
@@ -133,14 +162,12 @@ Mesh ModelBuilder::processMesh(aiMesh* mesh, const aiScene* scene)
             indices.push_back(face.mIndices[j]);
     }
 
-    if (mesh->mMaterialIndex >= 0)
+    // mMaterialIndex is unsigned, so it needs bounds-checking against the scene's material
+    // count rather than the '>= 0' test that reads naturally here
+    if (mesh->mMaterialIndex < scene->mNumMaterials)
     {
-        aiMaterial *material = scene->mMaterials[mesh->mMaterialIndex];
-        std::vector<Texture> diffuseMaps = loadMaterialTextures(material, aiTextureType_DIFFUSE, "texture_diffuse");
-        textures.insert(textures.end(), diffuseMaps.begin(), diffuseMaps.end());
-        std::vector<Texture> specularMaps = loadMaterialTextures(material, aiTextureType_SPECULAR, "texture_specular");
-        textures.insert(textures.end(), specularMaps.begin(), specularMaps.end());
+        material = loadMaterial(scene->mMaterials[mesh->mMaterialIndex]);
     }
 
-    return Mesh(vertices, indices, textures);
+    return Mesh(std::move(vertices), std::move(indices), material);
 }

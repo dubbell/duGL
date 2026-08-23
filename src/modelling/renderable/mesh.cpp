@@ -2,9 +2,14 @@
 #include "dugl/shading/shader.h"
 #include "dugl/utils/glad_include.h"
 
+#include <format>
+#include <stdexcept>
+#include <string>
 
-Mesh::Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std::vector<Texture> textures)
-    : vertices(std::move(vertices)), indices(std::move(indices)), textures(std::move(textures))
+
+Mesh::Mesh(std::vector<StaticVertex> vertices, std::vector<unsigned int> indices, Material material)
+    : attributes(STATIC_VERTEX_ATTRIBUTES),
+      vertices(std::move(vertices)), indices(std::move(indices)), material(material)
 {
     setupMesh();
 }
@@ -17,8 +22,8 @@ Mesh::~Mesh()
 }
 
 Mesh::Mesh(Mesh&& other) noexcept
-    : VAO(other.VAO), VBO(other.VBO), EBO(other.EBO),
-      vertices(std::move(other.vertices)), indices(std::move(other.indices)), textures(std::move(other.textures))
+    : VAO(other.VAO), VBO(other.VBO), EBO(other.EBO), attributes(other.attributes),
+      vertices(std::move(other.vertices)), indices(std::move(other.indices)), material(other.material)
 {
     other.VAO = 0;
     other.VBO = 0;
@@ -36,9 +41,10 @@ Mesh& Mesh::operator=(Mesh&& other) noexcept
         VAO = other.VAO;
         VBO = other.VBO;
         EBO = other.EBO;
+        attributes = other.attributes;
         vertices = std::move(other.vertices);
         indices = std::move(other.indices);
-        textures = std::move(other.textures);
+        material = other.material;
 
         other.VAO = 0;
         other.VBO = 0;
@@ -56,45 +62,54 @@ void Mesh::setupMesh()
     glBindVertexArray(VAO);
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
 
-    glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(Vertex), &vertices[0], GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(StaticVertex), &vertices[0], GL_STATIC_DRAW);
 
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(unsigned int), &indices[0], GL_STATIC_DRAW);
 
     // vertex positions
-    glEnableVertexAttribArray(0);	
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)0);
+    glEnableVertexAttribArray(attributeLocation(VertexAttribute::Position));
+    glVertexAttribPointer(attributeLocation(VertexAttribute::Position),
+        3, GL_FLOAT, GL_FALSE, sizeof(StaticVertex), (void*)offsetof(StaticVertex, position));
     // vertex normals
-    glEnableVertexAttribArray(1);	
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, normal));
+    glEnableVertexAttribArray(attributeLocation(VertexAttribute::Normal));
+    glVertexAttribPointer(attributeLocation(VertexAttribute::Normal),
+        3, GL_FLOAT, GL_FALSE, sizeof(StaticVertex), (void*)offsetof(StaticVertex, normal));
     // vertex texture coords
-    glEnableVertexAttribArray(2);	
-    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, texCoord));
+    glEnableVertexAttribArray(attributeLocation(VertexAttribute::TexCoord));
+    glVertexAttribPointer(attributeLocation(VertexAttribute::TexCoord),
+        2, GL_FLOAT, GL_FALSE, sizeof(StaticVertex), (void*)offsetof(StaticVertex, texCoord));
 
     glBindVertexArray(0);
 }
 
+void Mesh::checkShaderCompatibility(Shader* shader) const
+{
+    VertexAttributeMask missing = shader->getRequiredAttributes() & ~attributes;
+    if (missing == 0) return;
+
+    std::string missingNames;
+    for (dugl::uint location = 0; location < 8 * sizeof(VertexAttributeMask); location++)
+    {
+        if ((missing >> location & 1) == 0) continue;
+
+        if (!missingNames.empty()) missingNames += ", ";
+        missingNames += std::format("{} (location {})", attributeName(location), location);
+    }
+
+    throw std::runtime_error(std::format(
+        "Shader reads vertex attributes this mesh does not provide: {}", missingNames));
+}
+
 void Mesh::render(Shader* shader, bool bindTextures)
 {
+#ifndef NDEBUG
+    checkShaderCompatibility(shader);
+#endif
+
     if (bindTextures)
     {
-        unsigned int diffN = 1;
-        unsigned int specN = 1;
-
-        for (unsigned int i = 0; i < textures.size(); i++)
-        {
-            glActiveTexture(GL_TEXTURE0 + i);
-            std::string number;
-            std::string name = textures[i].type;
-            if (name == "texture_diffuse")
-                number = std::to_string(diffN++);
-            else if (name == "texture_specular")
-                number = std::to_string(specN++);
-
-            shader->setInt(("material." + name + number).c_str(), i);
-            glBindTexture(GL_TEXTURE_2D, textures[i].id);
-        }
-        glActiveTexture(GL_TEXTURE0);
+        shader->setMaterial(material);
     }
 
     glBindVertexArray(VAO);

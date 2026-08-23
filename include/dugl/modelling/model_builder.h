@@ -9,6 +9,15 @@
 #include "mesh.h"
 
 
+// A texture loaded from the model's directory, kept so that materials sharing an image file
+// share the GL texture object rather than loading it twice.
+struct Texture
+{
+    dugl::uint id;
+    std::string path;
+};
+
+
 // Builds a renderable from a model file on disk, using assimp.
 class ModelBuilder : public RenderableBuilder
 {
@@ -23,8 +32,8 @@ public:
 
 private:
     void generateMeshes() override;
-
     void processNode(aiNode* node, const aiScene* scene);
-    std::vector<Texture> loadMaterialTextures(aiMaterial* mat, aiTextureType type, std::string typeName);
+    Material loadMaterial(aiMaterial* mat);
+    dugl::uint loadTexture(aiMaterial* mat, aiTextureType type);
     Mesh processMesh(aiMesh* mesh, const aiScene* scene);
 };
