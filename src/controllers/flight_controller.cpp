@@ -1,8 +1,20 @@
 #include "dugl/controllers/flight_controller.h"
+#include "dugl/controllers/keyboard.h"
+#include "dugl/controllers/mouse.h"
 
 
-FlightController::FlightController(PlayerInterface* playerInterface) 
-    : speed(0.1f), playerInterface(playerInterface) {}
+FlightController::FlightController(PlayerInterface* playerInterface, KeyboardController* keyboardController, MouseController* mouseController)
+    : speed(0.1f), playerInterface(playerInterface), keyboardController(keyboardController), mouseController(mouseController)
+{
+    keyboardController->registerObserver(this);
+    mouseController->registerOffsetObserver(this);
+}
+
+FlightController::~FlightController()
+{
+    keyboardController->unregisterObserver(this);
+    mouseController->unregisterOffsetObserver(this);
+}
 
 
 std::set<int> FlightController::getActiveKeys()

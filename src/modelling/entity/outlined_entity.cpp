@@ -2,15 +2,27 @@
 #include "dugl/utils/common.h"
 #include "dugl/shading/shader.h"
 #include "dugl/utils/glad_include.h"
+#include "dugl/controllers/mouse.h"
 
 
-OutlinedEntity::OutlinedEntity(Renderable* renderable, Shader* outlineShader) 
-    : Entity(renderable), outlineShader(outlineShader), enableOutline(false), outlineThickness(0.15f) 
-{}
+OutlinedEntity::OutlinedEntity(Renderable* renderable, Shader* outlineShader, MouseController* mouseController)
+    : Entity(renderable), outlineShader(outlineShader), enableOutline(false), outlineThickness(0.15f),
+      mouseController(mouseController)
+{
+    mouseController->registerScreenRayObserver(this);
+}
 
-OutlinedEntity::OutlinedEntity(Renderable* renderable, glm::vec3 position, Shader* outlineShader) 
-    : Entity(renderable, position), outlineShader(outlineShader), enableOutline(false), outlineThickness(0.15f) 
-{}
+OutlinedEntity::OutlinedEntity(Renderable* renderable, glm::vec3 position, Shader* outlineShader, MouseController* mouseController)
+    : Entity(renderable, position), outlineShader(outlineShader), enableOutline(false), outlineThickness(0.15f),
+      mouseController(mouseController)
+{
+    mouseController->registerScreenRayObserver(this);
+}
+
+OutlinedEntity::~OutlinedEntity()
+{
+    mouseController->unregisterScreenRayObserver(this);
+}
 
 
 void OutlinedEntity::render(Shader* shader)

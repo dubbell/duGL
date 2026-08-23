@@ -10,7 +10,7 @@
 #include <algorithm>
 
 
-ExampleEnvironment::ExampleEnvironment() : clearColor(0.7f, 0.8f, 1.0f, 1.0f), flightController(this)
+ExampleEnvironment::ExampleEnvironment() : clearColor(0.7f, 0.8f, 1.0f, 1.0f), flightController(this, &keyboardController, &mouseController)
 {
     initImGui(window);
 
@@ -20,13 +20,9 @@ ExampleEnvironment::ExampleEnvironment() : clearColor(0.7f, 0.8f, 1.0f, 1.0f), f
     // enable face culling
     glEnable(GL_CULL_FACE);
     glCullFace(GL_BACK);
-    
+
     // disable cursor initially
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-
-    // register user input observers
-    mouseController.registerOffsetObserver(&flightController);
-    keyboardController.registerObserver(&flightController);
 
     directionalLight = {
         0.0f, 0.0f,
@@ -60,9 +56,6 @@ ExampleEnvironment::ExampleEnvironment() : clearColor(0.7f, 0.8f, 1.0f, 1.0f), f
     OutlinedEntity* entity1 = createOutlinedEntity(backpack_renderable, glm::vec3(1.0f, 1.0f, 6.0f), outlineShader);
     OutlinedEntity* entity2 = createOutlinedEntity(backpack_renderable, glm::vec3(-2.0f, 1.0f, 1.0f), outlineShader);
 
-    mouseController.registerScreenRayObserver(entity1);
-    mouseController.registerScreenRayObserver(entity2);
-
     // create skybox
     skybox.init("assets/skyboxes/sea", shaders[ShaderType::CubeMapShader].get());
 
@@ -88,7 +81,7 @@ Entity* ExampleEnvironment::createEntity(Renderable* renderable, glm::vec3 posit
 
 OutlinedEntity* ExampleEnvironment::createOutlinedEntity(Renderable* renderable, glm::vec3 position, Shader* outlineShader)
 {
-    auto outlinedEntity = std::make_unique<OutlinedEntity>(renderable, position, outlineShader);
+    auto outlinedEntity = std::make_unique<OutlinedEntity>(renderable, position, outlineShader, &mouseController);
     OutlinedEntity* ptr = outlinedEntity.get();
     entities.push_back(std::move(outlinedEntity));
     return ptr;
