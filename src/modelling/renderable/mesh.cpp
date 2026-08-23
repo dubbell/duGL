@@ -9,6 +9,44 @@ Mesh::Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std:
     setupMesh();
 }
 
+Mesh::~Mesh()
+{
+    glDeleteBuffers(1, &EBO);
+    glDeleteBuffers(1, &VBO);
+    glDeleteVertexArrays(1, &VAO);
+}
+
+Mesh::Mesh(Mesh&& other) noexcept
+    : VAO(other.VAO), VBO(other.VBO), EBO(other.EBO),
+      vertices(std::move(other.vertices)), indices(std::move(other.indices)), textures(std::move(other.textures))
+{
+    other.VAO = 0;
+    other.VBO = 0;
+    other.EBO = 0;
+}
+
+Mesh& Mesh::operator=(Mesh&& other) noexcept
+{
+    if (this != &other)
+    {
+        glDeleteBuffers(1, &EBO);
+        glDeleteBuffers(1, &VBO);
+        glDeleteVertexArrays(1, &VAO);
+
+        VAO = other.VAO;
+        VBO = other.VBO;
+        EBO = other.EBO;
+        vertices = std::move(other.vertices);
+        indices = std::move(other.indices);
+        textures = std::move(other.textures);
+
+        other.VAO = 0;
+        other.VBO = 0;
+        other.EBO = 0;
+    }
+    return *this;
+}
+
 void Mesh::setupMesh()
 {
     glGenVertexArrays(1, &VAO);

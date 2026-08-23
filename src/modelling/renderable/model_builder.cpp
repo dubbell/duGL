@@ -24,7 +24,7 @@ RenderableBuilder::RenderableBuilder(std::string path) : path(path), directory(p
 Renderable RenderableBuilder::build()
 {
     processNode(scene->mRootNode, scene);
-    return Renderable(directory, meshes);
+    return Renderable(directory, std::move(meshes));
 }
 
 void RenderableBuilder::processNode(aiNode* node, const aiScene* scene)

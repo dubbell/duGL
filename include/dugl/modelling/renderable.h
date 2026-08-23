@@ -15,5 +15,6 @@ private:
 
 public:
     Renderable(std::string directory, std::vector<Mesh> meshes);
+
     void render(Shader* shader);
 };

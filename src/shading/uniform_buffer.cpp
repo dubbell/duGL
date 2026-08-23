@@ -3,6 +3,11 @@
 
 UniformBuffer::UniformBuffer() : UBO(0), bufferSize(0) {}
 
+UniformBuffer::~UniformBuffer()
+{
+    glDeleteBuffers(1, &UBO);
+}
+
 void UniformBuffer::create(const char* uboName, std::vector<Shader*> shaders, GLsizeiptr bufferSize, GLenum usage)
 {
     this->bufferSize = bufferSize;

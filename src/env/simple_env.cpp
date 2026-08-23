@@ -64,8 +64,7 @@ ExampleEnvironment::ExampleEnvironment() : clearColor(0.7f, 0.8f, 1.0f, 1.0f), f
     mouseController.registerScreenRayObserver(entity2);
 
     // create skybox
-    skybox.setShader(shaders[ShaderType::CubeMapShader].get());
-    skybox.loadSkybox("assets/skyboxes/sea");
+    skybox.init("assets/skyboxes/sea", shaders[ShaderType::CubeMapShader].get());
 
     // create uniform buffer object for perspective transforms
     uboPerspective.create("Perspective", { objectShader, cubeMapShader }, sizeof(PerspectiveData), GL_DYNAMIC_DRAW);

@@ -4,6 +4,7 @@
 #include <string>
 
 #include "dugl/shading/shader.h"
+#include "dugl/common.h"
 
 
 struct Vertex
@@ -23,7 +24,7 @@ struct Texture
 class Mesh
 {
 private:
-    unsigned int VAO, VBO, EBO;
+    uint VAO, VBO, EBO;
 
 public:
     std::vector<Vertex> vertices;
@@ -31,6 +32,16 @@ public:
     std::vector<Texture> textures;
 
     Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std::vector<Texture> textures);
+    ~Mesh();
+
+    // enable move functionality
+    Mesh(Mesh&& other) noexcept;
+    Mesh& operator=(Mesh&& other) noexcept;
+
+    // delete copy functionality
+    Mesh(const Mesh&) = delete;
+    Mesh& operator=(const Mesh&) = delete;
+
     void render(Shader* shader, bool bindTextures);
     
 private:

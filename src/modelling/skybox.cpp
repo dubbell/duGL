@@ -6,17 +6,21 @@
 #include <iostream>
 
 
-Skybox::Skybox() {}
-
-
-void Skybox::setShader(Shader* shader)
+Skybox::~Skybox() 
 {
-    this->shader = shader;
+    if (VAO != 0)
+    {
+        glDeleteTextures(1, &textureId);
+        glDeleteBuffers(1, &VBO);
+        glDeleteVertexArrays(1, &VAO);
+    }
 }
 
 
-void Skybox::loadSkybox(const char* path)
+void Skybox::init(const char* path, Shader* shader)
 {
+    this->shader = shader;
+
     float vertices[] = {
         -1.0f,  1.0f, -1.0f,
         -1.0f, -1.0f, -1.0f,
@@ -115,6 +119,10 @@ void Skybox::loadSkybox(const char* path)
 
 void Skybox::draw()
 {
+    if (VAO == 0) {
+        return;
+    }
+
     glDepthFunc(GL_LEQUAL);
     
     shader->use();

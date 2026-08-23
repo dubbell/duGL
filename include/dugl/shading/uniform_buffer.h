@@ -17,13 +17,20 @@ private:
 
 public:
     UniformBuffer();
-    
+    ~UniformBuffer();
+
+    // delete copy functionality
+    UniformBuffer(const UniformBuffer&) = delete;
+    UniformBuffer& operator=(const UniformBuffer&) = delete;
+
     void create(const char* uboName, std::vector<Shader*> shaders, GLsizeiptr bufferSize, GLenum usage);
 
     template <typename T>
     void writeData(const T& data)
     {
-        if (UBO == 0) throw std::runtime_error("UBO not initialized...");
+        if (UBO == 0) {
+            throw std::runtime_error("UBO not initialized...");
+        }
 
         glBindBuffer(GL_UNIFORM_BUFFER, UBO);
         glBufferSubData(GL_UNIFORM_BUFFER, 0, bufferSize, &data);
