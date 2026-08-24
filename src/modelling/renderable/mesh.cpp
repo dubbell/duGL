@@ -86,14 +86,20 @@ void Mesh::setupMesh()
 void Mesh::checkShaderCompatibility(Shader* shader) const
 {
     VertexAttributeMask missing = shader->getRequiredAttributes() & ~attributes;
-    if (missing == 0) return;
+    if (missing == 0) {
+        return;
+    }
 
     std::string missingNames;
     for (dugl::uint location = 0; location < 8 * sizeof(VertexAttributeMask); location++)
     {
-        if ((missing >> location & 1) == 0) continue;
+        if ((missing >> location & 1) == 0) {
+            continue;
+        }
 
-        if (!missingNames.empty()) missingNames += ", ";
+        if (!missingNames.empty()) {
+            missingNames += ", ";
+        }
         missingNames += std::format("{} (location {})", attributeName(location), location);
     }
 

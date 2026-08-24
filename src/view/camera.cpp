@@ -78,15 +78,23 @@ void Camera::accelerateLocally(glm::vec3 &localAcceleration)
 void Camera::turnRight(float deltaYaw)
 {
     yaw += deltaYaw;
-    if (yaw < -180.0f) yaw += 360.0f;
-    else if (yaw > 180.0f) yaw -= 360.0f;
+    if (yaw < -180.0f) {
+        yaw += 360.0f;
+    }
+    else if (yaw > 180.0f) {
+        yaw -= 360.0f;
+    }
 }
 
 void Camera::turnUp(float deltaPitch)
 {
     pitch += deltaPitch;
-    if (pitch < -89.0f) pitch = -89.0f;
-    else if (pitch > 89.0f) pitch = 89.0f;
+    if (pitch < -89.0f) {
+        pitch = -89.0f;
+    }
+    else if (pitch > 89.0f) {
+        pitch = 89.0f;
+    }
 }
 
 

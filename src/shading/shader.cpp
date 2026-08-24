@@ -128,7 +128,9 @@ void Shader::queryRequiredAttributes()
         int location = glGetAttribLocation(ID, name.c_str());
 
         // built-ins such as gl_VertexID are reported as active but aren't fed from a buffer
-        if (location < 0) continue;
+        if (location < 0) {
+            continue;
+        }
 
         for (dugl::uint span = attributeLocationSpan(type, size), j = 0; j < span; j++)
         {

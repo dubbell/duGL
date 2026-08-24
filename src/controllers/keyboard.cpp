@@ -53,19 +53,25 @@ void KeyboardController::registerObserver(KeyboardObserver* observer)
 {
     observers.insert(observer);
 
-    for (int key : observer->getActiveKeys()) 
+    for (int key : observer->getActiveKeys())
+    {
         registeredKeys.insert(key);
-    
+    }
+
     for (int key : observer->getActiveTogglableKeys()) 
     {
         if (registeredTogglableKeys.find(key) == registeredTogglableKeys.end())
+        {
             registeredTogglableKeys.insert({ key, false });
+        }
     }
 
     for (int key : observer->getActiveSingleTriggerKeys()) 
     {
         if (registeredSingleTriggerKeys.find(key) == registeredSingleTriggerKeys.end())
+        {
             registeredSingleTriggerKeys.insert({ key, GLFW_RELEASE });
+        }
     }
 }
 
@@ -80,7 +86,9 @@ void KeyboardController::processInput()
 
     // get key press input
     for (int key : registeredKeys)
+    {
         keyboardState.keys[key] = glfwGetKey(window, key);
+    }
 
     for (auto it = registeredTogglableKeys.begin(); it !=registeredTogglableKeys.end(); it++)
     {
@@ -88,8 +96,10 @@ void KeyboardController::processInput()
         int prevState = it->second;
         int nextState = glfwGetKey(window, key);
 
-        if (prevState != nextState && nextState == GLFW_PRESS) 
+        if (prevState != nextState && nextState == GLFW_PRESS)
+        {
             registeredTogglableKeys[key] = !registeredTogglableKeys[key];
+        }
         
         keyboardState.togglableKeys[key] = registeredTogglableKeys[key];
     }
@@ -101,14 +111,25 @@ void KeyboardController::processInput()
         int prevState = it->second;
         int nextState = glfwGetKey(window, key);
 
-        if (prevState == nextState) keyboardState.singleTriggerKeys[key] = SINGLE_TRIGGER_KEY_NO_CHANGE;
-        else if (nextState == GLFW_RELEASE) keyboardState.singleTriggerKeys[key] = SINGLE_TRIGGER_KEY_RELEASE;
-        else keyboardState.singleTriggerKeys[key] = SINGLE_TRIGGER_KEY_PRESS;
+        if (prevState == nextState)
+        {
+            keyboardState.singleTriggerKeys[key] = SINGLE_TRIGGER_KEY_NO_CHANGE;
+        }
+        else if (nextState == GLFW_RELEASE)
+        {
+            keyboardState.singleTriggerKeys[key] = SINGLE_TRIGGER_KEY_RELEASE;
+        }
+        else
+        {
+            keyboardState.singleTriggerKeys[key] = SINGLE_TRIGGER_KEY_PRESS;
+        }
 
         registeredSingleTriggerKeys[key] = nextState;
     }
 
     // process input in observers
     for (auto& observer : observers)
+    {
         observer->processKeyboardInput(keyboardState);
+    }
 }

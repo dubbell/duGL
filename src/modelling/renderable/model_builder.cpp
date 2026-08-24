@@ -85,7 +85,9 @@ unsigned int textureFromFile(std::string filename, std::string directory)
 // the same type is a material-graph feature, not something a single factor can express.
 dugl::uint ModelBuilder::loadTexture(aiMaterial* mat, aiTextureType type)
 {
-    if (mat->GetTextureCount(type) == 0) return 0;
+    if (mat->GetTextureCount(type) == 0) {
+        return 0;
+    }
 
     aiString str;
     mat->GetTexture(type, 0, &str);
@@ -93,7 +95,9 @@ dugl::uint ModelBuilder::loadTexture(aiMaterial* mat, aiTextureType type)
     // reuse the texture if this image file has already been loaded for another material
     for (const Texture& loaded : loadedTextures)
     {
-        if (loaded.path == str.C_Str()) return loaded.id;
+        if (loaded.path == str.C_Str()) {
+            return loaded.id;
+        }
     }
 
     Texture texture = { textureFromFile(str.C_Str(), directory), str.C_Str() };
@@ -159,7 +163,9 @@ Mesh ModelBuilder::processMesh(aiMesh* mesh, const aiScene* scene)
     {
         aiFace face = mesh->mFaces[i];
         for (unsigned int j = 0; j < face.mNumIndices; j++)
+        {
             indices.push_back(face.mIndices[j]);
+        }
     }
 
     // mMaterialIndex is unsigned, so it needs bounds-checking against the scene's material

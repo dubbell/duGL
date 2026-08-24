@@ -42,7 +42,9 @@ void MouseController::handleCursorPosition(float xPos, float yPos)
     lastY = yPos;
 
     for (auto& observer : mouseOffsetObservers)
+    {
         observer->cursorOffsetCallback(xOffset, yOffset);
+    }
 }
 
 void MouseController::handleScreenRay(float xPos, float yPos)
@@ -56,7 +58,9 @@ void MouseController::handleScreenRay(float xPos, float yPos)
     glm::vec3 direction = castScreenRay(xPos, yPos, viewportWidth, viewportHeight, view, projection);
 
     for (auto& observer : screenRayObservers)
+    {
         observer->observeRay(origin, direction);
+    }
 }
 
 void MouseController::processInput()
@@ -67,5 +71,7 @@ void MouseController::processInput()
     handleCursorPosition(xPos, yPos);
 
     if (screenCastInterface->getFreeCursor())
+    {
         handleScreenRay(xPos, yPos);
+    }
 }

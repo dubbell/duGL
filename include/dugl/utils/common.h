@@ -36,7 +36,9 @@ inline bool checkRayIntersection(glm::vec3 target, float distance, glm::vec3 ori
     float t = glm::dot(toTarget, direction);
 
     // ray is cast in wrong direction
-    if (t < 0.0f) return false;
+    if (t < 0.0f) {
+        return false;
+    }
 
     glm::vec3 closestPoint = origin + t * direction;
 

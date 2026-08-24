@@ -50,32 +50,46 @@ void FlightController::processKeyboardInput(KeyboardState& keyboardState)
     if (keyboardState.keys[GLFW_KEY_W] == GLFW_PRESS)
     {
         if (keyboardState.keys[GLFW_KEY_S] == GLFW_RELEASE)
+        {
             localVelocity += glm::vec3(0.0f, 0.0f, -1.0);
+        }
     }
     else if (keyboardState.keys[GLFW_KEY_S] == GLFW_PRESS)
+    {
         localVelocity += glm::vec3(0.0f, 0.0f, 1.0);
+    }
 
     // left/right
     if (keyboardState.keys[GLFW_KEY_A] == GLFW_PRESS)
     {
         if (keyboardState.keys[GLFW_KEY_D] == GLFW_RELEASE)
+        {
             localVelocity += glm::vec3(-1.0, 0.0f, 0.0f);
+        }
     }
     else if (keyboardState.keys[GLFW_KEY_D] == GLFW_PRESS)
+    {
         localVelocity += glm::vec3(1.0, 0.0f, 0.0f);
+    }
     
     // up/down
     if (keyboardState.keys[GLFW_KEY_SPACE] == GLFW_PRESS)
     {
         if (keyboardState.keys[GLFW_KEY_LEFT_CONTROL] == GLFW_RELEASE)
+        {
             localVelocity += glm::vec3(0.0f, 1.0, 0.0f);
+        }
     }
     else if (keyboardState.keys[GLFW_KEY_LEFT_CONTROL] == GLFW_PRESS)
+    {
         localVelocity += glm::vec3(0.0f, -1.0, 0.0f);
+    }
 
     // normalize velocity vector and set to movement speed, if velocity is nonzero
     if (glm::length(localVelocity) > 0.0001f)
+    {
         localVelocity = glm::normalize(localVelocity) * (keyboardState.keys[GLFW_KEY_LEFT_SHIFT] == GLFW_RELEASE ? speed : speed * 2);
+    }
     
     Camera* camera = playerInterface->getActiveCamera();
     GLFWwindow* window = playerInterface->getWindow();
