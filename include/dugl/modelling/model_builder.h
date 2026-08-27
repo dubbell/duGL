@@ -24,7 +24,8 @@ class ModelBuilder : public RenderableBuilder
 private:
     Assimp::Importer importer;
     const aiScene* scene;
-    std::string path, directory;
+    std::string path;
+    std::string directory;
     std::vector<Texture> loadedTextures;
 
 public:

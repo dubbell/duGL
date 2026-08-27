@@ -16,23 +16,29 @@ struct StaticVertex
     glm::vec2 texCoord;
 };
 
+// The vertex attribute mask for non-deformable geometries.
 constexpr VertexAttributeMask STATIC_VERTEX_ATTRIBUTES =
     attributeMask(VertexAttribute::Position) |
     attributeMask(VertexAttribute::Normal) |
     attributeMask(VertexAttribute::TexCoord);
 
+// A Mesh represents an object that can be rendered on the screen. Accessed through OpenGL GPU handles.
+// The object geometry consists of triangles, which are represented by collections of vertices and
+// indices. The object appearance is defined by its Material properties.
 class Mesh
 {
 private:
+    // OpenGL GPU handles
     dugl::uint VAO, VBO, EBO;
 
     // the attribute locations this mesh's vertex format supplies
     VertexAttributeMask attributes;
 
-public:
     std::vector<StaticVertex> vertices;
     std::vector<unsigned int> indices;
     Material material;
+
+public:
 
     Mesh(std::vector<StaticVertex> vertices, std::vector<unsigned int> indices, Material material);
     ~Mesh();

@@ -49,5 +49,6 @@ public:
     void setPointLights(std::vector<PointLight>& pointLights) const;
 
 private:
+    // Query the shader program for the active attributes
     void queryRequiredAttributes();
 };
