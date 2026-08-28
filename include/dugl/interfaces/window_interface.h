@@ -4,6 +4,8 @@
 #include <utility>
 
 
+// Abstract interface to access a GLFW window in an object, along with some
+// window-related properties.
 class WindowInterface
 {
 public:

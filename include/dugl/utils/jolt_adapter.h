@@ -5,6 +5,7 @@
 #include <Jolt/Core/Factory.h>
 
 
+// Initialize Jolt for physics simulation.
 inline void initJolt()
 {
 	JPH::RegisterDefaultAllocator();

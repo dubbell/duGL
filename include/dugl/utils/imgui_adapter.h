@@ -6,6 +6,7 @@
 #include "imgui_impl_opengl3.h"
 
 
+// Initialize ImGui to allow rendering of interactive GUI elements on the screen.
 inline void initImGui(GLFWwindow* window)
 {
     IMGUI_CHECKVERSION();

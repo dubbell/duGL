@@ -6,6 +6,7 @@
 #include <glm/gtx/norm.hpp>
 
 
+// Computes a vector in world space from a point in screen space.
 inline glm::vec3 castScreenRay(float screenX, float screenY, int viewportWidth, int viewportHeight, glm::mat4 viewMatrix, glm::mat4 projectionMatrix)
 {
     glm::vec4 viewport(0.0f, 0.0f, (float)viewportWidth, (float)viewportHeight);
@@ -29,6 +30,7 @@ inline glm::vec3 castScreenRay(float screenX, float screenY, int viewportWidth, 
     return direction;
 }
 
+// True if a given line (defined by an origin and direction) comes within a specified distance of a target point.
 inline bool checkRayIntersection(glm::vec3 target, float distance, glm::vec3 origin, glm::vec3 direction)
 {
     glm::vec3 toTarget = target - origin;

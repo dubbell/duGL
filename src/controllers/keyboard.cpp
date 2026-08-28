@@ -84,7 +84,7 @@ void KeyboardController::processInput()
 {
     KeyboardState keyboardState;
 
-    // get key press input
+    // Get key press input.
     for (int key : registeredKeys)
     {
         keyboardState.keys[key] = glfwGetKey(window, key);
@@ -104,7 +104,7 @@ void KeyboardController::processInput()
         keyboardState.togglableKeys[key] = registeredTogglableKeys[key];
     }
 
-    // get single trigger key input
+    // Get single trigger key input.
     for (auto it = registeredSingleTriggerKeys.begin(); it != registeredSingleTriggerKeys.end(); it++)
     {
         int key = it->first;
@@ -127,7 +127,7 @@ void KeyboardController::processInput()
         registeredSingleTriggerKeys[key] = nextState;
     }
 
-    // process input in observers
+    // Process input in observers.
     for (auto& observer : observers)
     {
         observer->processKeyboardInput(keyboardState);

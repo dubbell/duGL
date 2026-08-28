@@ -1,5 +1,7 @@
 #pragma once
 
+#include <glm/glm.hpp>
+
 #include "dugl/common.h"
 
 
@@ -56,3 +58,18 @@ inline const char* attributeName(dugl::uint location)
         default:                                            return "unassigned";
     }
 }
+
+
+// The vertex format for non-deformable geometries.
+struct StaticVertex
+{
+    glm::vec3 position;
+    glm::vec3 normal;
+    glm::vec2 texCoord;
+};
+
+// The vertex attribute mask for non-deformable geometries.
+constexpr VertexAttributeMask STATIC_VERTEX_ATTRIBUTES =
+    attributeMask(VertexAttribute::Position) |
+    attributeMask(VertexAttribute::Normal) |
+    attributeMask(VertexAttribute::TexCoord);

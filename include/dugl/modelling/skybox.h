@@ -4,6 +4,7 @@
 #include "dugl/common.h"
 
 
+// For rendering a background image, in all directions.
 class Skybox
 {
 private:

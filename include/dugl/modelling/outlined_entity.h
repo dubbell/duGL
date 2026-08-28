@@ -5,6 +5,7 @@
 
 class MouseController;
 
+// An Entity around which an outline is rendered when the mouse hovers over it.
 class OutlinedEntity : public Entity, public ScreenRayObserver
 {
 private:

@@ -3,6 +3,7 @@
 #include <glm/glm.hpp>
 
 
+// A container for all perspective-related data used to render an Environment on the screen.
 class Camera
 {
 private:

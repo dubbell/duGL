@@ -3,6 +3,7 @@
 #include <chrono>
 
 
+// Used to keep track of time between calls to tick().
 class Stopwatch
 {
 private:

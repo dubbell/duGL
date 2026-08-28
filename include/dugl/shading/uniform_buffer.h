@@ -7,6 +7,8 @@
 #include <stdexcept>
 
 
+// Interface for an OpenGL Uniform Buffer Object (UBO) in the GPU. Can be used for 
+// things like perspective-related matrix transforms.
 class UniformBuffer
 {
 private:

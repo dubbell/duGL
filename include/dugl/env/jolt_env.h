@@ -8,6 +8,7 @@
 #include <Jolt/Physics/PhysicsSystem.h>
 
 
+// And Environment with Jolt physics enabled.
 class JoltedEnvironment : public Environment
 {
 protected:

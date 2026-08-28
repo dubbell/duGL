@@ -11,6 +11,7 @@
 #include <vector>
 
 
+// Base class for starting a duGL session. Initializes the GLFW window.
 class Environment : public PlayerInterface
 {
 protected:

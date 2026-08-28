@@ -4,6 +4,9 @@
 #include "dugl/modelling/renderable.h"
 
 
+// An Entity is the world space representation of a Renderable. While
+// each Renderable is singular, multiple Entity objects with the same
+// Renderable can exist and be rendered on the screen simultaneously.
 class Entity
 {
 protected:

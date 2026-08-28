@@ -9,6 +9,7 @@
 #include "dugl/modelling/vertex_layout.h"
 
 
+// Interface for an OpenGL shader program in the GPU.
 class Shader
 {
 private:

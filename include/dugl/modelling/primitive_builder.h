@@ -2,8 +2,9 @@
 
 #include <vector>
 
+#include "dugl/shading/material.h"
 #include "renderable_builder.h"
-#include "mesh.h"
+#include "vertex_layout.h"
 
 
 // Base for builders that generate their geometry procedurally instead of loading it.

@@ -8,23 +8,9 @@
 #include "vertex_layout.h"
 
 
-// The vertex format for non-deformable geometries.
-struct StaticVertex
-{
-    glm::vec3 position;
-    glm::vec3 normal;
-    glm::vec2 texCoord;
-};
-
-// The vertex attribute mask for non-deformable geometries.
-constexpr VertexAttributeMask STATIC_VERTEX_ATTRIBUTES =
-    attributeMask(VertexAttribute::Position) |
-    attributeMask(VertexAttribute::Normal) |
-    attributeMask(VertexAttribute::TexCoord);
-
-// A Mesh represents an object that can be rendered on the screen. Accessed through OpenGL GPU handles.
-// The object geometry consists of triangles, which are represented by collections of vertices and
-// indices. The object appearance is defined by its Material properties.
+// A collection of triangles in the GPU that can be rendered on the screen, 
+// constructed from vertices and indices in object space. Its appearance is 
+// determined by its Material properties. Accessed through OpenGL GPU handles.
 class Mesh
 {
 private:

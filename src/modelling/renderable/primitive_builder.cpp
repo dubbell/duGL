@@ -1,5 +1,7 @@
 #include "dugl/modelling/primitive_builder.h"
 
+#include "dugl/modelling/mesh.h"
+
 
 PrimitiveBuilder::PrimitiveBuilder(Material material) : material(material)
 {}
