@@ -44,6 +44,8 @@ public:
     void start() override;
 
 private:
+    void createPrimitives();
+
     Renderable* createRenderable(RenderableBuilder& builder);
     Renderable* createRenderable(RenderableBuilder&& builder) { return createRenderable(builder); }
     Entity* createEntity(Renderable* renderable, glm::vec3 position);

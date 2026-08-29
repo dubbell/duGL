@@ -1,6 +1,7 @@
 #include "dugl/env/simple_env.h"
 #include "dugl/utils/imgui_adapter.h"
 #include "dugl/modelling/model_builder.h"
+#include "dugl/modelling/primitive_builder.h"
 #include "dugl/shading/ubo_templates.h"
 
 #include <glm/gtc/type_ptr.hpp>
@@ -25,17 +26,17 @@ ExampleEnvironment::ExampleEnvironment() : clearColor(0.7f, 0.8f, 1.0f, 1.0f), f
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
     directionalLight = {
-        0.0f, 0.0f,
-        { 0.0f,  0.0f,  0.0f},
+        0.0f, -60.0f,
+        { 0.3f,  0.3f,  0.3f},
         { 0.5f,  0.5f,  0.5f},
         { 1.0f,  1.0f,  1.0f}
     };
 
     pointLights = {{
         { 0.0f, 0.0f, 0.0f },
-        { 0.4f, 0.2f, 0.0f },
-        { 0.7f, 0.3f, 0.3f },
-        { 1.0f, 0.0f, 0.0f },
+        { 0.7f, 0.2f, 0.0f },
+        { 0.1f, 0.7f, 0.7f },
+        { 1.0f, 1.0f, 1.0f },
         1.0f, 0.09f, 0.032f}};
 
     // create objects to render
@@ -56,6 +57,8 @@ ExampleEnvironment::ExampleEnvironment() : clearColor(0.7f, 0.8f, 1.0f, 1.0f), f
     OutlinedEntity* entity1 = createOutlinedEntity(backpack_renderable, glm::vec3(1.0f, 1.0f, 6.0f), outlineShader);
     OutlinedEntity* entity2 = createOutlinedEntity(backpack_renderable, glm::vec3(-2.0f, 1.0f, 1.0f), outlineShader);
 
+    createPrimitives();
+
     // create skybox
     skybox.init("assets/skyboxes/sea", shaders[ShaderType::CubeMapShader].get());
 
@@ -67,6 +70,59 @@ void ExampleEnvironment::clearBuffers()
 {
     glClearColor(clearColor.r, clearColor.g, clearColor.b, clearColor.a);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+}
+
+void ExampleEnvironment::createPrimitives()
+{
+    const float rowX = 8.0f;      // in front of the camera's starting position
+    const float groundY = -2.0f;  // the plane everything else stands on
+
+    PlaneBuilder groundBuilder(24.0f, 24.0f, 12, 12);
+    groundBuilder.setMaterial({
+        .diffuseColor = { 0.35f, 0.40f, 0.35f },
+        .specularColor = glm::vec3(0.05f),
+        .shininess = 4.0f });
+    createEntity(createRenderable(groundBuilder), { rowX, groundY, 0.0f });
+
+    // matte, to contrast with the sphere
+    BoxBuilder boxBuilder({ 1.5f, 1.5f, 1.5f });
+    boxBuilder.setMaterial({
+        .diffuseColor = { 0.85f, 0.25f, 0.20f },
+        .specularColor = glm::vec3(0.08f),
+        .shininess = 8.0f });
+    createEntity(createRenderable(boxBuilder), { rowX, groundY + 0.75f, -6.0f });
+
+    // equal radii, so this is a plain sphere; glossy
+    EllipsoidBuilder sphereBuilder(glm::vec3(1.0f), 32, 16);
+    sphereBuilder.setMaterial({
+        .diffuseColor = { 0.20f, 0.45f, 0.85f },
+        .specularColor = glm::vec3(0.9f),
+        .shininess = 128.0f });
+    createEntity(createRenderable(sphereBuilder), { rowX, groundY + 1.0f, -3.0f });
+
+    // unequal radii: the interesting case for the normals
+    EllipsoidBuilder ellipsoidBuilder({ 0.6f, 1.5f, 0.6f }, 32, 16);
+    ellipsoidBuilder.setMaterial({
+        .diffuseColor = { 0.30f, 0.75f, 0.35f },
+        .specularColor = glm::vec3(0.5f),
+        .shininess = 48.0f });
+    createEntity(createRenderable(ellipsoidBuilder), { rowX, groundY + 1.5f, 0.0f });
+
+    // smoothly shaded around its axis
+    ConeBuilder coneBuilder(1.0f, 2.5f, 32);
+    coneBuilder.setMaterial({
+        .diffuseColor = { 0.95f, 0.65f, 0.15f },
+        .specularColor = glm::vec3(0.4f),
+        .shininess = 32.0f });
+    createEntity(createRenderable(coneBuilder), { rowX, groundY, 3.0f });
+
+    // faceted, unlike the cone: its four sides each carry a flat normal
+    PyramidBuilder pyramidBuilder(2.0f, 2.0f, 2.0f);
+    pyramidBuilder.setMaterial({
+        .diffuseColor = { 0.60f, 0.35f, 0.80f },
+        .specularColor = glm::vec3(0.25f),
+        .shininess = 16.0f });
+    createEntity(createRenderable(pyramidBuilder), { rowX, groundY, 6.0f });
 }
 
 Renderable* ExampleEnvironment::createRenderable(RenderableBuilder& builder)
