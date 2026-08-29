@@ -2,7 +2,7 @@
 
 #include "dugl/controllers/mouse.h"
 #include "dugl/controllers/keyboard.h"
-#include "dugl/interfaces/player_interface.h"
+#include "dugl/interfaces/perspective_interface.h"
 #include "dugl/view/camera.h"
 #include "dugl/utils/glfw_include.h"
 #include "dugl/utils/glad_include.h"
@@ -12,7 +12,7 @@
 
 
 // Base class for starting a duGL session. Initializes the GLFW window.
-class Environment : public PlayerInterface
+class Environment : public PerspectiveInterface
 {
 protected:
     GLFWwindow* window;

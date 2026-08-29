@@ -2,8 +2,8 @@
 #include "dugl/utils/common.h"
 #include "dugl/view/camera.h"
 
-MouseController::MouseController(PlayerInterface* screenCastInterface)
-    : screenCastInterface(screenCastInterface), lastX(0.0f), lastY(0.0f), sensitivity(0.05f), firstMouse(true)
+MouseController::MouseController(PerspectiveInterface* perspective)
+    : perspective(perspective), lastX(0.0f), lastY(0.0f), sensitivity(0.05f), firstMouse(true)
 {}
 
 
@@ -49,10 +49,10 @@ void MouseController::handleCursorPosition(float xPos, float yPos)
 
 void MouseController::handleScreenRay(float xPos, float yPos)
 {
-    Camera* camera = screenCastInterface->getActiveCamera();
+    Camera* camera = perspective->getActiveCamera();
     glm::mat4 view = camera->getViewMatrix();
     glm::mat4 projection = camera->getProjectionMatrix();
-    auto [viewportWidth, viewportHeight] = screenCastInterface->getViewportSize();
+    auto [viewportWidth, viewportHeight] = perspective->getViewportSize();
     
     glm::vec3 origin = camera->getPosition();
     glm::vec3 direction = castScreenRay(xPos, yPos, viewportWidth, viewportHeight, view, projection);
@@ -66,11 +66,11 @@ void MouseController::handleScreenRay(float xPos, float yPos)
 void MouseController::processInput()
 {
     double xPos, yPos;
-    glfwGetCursorPos(screenCastInterface->getWindow(), &xPos, &yPos);
+    glfwGetCursorPos(perspective->getWindow(), &xPos, &yPos);
 
     handleCursorPosition(xPos, yPos);
 
-    if (screenCastInterface->getFreeCursor())
+    if (perspective->getFreeCursor())
     {
         handleScreenRay(xPos, yPos);
     }

@@ -3,8 +3,8 @@
 #include "dugl/controllers/mouse.h"
 
 
-FlightController::FlightController(PlayerInterface* playerInterface, KeyboardController* keyboardController, MouseController* mouseController)
-    : speed(0.1f), playerInterface(playerInterface), keyboardController(keyboardController), mouseController(mouseController)
+FlightController::FlightController(PerspectiveInterface* perspective, KeyboardController* keyboardController, MouseController* mouseController)
+    : speed(0.1f), perspective(perspective), keyboardController(keyboardController), mouseController(mouseController)
 {
     keyboardController->registerObserver(this);
     mouseController->registerOffsetObserver(this);
@@ -91,8 +91,8 @@ void FlightController::processKeyboardInput(KeyboardState& keyboardState)
         localVelocity = glm::normalize(localVelocity) * (keyboardState.keys[GLFW_KEY_LEFT_SHIFT] == GLFW_RELEASE ? speed : speed * 2);
     }
     
-    Camera* camera = playerInterface->getActiveCamera();
-    GLFWwindow* window = playerInterface->getWindow();
+    Camera* camera = perspective->getActiveCamera();
+    GLFWwindow* window = perspective->getWindow();
 
     // set velocity in local basis and update position based on velocity
     camera->setLocalVelocity(localVelocity);
@@ -101,17 +101,17 @@ void FlightController::processKeyboardInput(KeyboardState& keyboardState)
     // cursor capture
     if (keyboardState.singleTriggerKeys[GLFW_KEY_ESCAPE] == SINGLE_TRIGGER_KEY_PRESS)
     {
-        bool freeCursor = playerInterface->getFreeCursor();
+        bool freeCursor = perspective->getFreeCursor();
         glfwSetInputMode(window, GLFW_CURSOR, freeCursor ? GLFW_CURSOR_DISABLED : GLFW_CURSOR_NORMAL);
-        playerInterface->setFreeCursor(!freeCursor);
+        perspective->setFreeCursor(!freeCursor);
     }
 }
 
 void FlightController::cursorOffsetCallback(float xOffset, float yOffset)
 {
-    if (!playerInterface->getFreeCursor())
+    if (!perspective->getFreeCursor())
     {
-        Camera* camera = playerInterface->getActiveCamera();
+        Camera* camera = perspective->getActiveCamera();
         camera->turnRight(xOffset);
         camera->turnUp(yOffset);
     }

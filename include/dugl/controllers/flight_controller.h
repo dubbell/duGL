@@ -5,7 +5,7 @@
 
 #include "keyboard_observer.h"
 #include "mouse_observer.h"
-#include "dugl/interfaces/player_interface.h"
+#include "dugl/interfaces/perspective_interface.h"
 
 class KeyboardController;
 class MouseController;
@@ -13,7 +13,7 @@ class MouseController;
 class FlightController : public KeyboardObserver, public MouseOffsetObserver
 {
 private:
-    PlayerInterface* playerInterface;
+    PerspectiveInterface* perspective;
 
     KeyboardController* keyboardController;
     MouseController* mouseController;
@@ -21,7 +21,7 @@ private:
     float speed;
 
 public:
-    FlightController(PlayerInterface* playerInterface, KeyboardController* keyboardController, MouseController* mouseController);
+    FlightController(PerspectiveInterface* perspective, KeyboardController* keyboardController, MouseController* mouseController);
     ~FlightController();
 
     // Registration with the keyboard/mouse controllers is tied to this object's lifetime; disable

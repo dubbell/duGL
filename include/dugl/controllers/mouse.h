@@ -3,13 +3,13 @@
 #include <set>
 
 #include "mouse_observer.h"
-#include "dugl/interfaces/player_interface.h"
+#include "dugl/interfaces/perspective_interface.h"
 
 
 class MouseController
 {
 private:
-    PlayerInterface* screenCastInterface;
+    PerspectiveInterface* perspective;
 
     std::set<ScreenRayObserver*> screenRayObservers;
     std::set<MouseOffsetObserver*> mouseOffsetObservers;
@@ -22,7 +22,7 @@ private:
     void handleScreenRay(float xPos, float yPos);
 
 public:
-    MouseController(PlayerInterface* screenCastInterface);
+    MouseController(PerspectiveInterface* perspective);
 
     void registerOffsetObserver(MouseOffsetObserver* observer);
     void unregisterOffsetObserver(MouseOffsetObserver* observer);
