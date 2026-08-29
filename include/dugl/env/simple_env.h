@@ -14,7 +14,7 @@
 #include "dugl/modelling/skybox.h"
 
 
-enum class ShaderType
+enum class ExampleShaderType
 {
     ObjectShader,
     OutlineShader,
@@ -26,13 +26,13 @@ class ExampleEnvironment : public Environment
 private:
     FlightController flightController;
 
-    UniformBuffer uboPerspective;
+    UniformBuffer perspectiveUbo;
 
     Skybox skybox;
 
     std::vector<std::unique_ptr<Renderable>> renderables;
     std::vector<std::unique_ptr<Entity>> entities;
-    std::map<ShaderType, std::unique_ptr<Shader>> shaders;
+    std::map<ExampleShaderType, std::unique_ptr<Shader>> shaders;
 
     DirectionalLight directionalLight;
     std::vector<PointLight> pointLights;
@@ -51,7 +51,7 @@ private:
     Entity* createEntity(Renderable* renderable, glm::vec3 position);
     OutlinedEntity* createOutlinedEntity(Renderable* renderable, glm::vec3 position, Shader* outlineShader);
 
-    Shader* createShader(const char* vertexShaderPath, const char* fragmentShaderPath, ShaderType type);
+    Shader* createShader(const char* vertexShaderPath, const char* fragmentShaderPath, ExampleShaderType type);
 
     void createImGuiFrame();
     void drawImGui();

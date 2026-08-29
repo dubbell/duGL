@@ -43,7 +43,6 @@ public:
     void setFreeCursor(bool freeCursor) override;
     
 protected:
-
     virtual void frameBufferResizeCallback(int width, int height) = 0;
 
 private:

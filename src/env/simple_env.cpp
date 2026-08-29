@@ -45,13 +45,13 @@ ExampleEnvironment::ExampleEnvironment() : clearColor(0.7f, 0.8f, 1.0f, 1.0f), f
     // create shader programs
     Shader* objectShader = createShader(
         "assets/shaders/basic_texture.vert", "assets/shaders/basic_texture.frag", 
-        ShaderType::ObjectShader);
+        ExampleShaderType::ObjectShader);
     Shader* outlineShader = createShader(
         "assets/shaders/outline.vert", "assets/shaders/outline.frag", 
-        ShaderType::OutlineShader);
+        ExampleShaderType::OutlineShader);
     Shader* cubeMapShader = createShader(
         "assets/shaders/skybox.vert", "assets/shaders/skybox.frag", 
-        ShaderType::CubeMapShader);
+        ExampleShaderType::CubeMapShader);
 
     // create entities
     OutlinedEntity* entity1 = createOutlinedEntity(backpack_renderable, glm::vec3(1.0f, 1.0f, 6.0f), outlineShader);
@@ -60,10 +60,10 @@ ExampleEnvironment::ExampleEnvironment() : clearColor(0.7f, 0.8f, 1.0f, 1.0f), f
     createPrimitives();
 
     // create skybox
-    skybox.init("assets/skyboxes/sea", shaders[ShaderType::CubeMapShader].get());
+    skybox.init("assets/skyboxes/sea", shaders[ExampleShaderType::CubeMapShader].get());
 
     // create uniform buffer object for perspective transforms
-    uboPerspective.create("Perspective", { objectShader, cubeMapShader }, sizeof(PerspectiveData), GL_DYNAMIC_DRAW);
+    perspectiveUbo.create("Perspective", { objectShader, cubeMapShader }, sizeof(PerspectiveData), GL_DYNAMIC_DRAW);
 }
 
 void ExampleEnvironment::clearBuffers()
@@ -143,14 +143,14 @@ OutlinedEntity* ExampleEnvironment::createOutlinedEntity(Renderable* renderable,
     return ptr;
 }
 
-Shader* ExampleEnvironment::createShader(const char* vertexShaderPath, const char* fragmentShaderPath, ShaderType shaderType)
+Shader* ExampleEnvironment::createShader(const char* vertexShaderPath, const char* fragmentShaderPath, ExampleShaderType shaderType)
 {
     return shaders.emplace(shaderType, std::make_unique<Shader>(vertexShaderPath, fragmentShaderPath)).first->second.get();
 }
 
 void ExampleEnvironment::start()
 {
-    Shader* objectShader = shaders[ShaderType::ObjectShader].get();
+    Shader* objectShader = shaders[ExampleShaderType::ObjectShader].get();
 
     while (!glfwWindowShouldClose(window))
     {
@@ -158,7 +158,7 @@ void ExampleEnvironment::start()
 
         // write to perspective UBO, shared among shaders
         PerspectiveData perspectiveData = { activeCamera->getViewMatrix(), activeCamera->getProjectionMatrix() }; 
-        uboPerspective.writeData(perspectiveData);
+        perspectiveUbo.writeData(perspectiveData);
         
         glfwPollEvents();  // viewport resizing and GUI interaction
 
