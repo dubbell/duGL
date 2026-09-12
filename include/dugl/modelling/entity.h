@@ -16,6 +16,7 @@ protected:
 public:
     Entity(Renderable* model);
     Entity(Renderable* model, glm::vec3 position);
+    virtual ~Entity() = default;
 
     virtual void render(Shader* shader);
 

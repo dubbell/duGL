@@ -11,7 +11,9 @@ private:
     dugl::uint VAO = 0;
     dugl::uint VBO = 0;
     dugl::uint textureId = 0;
-    Shader* shader;
+    Shader* shader = nullptr;
+
+    void release();
 
 public:
     Skybox() = default;

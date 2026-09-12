@@ -1,9 +1,10 @@
 #include "dugl/env/jolt_env.h"
 #include "dugl/utils/jolt_adapter.h"
 #include "dugl/utils/time.h"
+#include "dugl/modelling/primitive_builder.h"
 
 #include <chrono>
-
+#include <memory>
 
 static constexpr uint32_t MAX_BODIES              = 1024;
 static constexpr uint32_t MAX_BODY_PAIRS          = 1024;
@@ -12,6 +13,29 @@ static constexpr uint32_t MAX_JOBS                = 1024;
 static constexpr uint32_t MAX_BARRIERS            = 8;
 static constexpr uint32_t TEMP_ALLOCATOR_SIZE     = 10 * 1024 * 1024;  // 10 MB
 
+static constexpr dugl::uint DEFAULT_ENTITY_GROUP_ID = 0;
+
+static std::unique_ptr<Shader> createShader(const char* vertexPath, const char* fragmentPath)
+{
+    return std::make_unique<Shader>(
+        ("assets/shaders/" + std::string(vertexPath)).c_str(),
+        ("assets/shaders/" + std::string(fragmentPath)).c_str());
+}
+
+static std::unique_ptr<Renderable> createRenderable(RenderableBuilder& builder)
+{
+    return std::make_unique<Renderable>(builder.build());
+}
+
+static std::unique_ptr<Entity> createEntity(Renderable* renderable)
+{
+    return std::make_unique<Entity>(renderable);
+}
+
+static std::unique_ptr<StandardEntityGroup> createStandardEntityGroup(Shader* shader)
+{
+    return std::make_unique<StandardEntityGroup>(shader);
+}
 
 JoltedEnvironment::JoltedEnvironment()
     : tempAllocator(TEMP_ALLOCATOR_SIZE), 
@@ -32,6 +56,13 @@ JoltedEnvironment::JoltedEnvironment()
         objectBroadPhaseFilter,
         objectCollisionFilter
     );
+
+    Shader* defaultShader = scene.addShader(createShader("basic_texture.vert", "basic_texture.frag"));
+    StandardEntityGroup* defaultGroup = scene.addGroup(DEFAULT_ENTITY_GROUP_ID, createStandardEntityGroup(defaultShader));
+    BoxBuilder boxBuilder(glm::vec3(1.0f));
+    Renderable* boxRenderable = scene.addRenderable(createRenderable(boxBuilder));
+    Entity* boxEntity = scene.addEntity(createEntity(boxRenderable));
+    defaultGroup->addEntity(boxEntity);
 }
 
 void JoltedEnvironment::start()

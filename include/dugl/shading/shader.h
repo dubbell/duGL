@@ -17,7 +17,7 @@ private:
     VertexAttributeMask requiredAttributes;
 
 public:
-    unsigned int ID;
+    dugl::uint ID;
 
     Shader(const char* vertexPath, const char* fragmentPath);
 

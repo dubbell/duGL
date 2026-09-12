@@ -7,17 +7,13 @@
 
 #include "renderable.h"
 #include "entity.h"
+#include "entity_group.h"
+#include "standard_entity_group.h"
 #include "skybox.h"
 #include "dugl/shading/shader.h"
 #include "dugl/shading/material.h"
 #include "dugl/modelling/renderable_builder.h"
 
-
-enum class ShaderType
-{
-    ObjectShader,
-    CubeMapShader
-};
 
 class Scene
 {
@@ -26,7 +22,8 @@ private:
 
     std::vector<std::unique_ptr<Renderable>> renderables;
     std::vector<std::unique_ptr<Entity>> entities;
-    std::map<ShaderType, std::unique_ptr<Shader>> shaders;
+    std::map<dugl::uint, std::unique_ptr<EntityGroup>> entityGroups;
+    std::map<dugl::uint, std::unique_ptr<Shader>> shaders;
 
     // a neutral overhead light, so a Scene renders sensibly before any lighting is set
     DirectionalLight directionalLight = {
@@ -40,22 +37,14 @@ private:
 public:
     void render();
 
-    Shader* setShader(ShaderType type, const char* vertexPath, const char* fragmentPath);
-    Shader* setShader(ShaderType type, std::unique_ptr<Shader> shader);
-
-    Shader* getShader(ShaderType type) const;
+    Shader* addShader(std::unique_ptr<Shader> shader);
+    Shader* getShader(dugl::uint) const;
 
     void setSkybox(const char* path, Shader* shader);
-    void setSkybox(const char* path);
-
-    Renderable* createRenderable(RenderableBuilder& builder);
-    Renderable* createRenderable(RenderableBuilder&& builder) { return createRenderable(builder); }
 
     Renderable* addRenderable(std::unique_ptr<Renderable> renderable);
 
-    Entity* createEntity(Renderable* renderable);
-    Entity* createEntity(Renderable* renderable, glm::vec3 position);
-
+    // Add an entity to the scene. The scene takes ownership of the entity's lifecycle.
     template <class T>
     T* addEntity(std::unique_ptr<T> entity)
     {
@@ -64,6 +53,24 @@ public:
         T* ptr = entity.get();
         entities.push_back(std::move(entity));
         return ptr;
+    }
+
+    // Add an entity group to the scene. The scene takes ownership of the entity group's lifecycle.
+    template <class T>
+    T* addGroup(dugl::uint groupId, std::unique_ptr<T> group)
+    {
+        static_assert(std::is_base_of_v<EntityGroup, T>, "addGroup() requires an EntityGroup subclass");
+
+        T* ptr = group.get();
+        entityGroups.insert_or_assign(groupId, std::move(group));
+        return ptr;
+    }
+
+    template <class T>
+    T* getGroup(dugl::uint groupId) const
+    {
+        auto it = entityGroups.find(groupId);
+        return it == entityGroups.end() ? nullptr : dynamic_cast<T*>(it->second.get());
     }
 
     void setDirectionalLight(const DirectionalLight& directionalLight);

@@ -8,7 +8,10 @@
 #include "dugl/controllers/flight_controller.h"
 #include "dugl/shading/uniform_buffer.h"
 #include "dugl/modelling/entity.h"
-#include "dugl/modelling/outlined_entity.h"
+#include "dugl/modelling/hoverable_entity.h"
+#include "dugl/modelling/entity_group.h"
+#include "dugl/modelling/standard_entity_group.h"
+#include "dugl/modelling/outlined_entity_group.h"
 #include "dugl/modelling/renderable.h"
 #include "dugl/modelling/renderable_builder.h"
 #include "dugl/modelling/skybox.h"
@@ -32,7 +35,11 @@ private:
 
     std::vector<std::unique_ptr<Renderable>> renderables;
     std::vector<std::unique_ptr<Entity>> entities;
+    std::vector<std::unique_ptr<EntityGroup>> entityGroups;
     std::map<ExampleShaderType, std::unique_ptr<Shader>> shaders;
+
+    StandardEntityGroup* standardGroup = nullptr;
+    OutlinedEntityGroup* outlinedGroup = nullptr;
 
     DirectionalLight directionalLight;
     std::vector<PointLight> pointLights;
@@ -48,8 +55,17 @@ private:
 
     Renderable* createRenderable(RenderableBuilder& builder);
     Renderable* createRenderable(RenderableBuilder&& builder) { return createRenderable(builder); }
+
     Entity* createEntity(Renderable* renderable, glm::vec3 position);
-    OutlinedEntity* createOutlinedEntity(Renderable* renderable, glm::vec3 position, Shader* outlineShader);
+    HoverableEntity* createHoverableEntity(Renderable* renderable, glm::vec3 position);
+
+    template <class T>
+    T* addGroup(std::unique_ptr<T> group)
+    {
+        T* ptr = group.get();
+        entityGroups.push_back(std::move(group));
+        return ptr;
+    }
 
     Shader* createShader(const char* vertexShaderPath, const char* fragmentShaderPath, ExampleShaderType type);
 

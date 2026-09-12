@@ -4,6 +4,7 @@
 #include "dugl/async/dispatcher.h"
 #include "dugl/physics/common.h"
 #include "dugl/utils/time.h"
+#include "dugl/modelling/scene.h"
 
 #include <Jolt/Core/TempAllocator.h>
 #include <Jolt/Physics/PhysicsSystem.h>
@@ -22,11 +23,15 @@ protected:
 
     JPH::PhysicsSystem physicsSystem;
 
+    Scene scene;
+
     Stopwatch stopWatch;
 
 public:
     JoltedEnvironment();
     virtual ~JoltedEnvironment() = default;
+
+    void start() override;
 
 protected:
     virtual void update(float dt) {}

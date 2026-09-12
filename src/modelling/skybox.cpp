@@ -6,19 +6,26 @@
 #include <iostream>
 
 
-Skybox::~Skybox() 
+Skybox::~Skybox()
+{
+    release();
+}
+
+void Skybox::release()
 {
     if (VAO != 0)
     {
         glDeleteTextures(1, &textureId);
         glDeleteBuffers(1, &VBO);
         glDeleteVertexArrays(1, &VAO);
+        VAO = VBO = textureId = 0;
     }
 }
 
 
 void Skybox::init(const char* path, Shader* shader)
 {
+    release();
     this->shader = shader;
 
     float vertices[] = {

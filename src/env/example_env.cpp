@@ -1,4 +1,4 @@
-#include "dugl/env/simple_env.h"
+﻿#include "dugl/env/example_env.h"
 #include "dugl/utils/imgui_adapter.h"
 #include "dugl/modelling/model_builder.h"
 #include "dugl/modelling/primitive_builder.h"
@@ -53,9 +53,13 @@ ExampleEnvironment::ExampleEnvironment() : clearColor(0.7f, 0.8f, 1.0f, 1.0f), f
         "assets/shaders/skybox.vert", "assets/shaders/skybox.frag", 
         ExampleShaderType::CubeMapShader);
 
+    // create entity groups, one per kind of render pass
+    outlinedGroup = addGroup(std::make_unique<OutlinedEntityGroup>(objectShader, outlineShader));
+    standardGroup = addGroup(std::make_unique<StandardEntityGroup>(objectShader));
+
     // create entities
-    OutlinedEntity* entity1 = createOutlinedEntity(backpack_renderable, glm::vec3(1.0f, 1.0f, 6.0f), outlineShader);
-    OutlinedEntity* entity2 = createOutlinedEntity(backpack_renderable, glm::vec3(-2.0f, 1.0f, 1.0f), outlineShader);
+    outlinedGroup->addEntity(createHoverableEntity(backpack_renderable, glm::vec3(1.0f, 1.0f, 6.0f)));
+    outlinedGroup->addEntity(createHoverableEntity(backpack_renderable, glm::vec3(-2.0f, 1.0f, 1.0f)));
 
     createPrimitives();
 
@@ -82,7 +86,7 @@ void ExampleEnvironment::createPrimitives()
         .diffuseColor = { 0.35f, 0.40f, 0.35f },
         .specularColor = glm::vec3(0.05f),
         .shininess = 4.0f });
-    createEntity(createRenderable(groundBuilder), { rowX, groundY, 0.0f });
+    standardGroup->addEntity(createEntity(createRenderable(groundBuilder), { rowX, groundY, 0.0f }));
 
     // matte, to contrast with the sphere
     BoxBuilder boxBuilder({ 1.5f, 1.5f, 1.5f });
@@ -90,7 +94,7 @@ void ExampleEnvironment::createPrimitives()
         .diffuseColor = { 0.85f, 0.25f, 0.20f },
         .specularColor = glm::vec3(0.08f),
         .shininess = 8.0f });
-    createEntity(createRenderable(boxBuilder), { rowX, groundY + 0.75f, -6.0f });
+    standardGroup->addEntity(createEntity(createRenderable(boxBuilder), { rowX, groundY + 0.75f, -6.0f }));
 
     // equal radii, so this is a plain sphere; glossy
     EllipsoidBuilder sphereBuilder(glm::vec3(1.0f), 32, 16);
@@ -98,7 +102,7 @@ void ExampleEnvironment::createPrimitives()
         .diffuseColor = { 0.20f, 0.45f, 0.85f },
         .specularColor = glm::vec3(0.9f),
         .shininess = 128.0f });
-    createEntity(createRenderable(sphereBuilder), { rowX, groundY + 1.0f, -3.0f });
+    standardGroup->addEntity(createEntity(createRenderable(sphereBuilder), { rowX, groundY + 1.0f, -3.0f }));
 
     // unequal radii: the interesting case for the normals
     EllipsoidBuilder ellipsoidBuilder({ 0.6f, 1.5f, 0.6f }, 32, 16);
@@ -106,7 +110,7 @@ void ExampleEnvironment::createPrimitives()
         .diffuseColor = { 0.30f, 0.75f, 0.35f },
         .specularColor = glm::vec3(0.5f),
         .shininess = 48.0f });
-    createEntity(createRenderable(ellipsoidBuilder), { rowX, groundY + 1.5f, 0.0f });
+    standardGroup->addEntity(createEntity(createRenderable(ellipsoidBuilder), { rowX, groundY + 1.5f, 0.0f }));
 
     // smoothly shaded around its axis
     ConeBuilder coneBuilder(1.0f, 2.5f, 32);
@@ -114,7 +118,7 @@ void ExampleEnvironment::createPrimitives()
         .diffuseColor = { 0.95f, 0.65f, 0.15f },
         .specularColor = glm::vec3(0.4f),
         .shininess = 32.0f });
-    createEntity(createRenderable(coneBuilder), { rowX, groundY, 3.0f });
+    standardGroup->addEntity(createEntity(createRenderable(coneBuilder), { rowX, groundY, 3.0f }));
 
     // faceted, unlike the cone: its four sides each carry a flat normal
     PyramidBuilder pyramidBuilder(2.0f, 2.0f, 2.0f);
@@ -122,7 +126,7 @@ void ExampleEnvironment::createPrimitives()
         .diffuseColor = { 0.60f, 0.35f, 0.80f },
         .specularColor = glm::vec3(0.25f),
         .shininess = 16.0f });
-    createEntity(createRenderable(pyramidBuilder), { rowX, groundY, 6.0f });
+    standardGroup->addEntity(createEntity(createRenderable(pyramidBuilder), { rowX, groundY, 6.0f }));
 }
 
 Renderable* ExampleEnvironment::createRenderable(RenderableBuilder& builder)
@@ -132,14 +136,17 @@ Renderable* ExampleEnvironment::createRenderable(RenderableBuilder& builder)
 
 Entity* ExampleEnvironment::createEntity(Renderable* renderable, glm::vec3 position)
 {
-    return entities.emplace_back(std::make_unique<Entity>(renderable, position)).get();
+    auto entity = std::make_unique<Entity>(renderable, position);
+    Entity* ptr = entity.get();
+    entities.push_back(std::move(entity));
+    return ptr;
 }
 
-OutlinedEntity* ExampleEnvironment::createOutlinedEntity(Renderable* renderable, glm::vec3 position, Shader* outlineShader)
+HoverableEntity* ExampleEnvironment::createHoverableEntity(Renderable* renderable, glm::vec3 position)
 {
-    auto outlinedEntity = std::make_unique<OutlinedEntity>(renderable, position, outlineShader, &mouseController);
-    OutlinedEntity* ptr = outlinedEntity.get();
-    entities.push_back(std::move(outlinedEntity));
+    auto entity = std::make_unique<HoverableEntity>(renderable, position, &mouseController);
+    HoverableEntity* ptr = entity.get();
+    entities.push_back(std::move(entity));
     return ptr;
 }
 
@@ -178,10 +185,10 @@ void ExampleEnvironment::start()
         objectShader->setDirectionalLight(directionalLight);
         objectShader->setPointLights(pointLights);
         
-        // render all entities
-        for (const auto& entity : entities)
+        // render all entity groups
+        for (const auto& group : entityGroups)
         {
-            entity->render(objectShader);
+            group->render();
         }
 
         // draw sky box

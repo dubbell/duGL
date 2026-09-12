@@ -1,5 +1,4 @@
 #include "dugl/modelling/entity.h"
-#include "dugl/shading/shader.h"
 
 #include <glm/gtc/matrix_transform.hpp>
 
@@ -12,11 +11,9 @@ Entity::Entity(Renderable* renderable, glm::vec3 position) : renderable(renderab
 
 void Entity::render(Shader* shader)
 {
-    shader->use();
     shader->setMat4("model", getModelTransform());
     renderable->render(shader);
 }
-
 
 void Entity::setPosition(glm::vec3 position)
 {
@@ -28,7 +25,6 @@ glm::vec3& Entity::getPosition()
 {
     return position;
 }
-
 
 glm::mat4 Entity::getModelTransform()
 {
