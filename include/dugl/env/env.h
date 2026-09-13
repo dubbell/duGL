@@ -7,6 +7,7 @@
 #include "dugl/modelling/scene.h"
 #include "dugl/utils/time.h"
 #include "dugl/shading/uniform_buffer.h"
+#include "dugl/async/dispatcher.h"
 
 #include "dugl/utils/glfw_include.h"
 #include "dugl/utils/glad_include.h"
@@ -23,6 +24,9 @@ protected:
     GLFWwindow* window;
     int viewportWidth;
     int viewportHeight;
+
+    dugl::AsyncDispatcher dispatcher;  // for concurrent work
+    dugl::uint32 reservedJobs;         // number of jobs reserved for general async work
 
     std::vector<std::unique_ptr<Camera>> cameras;
     Camera* activeCamera;
@@ -92,6 +96,8 @@ protected:
     virtual void frameBufferResizeCallback(int width, int height) {}
 
 private:
+    void updateEntities(float dt);
+
     void clearBuffers();
     void writeData();
 

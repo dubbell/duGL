@@ -19,8 +19,6 @@ JoltedEnvironment::JoltedEnvironment()
     : tempAllocator(TEMP_ALLOCATOR_SIZE), 
       dispatcher(MAX_JOBS, MAX_BARRIERS)
 {
-    initJolt();
-
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_CULL_FACE);
     glCullFace(GL_BACK);

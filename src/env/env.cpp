@@ -1,12 +1,18 @@
 #include "dugl/env/env.h"
 #include "dugl/utils/glfw_include.h"
 #include "dugl/shading/ubo_templates.h"
+#include "dugl/async/job.h"
 
+#include <algorithm>
 #include <stdexcept>
 
 
+static constexpr dugl::uint32 MAX_JOBS = 1024;
+static constexpr dugl::uint32 MAX_BARRIERS = 8;
+
 Environment::Environment() 
-    : viewportWidth(1920), viewportHeight(1080), freeCursor(false), mouseController(this), clearColor(0.7f, 0.8f, 1.0f, 1.0f)
+    : viewportWidth(1920), viewportHeight(1080), dispatcher(MAX_JOBS, MAX_BARRIERS), reservedJobs(MAX_JOBS),
+      freeCursor(false), mouseController(this), clearColor(0.7f, 0.8f, 1.0f, 1.0f)
 {
     // window initialization
     if (!glfwInit())
@@ -84,8 +90,9 @@ void Environment::start()
         keyboardController.processInput();  // user keyboard input
 
         // Process environment logic.
-        float dt = stopwatch.tick();        // time since last frame
+        float dt = stopwatch.tick();
         update(dt);
+        updateEntities(dt);
 
         // Write data to the GPU (transforms, lighting, UBOs, ...)
         writeData();
@@ -133,6 +140,38 @@ Shader* Environment::createShader(const char* vertexShader, const char* fragment
 Renderable* Environment::createRenderable(RenderableBuilder& builder)
 {
     return scene.addRenderable(std::make_unique<Renderable>(builder.build()));
+}
+
+void Environment::updateEntities(float dt)
+{
+    std::vector<Entity*> entities = scene.getEntities();
+    if (entities.empty()) {
+        return;
+    }
+
+    dugl::uint32 numJobs = std::min<dugl::uint32>(reservedJobs, dispatcher.getNumThreads() * 4);
+    numJobs = std::max<dugl::uint32>(1, std::min<dugl::uint32>(numJobs, (dugl::uint32)entities.size()));
+
+    // Add largest possible remainder numJobs-1 so that last batch of entities are not discarded.
+    size_t entitiesPerJob = (entities.size() + numJobs - 1) / numJobs;
+
+    std::vector<std::unique_ptr<dugl::EntityUpdateJob>> jobs;
+    dugl::JobBarrier* barrier = dispatcher.createBarrier();
+
+    for (dugl::uint32 job_i = 0; job_i < numJobs; job_i++)
+    {
+        size_t begin = job_i * entitiesPerJob;
+        size_t end = std::min(begin + entitiesPerJob, entities.size());
+        if (begin >= end) {
+            break;
+        }
+
+        auto& job = jobs.emplace_back(std::make_unique<dugl::EntityUpdateJob>(
+            dt, std::vector<Entity*>(entities.begin() + begin, entities.begin() + end)));
+        dispatcher.submitJob("EntityUpdate", job.get(), barrier);
+    }
+
+    dispatcher.waitAndDestroyBarrier(barrier);
 }
 
 void Environment::clearBuffers()

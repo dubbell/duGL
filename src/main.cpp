@@ -1,4 +1,5 @@
 #include "dugl/env/example_env.h"
+#include "dugl/utils/jolt_adapter.h"
 
 #include <exception>
 #include <iostream>
@@ -8,6 +9,10 @@ int main()
 {
     try
     {
+        // The base Environment constructor needs Jolt's allocator registered before it can
+        // build its AsyncDispatcher, regardless of whether this environment uses physics.
+        initJolt();
+
         Environment* env = new ExampleEnvironment();
 
         env->start();

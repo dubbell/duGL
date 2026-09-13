@@ -18,6 +18,7 @@ public:
     Entity(Renderable* model, glm::vec3 position);
     virtual ~Entity() = default;
 
+    virtual void update(float dt) {}
     virtual void render(Shader* shader);
 
     void setPosition(glm::vec3 position);
