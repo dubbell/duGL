@@ -68,6 +68,7 @@ public:
     }
 
     std::vector<Entity*> getEntities();
+    void clearEntities();
 
     void setDirectionalLight(const DirectionalLight& directionalLight);
     DirectionalLight& getDirectionalLight() { return directionalLight; }

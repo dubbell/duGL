@@ -53,6 +53,13 @@ Environment::Environment()
     // enable MSAA in OpenGL
     glEnable(GL_MULTISAMPLE);
 
+    // enable depth testing
+    glEnable(GL_DEPTH_TEST);
+
+    // enable face culling
+    glEnable(GL_CULL_FACE);
+    glCullFace(GL_BACK);
+
     activeCamera = cameras.emplace_back(std::make_unique<Camera>()).get();
     activeCamera->setAspectRatio((float)16 / 9);
 
@@ -80,6 +87,8 @@ Environment::~Environment()
 
 void Environment::start()
 {
+    init();
+
     while (!glfwWindowShouldClose(window))
     {
         clearBuffers();

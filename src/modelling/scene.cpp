@@ -61,6 +61,12 @@ std::vector<Entity*> Scene::getEntities()
     return rawEntities;
 }
 
+void Scene::clearEntities()
+{
+    entityGroups.clear();
+    entities.clear();
+}
+
 void Scene::setDirectionalLight(const DirectionalLight& directionalLight)
 {
     this->directionalLight = directionalLight;

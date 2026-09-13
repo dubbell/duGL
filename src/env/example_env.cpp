@@ -15,16 +15,12 @@ static constexpr dugl::uint DEFAULT_ENTITY_GROUP_ID = 0;
 static constexpr dugl::uint OUTLINE_ENTITY_GROUP_ID = 1;
 
 
-ExampleEnvironment::ExampleEnvironment() : clearColor(0.7f, 0.8f, 1.0f, 1.0f), flightController(this, &keyboardController, &mouseController)
+ExampleEnvironment::ExampleEnvironment()
+    : clearColor(0.7f, 0.8f, 1.0f, 1.0f), flightController(this, &keyboardController, &mouseController) {}
+
+void ExampleEnvironment::init()
 {
     initImGui(window);
-
-    // enable depth testing
-    glEnable(GL_DEPTH_TEST);
-
-    // enable face culling
-    glEnable(GL_CULL_FACE);
-    glCullFace(GL_BACK);
 
     // disable cursor initially
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
@@ -33,12 +29,12 @@ ExampleEnvironment::ExampleEnvironment() : clearColor(0.7f, 0.8f, 1.0f, 1.0f), f
         0.0f, -60.0f,
         { 0.3f,  0.3f,  0.3f},
         { 0.5f,  0.5f,  0.5f},
-        { 1.0f,  1.0f,  1.0f}});
+        { 1.0f,  1.0f,  1.0f} });
 
     // create objects to render
     ModelBuilder backpackBuilder("assets/models/backpack/backpack.obj");
     Renderable* backpackRenderable = createRenderable(backpackBuilder);
-    
+
     // create shader programs
     Shader* objectShader = createShader("basic_texture.vert", "basic_texture.frag");
     Shader* outlineShader = createShader("outline.vert", "outline.frag");

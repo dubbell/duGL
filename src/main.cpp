@@ -1,4 +1,4 @@
-#include "dugl/env/example_env.h"
+#include "dugl/env/example_physics_env.h"
 #include "dugl/utils/jolt_adapter.h"
 
 #include <exception>
@@ -13,7 +13,7 @@ int main()
         // build its AsyncDispatcher, regardless of whether this environment uses physics.
         initJolt();
 
-        Environment* env = new ExampleEnvironment();
+        Environment* env = new ExamplePhysicsEnvironment();
 
         env->start();
 

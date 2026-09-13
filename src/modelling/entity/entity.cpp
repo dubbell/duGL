@@ -26,7 +26,37 @@ glm::vec3& Entity::getPosition()
     return position;
 }
 
+void Entity::setRotation(glm::quat rotation)
+{
+    this->rotation = rotation;
+}
+
+glm::quat& Entity::getRotation()
+{
+    return rotation;
+}
+
+void Entity::setVelocity(glm::vec3 velocity)
+{
+    this->velocity = velocity;
+}
+
+glm::vec3& Entity::getVelocity()
+{
+    return velocity;
+}
+
+void Entity::setAngularVelocity(glm::vec3 angularVelocity)
+{
+    this->angularVelocity = angularVelocity;
+}
+
+glm::vec3& Entity::getAngularVelocity()
+{
+    return angularVelocity;
+}
+
 glm::mat4 Entity::getModelTransform()
 {
-    return glm::translate(glm::mat4(1.0f), position);
+    return glm::translate(glm::mat4(1.0f), position) * glm::mat4_cast(rotation);
 }

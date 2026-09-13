@@ -88,6 +88,9 @@ protected:
 
     /* Create a standard entity to be rendered in the environment scene. */
     Entity* createEntity(Renderable* renderable) { return createEntity<Entity>(renderable); }
+    
+    /* Invoked before the main loop starts iterating. */
+    virtual void init() {}
 
     /* Invoked after the scene is rendered. */
     virtual void postRender() {}

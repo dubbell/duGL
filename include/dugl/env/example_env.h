@@ -17,13 +17,6 @@
 #include "dugl/modelling/skybox.h"
 
 
-enum class ExampleShaderType
-{
-    ObjectShader,
-    OutlineShader,
-    CubeMapShader
-};
-
 class ExampleEnvironment : public Environment
 {
 private:
@@ -37,6 +30,7 @@ public:
     ExampleEnvironment();
 
 protected:
+    void init() override;
     void update(float dt) override;
     void postRender() override;
 

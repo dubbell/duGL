@@ -3,19 +3,18 @@
 #include "env.h"
 #include "dugl/async/dispatcher.h"
 #include "dugl/physics/common.h"
-#include "dugl/utils/time.h"
+#include "dugl/physics/physics_entity.h"
 #include "dugl/modelling/scene.h"
 
 #include <Jolt/Core/TempAllocator.h>
 #include <Jolt/Physics/PhysicsSystem.h>
 
 
-// And Environment with Jolt physics enabled.
-class JoltedEnvironment : public Environment
+// An Environment with Jolt physics enabled.
+class PhysicsEnvironment : public Environment
 {
 protected:
     JPH::TempAllocatorImpl tempAllocator;
-    dugl::AsyncDispatcher dispatcher;
 
     ObjectToBroadPhaseMapper broadPhaseMapper;
     ObjectCollisionFilter objectCollisionFilter;
@@ -23,15 +22,14 @@ protected:
 
     JPH::PhysicsSystem physicsSystem;
 
-    Stopwatch stopWatch;
+    float accumulator = 0.0f;
 
 public:
-    JoltedEnvironment();
-    virtual ~JoltedEnvironment() = default;
+    PhysicsEnvironment();
+    virtual ~PhysicsEnvironment();
 
 protected:
-    virtual void update(float dt) {}
-    virtual void render() {}
+    void update(float dt) override;
 
     void frameBufferResizeCallback(int width, int height) override;
 };

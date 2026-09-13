@@ -37,6 +37,9 @@ public:
 
     /* Get the max concurrency. */
     int getNumThreads();
+
+    /* Get the underlying Jolt job system. */
+    JPH::JobSystem* getJobSystem() { return &jobSystem; }
 };
 
 DUGL_NAMESPACE_END
