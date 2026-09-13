@@ -15,6 +15,7 @@ private:
 public:
 	Stopwatch() : lastTime(clock::now()) {}
 
+	/* Returns the time since tick() was last invoked, in seconds. */
 	float tick()
 	{
 		auto now = clock::now();

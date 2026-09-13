@@ -1,9 +1,11 @@
 #pragma once
 
+#include <vector>
 
 struct DirectionalLight
 {
-    float yaw, pitch;
+    float yaw;
+    float pitch;
     glm::vec3 ambient;
     glm::vec3 diffuse;
     glm::vec3 specular;

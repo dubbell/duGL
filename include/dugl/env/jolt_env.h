@@ -23,15 +23,11 @@ protected:
 
     JPH::PhysicsSystem physicsSystem;
 
-    Scene scene;
-
     Stopwatch stopWatch;
 
 public:
     JoltedEnvironment();
     virtual ~JoltedEnvironment() = default;
-
-    void start() override;
 
 protected:
     virtual void update(float dt) {}

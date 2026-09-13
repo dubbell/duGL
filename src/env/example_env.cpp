@@ -11,6 +11,10 @@
 #include <algorithm>
 
 
+static constexpr dugl::uint DEFAULT_ENTITY_GROUP_ID = 0;
+static constexpr dugl::uint OUTLINE_ENTITY_GROUP_ID = 1;
+
+
 ExampleEnvironment::ExampleEnvironment() : clearColor(0.7f, 0.8f, 1.0f, 1.0f), flightController(this, &keyboardController, &mouseController)
 {
     initImGui(window);
@@ -25,58 +29,41 @@ ExampleEnvironment::ExampleEnvironment() : clearColor(0.7f, 0.8f, 1.0f, 1.0f), f
     // disable cursor initially
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
-    directionalLight = {
+    scene.setDirectionalLight({
         0.0f, -60.0f,
         { 0.3f,  0.3f,  0.3f},
         { 0.5f,  0.5f,  0.5f},
-        { 1.0f,  1.0f,  1.0f}
-    };
-
-    pointLights = {{
-        { 0.0f, 0.0f, 0.0f },
-        { 0.7f, 0.2f, 0.0f },
-        { 0.1f, 0.7f, 0.7f },
-        { 1.0f, 1.0f, 1.0f },
-        1.0f, 0.09f, 0.032f}};
+        { 1.0f,  1.0f,  1.0f}});
 
     // create objects to render
-    Renderable* backpack_renderable = createRenderable(ModelBuilder("assets/models/backpack/backpack.obj"));
+    ModelBuilder backpackBuilder("assets/models/backpack/backpack.obj");
+    Renderable* backpackRenderable = createRenderable(backpackBuilder);
     
     // create shader programs
-    Shader* objectShader = createShader(
-        "assets/shaders/basic_texture.vert", "assets/shaders/basic_texture.frag", 
-        ExampleShaderType::ObjectShader);
-    Shader* outlineShader = createShader(
-        "assets/shaders/outline.vert", "assets/shaders/outline.frag", 
-        ExampleShaderType::OutlineShader);
-    Shader* cubeMapShader = createShader(
-        "assets/shaders/skybox.vert", "assets/shaders/skybox.frag", 
-        ExampleShaderType::CubeMapShader);
+    Shader* objectShader = createShader("basic_texture.vert", "basic_texture.frag");
+    Shader* outlineShader = createShader("outline.vert", "outline.frag");
+    Shader* cubeMapShader = createShader("skybox.vert", "skybox.frag");
 
-    // create entity groups, one per kind of render pass
-    outlinedGroup = addGroup(std::make_unique<OutlinedEntityGroup>(objectShader, outlineShader));
-    standardGroup = addGroup(std::make_unique<StandardEntityGroup>(objectShader));
+    // create entity groups
+    StandardEntityGroup* standardGroup = createEntityGroup(DEFAULT_ENTITY_GROUP_ID, objectShader);
+    OutlinedEntityGroup* outlinedGroup = createEntityGroup<OutlinedEntityGroup>(OUTLINE_ENTITY_GROUP_ID, objectShader, outlineShader);
 
     // create entities
-    outlinedGroup->addEntity(createHoverableEntity(backpack_renderable, glm::vec3(1.0f, 1.0f, 6.0f)));
-    outlinedGroup->addEntity(createHoverableEntity(backpack_renderable, glm::vec3(-2.0f, 1.0f, 1.0f)));
+    HoverableEntity* backpack1 = createEntity<HoverableEntity>(backpackRenderable, &mouseController);
+    backpack1->setPosition(glm::vec3(1.0f, 1.0f, 6.0f));
+    HoverableEntity* backpack2 = createEntity<HoverableEntity>(backpackRenderable, &mouseController);
+    backpack2->setPosition(glm::vec3(-2.0f, 1.0f, 1.0f));
 
-    createPrimitives();
+    outlinedGroup->addEntity(backpack1);
+    outlinedGroup->addEntity(backpack2);
+
+    createPrimitives(standardGroup);
 
     // create skybox
-    skybox.init("assets/skyboxes/sea", shaders[ExampleShaderType::CubeMapShader].get());
-
-    // create uniform buffer object for perspective transforms
-    perspectiveUbo.create("Perspective", { objectShader, cubeMapShader }, sizeof(PerspectiveData), GL_DYNAMIC_DRAW);
+    scene.setSkybox("assets/skyboxes/sea", cubeMapShader);
 }
 
-void ExampleEnvironment::clearBuffers()
-{
-    glClearColor(clearColor.r, clearColor.g, clearColor.b, clearColor.a);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
-}
-
-void ExampleEnvironment::createPrimitives()
+void ExampleEnvironment::createPrimitives(StandardEntityGroup* entityGroup)
 {
     const float rowX = 8.0f;      // in front of the camera's starting position
     const float groundY = -2.0f;  // the plane everything else stands on
@@ -86,7 +73,9 @@ void ExampleEnvironment::createPrimitives()
         .diffuseColor = { 0.35f, 0.40f, 0.35f },
         .specularColor = glm::vec3(0.05f),
         .shininess = 4.0f });
-    standardGroup->addEntity(createEntity(createRenderable(groundBuilder), { rowX, groundY, 0.0f }));
+    Entity* ground = createEntity(createRenderable(groundBuilder));
+    ground->setPosition({ rowX, groundY, 0.0f });
+    entityGroup->addEntity(ground);
 
     // matte, to contrast with the sphere
     BoxBuilder boxBuilder({ 1.5f, 1.5f, 1.5f });
@@ -94,7 +83,9 @@ void ExampleEnvironment::createPrimitives()
         .diffuseColor = { 0.85f, 0.25f, 0.20f },
         .specularColor = glm::vec3(0.08f),
         .shininess = 8.0f });
-    standardGroup->addEntity(createEntity(createRenderable(boxBuilder), { rowX, groundY + 0.75f, -6.0f }));
+    Entity* box = createEntity(createRenderable(boxBuilder));
+    box->setPosition({ rowX, groundY + 0.75f, -6.0f });
+    entityGroup->addEntity(box);
 
     // equal radii, so this is a plain sphere; glossy
     EllipsoidBuilder sphereBuilder(glm::vec3(1.0f), 32, 16);
@@ -102,7 +93,9 @@ void ExampleEnvironment::createPrimitives()
         .diffuseColor = { 0.20f, 0.45f, 0.85f },
         .specularColor = glm::vec3(0.9f),
         .shininess = 128.0f });
-    standardGroup->addEntity(createEntity(createRenderable(sphereBuilder), { rowX, groundY + 1.0f, -3.0f }));
+    Entity* sphere = createEntity(createRenderable(sphereBuilder));
+    sphere->setPosition({ rowX, groundY + 1.0f, -3.0f });
+    entityGroup->addEntity(sphere);
 
     // unequal radii: the interesting case for the normals
     EllipsoidBuilder ellipsoidBuilder({ 0.6f, 1.5f, 0.6f }, 32, 16);
@@ -110,7 +103,9 @@ void ExampleEnvironment::createPrimitives()
         .diffuseColor = { 0.30f, 0.75f, 0.35f },
         .specularColor = glm::vec3(0.5f),
         .shininess = 48.0f });
-    standardGroup->addEntity(createEntity(createRenderable(ellipsoidBuilder), { rowX, groundY + 1.5f, 0.0f }));
+    Entity* ellipsoid = createEntity(createRenderable(ellipsoidBuilder));
+    ellipsoid->setPosition({ rowX, groundY + 1.5f, 0.0f });
+    entityGroup->addEntity(ellipsoid);
 
     // smoothly shaded around its axis
     ConeBuilder coneBuilder(1.0f, 2.5f, 32);
@@ -118,7 +113,9 @@ void ExampleEnvironment::createPrimitives()
         .diffuseColor = { 0.95f, 0.65f, 0.15f },
         .specularColor = glm::vec3(0.4f),
         .shininess = 32.0f });
-    standardGroup->addEntity(createEntity(createRenderable(coneBuilder), { rowX, groundY, 3.0f }));
+    Entity* cone = createEntity(createRenderable(coneBuilder));
+    cone->setPosition({ rowX, groundY, 3.0f });
+    entityGroup->addEntity(cone);
 
     // faceted, unlike the cone: its four sides each carry a flat normal
     PyramidBuilder pyramidBuilder(2.0f, 2.0f, 2.0f);
@@ -126,80 +123,19 @@ void ExampleEnvironment::createPrimitives()
         .diffuseColor = { 0.60f, 0.35f, 0.80f },
         .specularColor = glm::vec3(0.25f),
         .shininess = 16.0f });
-    standardGroup->addEntity(createEntity(createRenderable(pyramidBuilder), { rowX, groundY, 6.0f }));
+    Entity* pyramid = createEntity(createRenderable(pyramidBuilder));
+    pyramid->setPosition({ rowX, groundY, 6.0f });
+    entityGroup->addEntity(pyramid);
 }
 
-Renderable* ExampleEnvironment::createRenderable(RenderableBuilder& builder)
+void ExampleEnvironment::update(float dt)
 {
-    return renderables.emplace_back(std::make_unique<Renderable>(builder.build())).get();
+    createImGuiFrame();
 }
 
-Entity* ExampleEnvironment::createEntity(Renderable* renderable, glm::vec3 position)
+void ExampleEnvironment::postRender()
 {
-    auto entity = std::make_unique<Entity>(renderable, position);
-    Entity* ptr = entity.get();
-    entities.push_back(std::move(entity));
-    return ptr;
-}
-
-HoverableEntity* ExampleEnvironment::createHoverableEntity(Renderable* renderable, glm::vec3 position)
-{
-    auto entity = std::make_unique<HoverableEntity>(renderable, position, &mouseController);
-    HoverableEntity* ptr = entity.get();
-    entities.push_back(std::move(entity));
-    return ptr;
-}
-
-Shader* ExampleEnvironment::createShader(const char* vertexShaderPath, const char* fragmentShaderPath, ExampleShaderType shaderType)
-{
-    return shaders.emplace(shaderType, std::make_unique<Shader>(vertexShaderPath, fragmentShaderPath)).first->second.get();
-}
-
-void ExampleEnvironment::start()
-{
-    Shader* objectShader = shaders[ExampleShaderType::ObjectShader].get();
-
-    while (!glfwWindowShouldClose(window))
-    {
-        clearBuffers();  // clear color and depth buffer
-
-        // write to perspective UBO, shared among shaders
-        PerspectiveData perspectiveData = { activeCamera->getViewMatrix(), activeCamera->getProjectionMatrix() }; 
-        perspectiveUbo.writeData(perspectiveData);
-        
-        glfwPollEvents();  // viewport resizing and GUI interaction
-
-        mouseController.processInput();     // user mouse input
-        keyboardController.processInput();  // user keyboard input
-
-        // user interface
-        createImGuiFrame();
-        
-        // for rendering objects
-        objectShader->use();
-
-        // camera pos only used by object shader
-        objectShader->setVec3("viewPos", activeCamera->getPosition());
-
-        // lighting
-        objectShader->setDirectionalLight(directionalLight);
-        objectShader->setPointLights(pointLights);
-        
-        // render all entity groups
-        for (const auto& group : entityGroups)
-        {
-            group->render();
-        }
-
-        // draw sky box
-        skybox.draw();
-
-        // draw gui
-        drawImGui();
-
-        // swap buffers
-        glfwSwapBuffers(window);
-    }
+    drawImGui();
 }
 
 void ExampleEnvironment::createImGuiFrame()
@@ -210,17 +146,16 @@ void ExampleEnvironment::createImGuiFrame()
 
     ImGui::SeparatorText("Directional Light");
 
-    ImGui::SliderFloat("Yaw", &directionalLight.yaw, -180.0f, 180.0f);
-    ImGui::SliderFloat("Pitch", &directionalLight.pitch, -89.0f, 89.0f);
-    ImGui::SliderFloat3("Ambient", glm::value_ptr(directionalLight.ambient), 0.0f, 1.0f);
-    ImGui::SliderFloat3("Diffuse", glm::value_ptr(directionalLight.diffuse), 0.0f, 1.0f);
-    ImGui::SliderFloat3("Specular", glm::value_ptr(directionalLight.specular), 0.0f, 1.0f);
-
+    ImGui::SliderFloat("Yaw", &scene.getDirectionalLight().yaw, -180.0f, 180.0f);
+    ImGui::SliderFloat("Pitch", &scene.getDirectionalLight().pitch, -89.0f, 89.0f);
+    ImGui::SliderFloat3("Ambient", glm::value_ptr(scene.getDirectionalLight().ambient), 0.0f, 1.0f);
+    ImGui::SliderFloat3("Diffuse", glm::value_ptr(scene.getDirectionalLight().diffuse), 0.0f, 1.0f);
+    ImGui::SliderFloat3("Specular", glm::value_ptr(scene.getDirectionalLight().specular), 0.0f, 1.0f);
 
     ImGui::SeparatorText("Entities");
 
     int entityCount = 1;
-    for (auto& entity : entities)
+    for (auto& entity : scene.getEntities())
     {
         ImGui::DragFloat3(std::format("Entity {}", entityCount).c_str(), glm::value_ptr(entity->getPosition()), 0.1f);
         entityCount++;

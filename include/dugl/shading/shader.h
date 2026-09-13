@@ -3,6 +3,7 @@
 #include <glm/glm.hpp>
 
 #include <string>
+#include <unordered_set>
 
 #include "lighting.h"
 #include "material.h"
@@ -13,9 +14,11 @@
 class Shader
 {
 private:
-    // vertex attribute locations this program reads, queried from the linked program
+    /* Vertex attribute locations in the linked shader program. */
     VertexAttributeMask requiredAttributes;
-
+    /* Active uniforms in the linked shader program. */
+    std::unordered_set<std::string> activeUniforms;
+    
 public:
     dugl::uint ID;
 
@@ -49,7 +52,11 @@ public:
     void setDirectionalLight(DirectionalLight& directionalLight) const;
     void setPointLights(std::vector<PointLight>& pointLights) const;
 
+    bool hasActiveUniform(const char* uniformName);
+
 private:
-    // Query the shader program for the active attributes
+    /* Query the shader program for the active attributes */
     void queryRequiredAttributes();
+    /* Query the shader program for the active uniforms. */
+    void queryActiveUniforms();
 };

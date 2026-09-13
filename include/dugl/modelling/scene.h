@@ -38,40 +38,36 @@ public:
     void render();
 
     Shader* addShader(std::unique_ptr<Shader> shader);
-    Shader* getShader(dugl::uint) const;
+    Shader* getShader(dugl::uint);
+    std::vector<Shader*> getShaders();
 
     void setSkybox(const char* path, Shader* shader);
 
     Renderable* addRenderable(std::unique_ptr<Renderable> renderable);
 
     // Add an entity to the scene. The scene takes ownership of the entity's lifecycle.
-    template <class T>
-    T* addEntity(std::unique_ptr<T> entity)
-    {
-        static_assert(std::is_base_of_v<Entity, T>, "addEntity() requires an Entity subclass");
-
+    template <class T> requires std::is_base_of_v<Entity, T>
+    T* addEntity(std::unique_ptr<T> entity) {
         T* ptr = entity.get();
         entities.push_back(std::move(entity));
         return ptr;
     }
 
     // Add an entity group to the scene. The scene takes ownership of the entity group's lifecycle.
-    template <class T>
-    T* addGroup(dugl::uint groupId, std::unique_ptr<T> group)
-    {
-        static_assert(std::is_base_of_v<EntityGroup, T>, "addGroup() requires an EntityGroup subclass");
-
+    template <class T> requires std::is_base_of_v<EntityGroup, T>
+    T* addGroup(dugl::uint groupId, std::unique_ptr<T> group) {
         T* ptr = group.get();
         entityGroups.insert_or_assign(groupId, std::move(group));
         return ptr;
     }
 
-    template <class T>
-    T* getGroup(dugl::uint groupId) const
-    {
+    template <class T> requires std::is_base_of_v<EntityGroup, T>
+    T* getGroup(dugl::uint groupId) const {
         auto it = entityGroups.find(groupId);
         return it == entityGroups.end() ? nullptr : dynamic_cast<T*>(it->second.get());
     }
+
+    std::vector<Entity*> getEntities();
 
     void setDirectionalLight(const DirectionalLight& directionalLight);
     DirectionalLight& getDirectionalLight() { return directionalLight; }

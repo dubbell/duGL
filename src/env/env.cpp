@@ -1,10 +1,12 @@
 #include "dugl/env/env.h"
 #include "dugl/utils/glfw_include.h"
+#include "dugl/shading/ubo_templates.h"
 
 #include <stdexcept>
 
 
-Environment::Environment() : viewportWidth(1920), viewportHeight(1080), freeCursor(false), mouseController(this)
+Environment::Environment() 
+    : viewportWidth(1920), viewportHeight(1080), freeCursor(false), mouseController(this), clearColor(0.7f, 0.8f, 1.0f, 1.0f)
 {
     // window initialization
     if (!glfwInit())
@@ -47,6 +49,9 @@ Environment::Environment() : viewportWidth(1920), viewportHeight(1080), freeCurs
 
     activeCamera = cameras.emplace_back(std::make_unique<Camera>()).get();
     activeCamera->setAspectRatio((float)16 / 9);
+
+    // create uniform buffer object for perspective transforms
+    perspectiveUbo.create("Perspective", scene.getShaders(), sizeof(PerspectiveData), GL_DYNAMIC_DRAW);
 }
 
 void Environment::stop()
@@ -65,6 +70,32 @@ Environment::~Environment()
     // destroyed before this destructor body runs. The GL context must outlive that teardown, so
     // it's released here rather than earlier.
     stop();
+}
+
+void Environment::start()
+{
+    while (!glfwWindowShouldClose(window))
+    {
+        clearBuffers();
+
+        // Process inputs.
+        glfwPollEvents();                   // viewport resizing and GUI interaction
+        mouseController.processInput();     // user mouse input
+        keyboardController.processInput();  // user keyboard input
+
+        // Process environment logic.
+        float dt = stopwatch.tick();        // time since last frame
+        update(dt);
+
+        // Write data to the GPU (transforms, lighting, UBOs, ...)
+        writeData();
+
+        // Render the scene.
+        scene.render();
+        postRender();
+
+        glfwSwapBuffers(window);
+    }
 }
 
 GLFWwindow* Environment::getWindow()
@@ -90,6 +121,35 @@ bool Environment::getFreeCursor()
 void Environment::setFreeCursor(bool freeCursor)
 {
     this->freeCursor = freeCursor;
+}
+
+Shader* Environment::createShader(const char* vertexShader, const char* fragmentShader)
+{
+    return scene.addShader(std::make_unique<Shader>(
+        ("assets/shaders/" + std::string(vertexShader)).c_str(),
+        ("assets/shaders/" + std::string(fragmentShader)).c_str()));
+}
+
+Renderable* Environment::createRenderable(RenderableBuilder& builder)
+{
+    return scene.addRenderable(std::make_unique<Renderable>(builder.build()));
+}
+
+void Environment::clearBuffers()
+{
+    glClearColor(clearColor.r, clearColor.g, clearColor.b, clearColor.a);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+}
+
+void Environment::writeData()
+{
+    PerspectiveData perspectiveData = { activeCamera->getViewMatrix(), activeCamera->getProjectionMatrix() };
+    perspectiveUbo.writeData(perspectiveData);
+    for (auto& shader : scene.getShaders()) {
+        if (shader->hasActiveUniform("viewPos")) {
+            shader->setVec3("viewPos", activeCamera->getPosition());
+        }
+    }
 }
 
 void Environment::glfwFrameBufferResizeCallback(GLFWwindow* window, int width, int height)

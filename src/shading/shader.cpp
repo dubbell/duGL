@@ -92,6 +92,7 @@ Shader::Shader(const char* vertexPath, const char* fragmentPath)
     }
 
     queryRequiredAttributes();
+    queryActiveUniforms();
 }
 
 // a matrix attribute occupies one location per column, an array one per element
@@ -139,6 +140,26 @@ void Shader::queryRequiredAttributes()
     }
 }
 
+void Shader::queryActiveUniforms()
+{
+    activeUniforms.clear();
+
+    int uniformCount = 0, maxNameLength = 0;
+    glGetProgramiv(ID, GL_ACTIVE_UNIFORMS, &uniformCount);
+    glGetProgramiv(ID, GL_ACTIVE_UNIFORM_MAX_LENGTH, &maxNameLength);
+
+    std::string name(std::max(maxNameLength, 1), '\0');
+
+    for (int i = 0; i < uniformCount; i++)
+    {
+        int size = 0;
+        unsigned int type = 0;
+        glGetActiveUniform(ID, i, (int)name.size(), nullptr, &size, &type, name.data());
+
+        activeUniforms.insert(name.c_str());
+    }
+}
+
 Shader::Shader(Shader&& other) noexcept : requiredAttributes(other.requiredAttributes), ID(other.ID)
 {
     other.ID = 0;
@@ -173,27 +194,27 @@ void Shader::use()
 
 void Shader::setBool(const std::string &name, bool value) const
 {
-    glUniform1i(glGetUniformLocation(ID, name.c_str()), (int)value);
+    glProgramUniform1i(ID, glGetUniformLocation(ID, name.c_str()), (int)value);
 }
 
 void Shader::setInt(const std::string &name, int value) const
 {
-    glUniform1i(glGetUniformLocation(ID, name.c_str()), value);
+    glProgramUniform1i(ID, glGetUniformLocation(ID, name.c_str()), value);
 }
 
 void Shader::setFloat(const std::string &name, float value) const
 {
-    glUniform1f(glGetUniformLocation(ID, name.c_str()), value);
+    glProgramUniform1f(ID, glGetUniformLocation(ID, name.c_str()), value);
 }
 
 void Shader::setVec3(const std::string& name, glm::vec3 value) const
 {
-    glUniform3fv(glGetUniformLocation(ID, name.c_str()), 1, glm::value_ptr(value));
+    glProgramUniform3fv(ID, glGetUniformLocation(ID, name.c_str()), 1, glm::value_ptr(value));
 }
 
 void Shader::setMat4(const std::string &name, glm::mat4 value) const
 {
-    glUniformMatrix4fv(glGetUniformLocation(ID, name.c_str()), 1, GL_FALSE, glm::value_ptr(value));
+    glProgramUniformMatrix4fv(ID, glGetUniformLocation(ID, name.c_str()), 1, GL_FALSE, glm::value_ptr(value));
 }
 
 // texture units the material's maps are bound to
@@ -258,4 +279,9 @@ void Shader::setPointLights(std::vector<PointLight>& pointLights) const
         setFloat(std::format("pointLights[{}].linear", p_i), pointLight.linear);
         setFloat(std::format("pointLights[{}].quadratic", p_i), pointLight.quadratic);
     }
+}
+
+bool Shader::hasActiveUniform(const char* uniformName)
+{
+    return activeUniforms.contains(uniformName);
 }
