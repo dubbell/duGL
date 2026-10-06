@@ -38,8 +38,3 @@ void PhysicsEnvironment::update(float dt)
         accumulator -= PHYSICS_STEP;
     }
 }
-
-void PhysicsEnvironment::frameBufferResizeCallback(int width, int height)
-{
-    activeCamera->setAspectRatio((float)width / (float)height);
-}

@@ -38,6 +38,4 @@ private:
 
     void createImGuiFrame();
     void drawImGui();
-
-    virtual void frameBufferResizeCallback(int width, int height) override;
 };

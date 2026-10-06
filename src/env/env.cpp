@@ -206,5 +206,8 @@ void Environment::glfwFrameBufferResizeCallback(GLFWwindow* window, int width, i
     Environment* env = static_cast<Environment*>(glfwGetWindowUserPointer(window));
     env->viewportWidth = width;
     env->viewportHeight = height;
+    if (height > 0) {
+        env->activeCamera->setAspectRatio((float)width / (float)height);
+    }
     env->frameBufferResizeCallback(width, height);
 }

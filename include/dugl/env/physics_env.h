@@ -30,6 +30,4 @@ public:
 
 protected:
     void update(float dt) override;
-
-    void frameBufferResizeCallback(int width, int height) override;
 };

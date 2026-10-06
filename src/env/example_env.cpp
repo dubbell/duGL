@@ -158,10 +158,3 @@ void ExampleEnvironment::drawImGui()
     ImGui::Render();
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 }
-
-void ExampleEnvironment::frameBufferResizeCallback(int width, int height)
-{
-    activeCamera->setAspectRatio((float)width / (float)height);
-    viewportWidth = width;
-    viewportHeight = height;
-}
