@@ -3,16 +3,14 @@
 #include "dugl/modelling/model_builder.h"
 #include "dugl/modelling/primitive_builder.h"
 #include "dugl/shading/ubo_templates.h"
+#include "dugl/modelling/render_pass.h"
+#include "dugl/modelling/outline_pass.h"
 
 #include <glm/gtc/type_ptr.hpp>
 
 #include <memory>
 #include <format>
 #include <algorithm>
-
-
-static constexpr dugl::uint DEFAULT_ENTITY_GROUP_ID = 0;
-static constexpr dugl::uint OUTLINE_ENTITY_GROUP_ID = 1;
 
 
 ExampleEnvironment::ExampleEnvironment()
@@ -40,26 +38,25 @@ void ExampleEnvironment::init()
     Shader* outlineShader = createShader("outline.vert", "outline.frag");
     Shader* cubeMapShader = createShader("skybox.vert", "skybox.frag");
 
-    // create entity groups
-    StandardEntityGroup* standardGroup = createEntityGroup(DEFAULT_ENTITY_GROUP_ID, objectShader);
-    OutlinedEntityGroup* outlinedGroup = createEntityGroup<OutlinedEntityGroup>(OUTLINE_ENTITY_GROUP_ID, objectShader, outlineShader);
+    // create render passes
+    createRenderPass<OutlinePass>(outlineShader);
 
     // create entities
-    HoverableEntity* backpack1 = createEntity<HoverableEntity>(backpackRenderable, &mouseController);
+    HoverableEntity* backpack1 = createEntity<HoverableEntity>(backpackRenderable, objectShader, &mouseController);
     backpack1->setPosition(glm::vec3(1.0f, 1.0f, 6.0f));
-    HoverableEntity* backpack2 = createEntity<HoverableEntity>(backpackRenderable, &mouseController);
+    HoverableEntity* backpack2 = createEntity<HoverableEntity>(backpackRenderable, objectShader, &mouseController);
     backpack2->setPosition(glm::vec3(-2.0f, 1.0f, 1.0f));
 
-    outlinedGroup->addEntity(backpack1);
-    outlinedGroup->addEntity(backpack2);
+    hoverableEntities.push_back(backpack1);
+    hoverableEntities.push_back(backpack2);
 
-    createPrimitives(standardGroup);
+    createPrimitives(objectShader);
 
     // create skybox
     scene.setSkybox("assets/skyboxes/sea", cubeMapShader);
 }
 
-void ExampleEnvironment::createPrimitives(StandardEntityGroup* entityGroup)
+void ExampleEnvironment::createPrimitives(Shader* shader)
 {
     const float rowX = 8.0f;      // in front of the camera's starting position
     const float groundY = -2.0f;  // the plane everything else stands on
@@ -69,9 +66,8 @@ void ExampleEnvironment::createPrimitives(StandardEntityGroup* entityGroup)
         .diffuseColor = { 0.35f, 0.40f, 0.35f },
         .specularColor = glm::vec3(0.05f),
         .shininess = 4.0f });
-    Entity* ground = createEntity(createRenderable(groundBuilder));
+    Entity* ground = createEntity(createRenderable(groundBuilder), shader);
     ground->setPosition({ rowX, groundY, 0.0f });
-    entityGroup->addEntity(ground);
 
     // matte, to contrast with the sphere
     BoxBuilder boxBuilder({ 1.5f, 1.5f, 1.5f });
@@ -79,9 +75,8 @@ void ExampleEnvironment::createPrimitives(StandardEntityGroup* entityGroup)
         .diffuseColor = { 0.85f, 0.25f, 0.20f },
         .specularColor = glm::vec3(0.08f),
         .shininess = 8.0f });
-    Entity* box = createEntity(createRenderable(boxBuilder));
+    Entity* box = createEntity(createRenderable(boxBuilder), shader);
     box->setPosition({ rowX, groundY + 0.75f, -6.0f });
-    entityGroup->addEntity(box);
 
     // equal radii, so this is a plain sphere; glossy
     EllipsoidBuilder sphereBuilder(glm::vec3(1.0f), 32, 16);
@@ -89,9 +84,8 @@ void ExampleEnvironment::createPrimitives(StandardEntityGroup* entityGroup)
         .diffuseColor = { 0.20f, 0.45f, 0.85f },
         .specularColor = glm::vec3(0.9f),
         .shininess = 128.0f });
-    Entity* sphere = createEntity(createRenderable(sphereBuilder));
+    Entity* sphere = createEntity(createRenderable(sphereBuilder), shader);
     sphere->setPosition({ rowX, groundY + 1.0f, -3.0f });
-    entityGroup->addEntity(sphere);
 
     // unequal radii: the interesting case for the normals
     EllipsoidBuilder ellipsoidBuilder({ 0.6f, 1.5f, 0.6f }, 32, 16);
@@ -99,9 +93,8 @@ void ExampleEnvironment::createPrimitives(StandardEntityGroup* entityGroup)
         .diffuseColor = { 0.30f, 0.75f, 0.35f },
         .specularColor = glm::vec3(0.5f),
         .shininess = 48.0f });
-    Entity* ellipsoid = createEntity(createRenderable(ellipsoidBuilder));
+    Entity* ellipsoid = createEntity(createRenderable(ellipsoidBuilder), shader);
     ellipsoid->setPosition({ rowX, groundY + 1.5f, 0.0f });
-    entityGroup->addEntity(ellipsoid);
 
     // smoothly shaded around its axis
     ConeBuilder coneBuilder(1.0f, 2.5f, 32);
@@ -109,9 +102,8 @@ void ExampleEnvironment::createPrimitives(StandardEntityGroup* entityGroup)
         .diffuseColor = { 0.95f, 0.65f, 0.15f },
         .specularColor = glm::vec3(0.4f),
         .shininess = 32.0f });
-    Entity* cone = createEntity(createRenderable(coneBuilder));
+    Entity* cone = createEntity(createRenderable(coneBuilder), shader);
     cone->setPosition({ rowX, groundY, 3.0f });
-    entityGroup->addEntity(cone);
 
     // faceted, unlike the cone: its four sides each carry a flat normal
     PyramidBuilder pyramidBuilder(2.0f, 2.0f, 2.0f);
@@ -119,13 +111,16 @@ void ExampleEnvironment::createPrimitives(StandardEntityGroup* entityGroup)
         .diffuseColor = { 0.60f, 0.35f, 0.80f },
         .specularColor = glm::vec3(0.25f),
         .shininess = 16.0f });
-    Entity* pyramid = createEntity(createRenderable(pyramidBuilder));
+    Entity* pyramid = createEntity(createRenderable(pyramidBuilder), shader);
     pyramid->setPosition({ rowX, groundY, 6.0f });
-    entityGroup->addEntity(pyramid);
 }
 
 void ExampleEnvironment::update(float dt)
 {
+    for (HoverableEntity* entity : hoverableEntities) {
+        entity->setFlag(EntityFlag::Outlined, entity->isHovered());
+    }
+
     createImGuiFrame();
 }
 

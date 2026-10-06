@@ -17,7 +17,7 @@
 #include <concepts>
 
 
-// Base class for starting a duGL session. Initializes the GLFW window.
+/* Base class for starting a duGL session. Initializes the GLFW window. */
 class Environment : public PerspectiveInterface
 {
 protected:
@@ -69,25 +69,20 @@ protected:
     /* Create a renderable. */
     Renderable* createRenderable(RenderableBuilder& builder);
 
-    /* Create an entity group. */
-    template<typename T, typename... Args> requires std::is_base_of_v<EntityGroup, T>
-    T* createEntityGroup(dugl::uint groupId, Args&&... args) {
-        return static_cast<T*>(scene.addGroup(groupId, std::make_unique<T>(std::forward<Args>(args)...)));
-    }
-
-    /* Create a standard entity group. */
-    StandardEntityGroup* createEntityGroup(dugl::uint groupId, Shader* shader) { 
-        return createEntityGroup<StandardEntityGroup>(groupId, shader); 
+    /* Create a render pass. */
+    template<typename T, typename... Args> requires std::is_base_of_v<RenderPass, T>
+    T* createRenderPass(Args&&... args) {
+        return scene.addRenderPass(std::make_unique<T>(std::forward<Args>(args)...));
     }
 
     /* Create an entity of the given type to be rendered in the environment scene. */
     template<typename T, typename... Args> requires std::is_base_of_v<Entity, T>
-    T* createEntity(Renderable* renderable, Args&&... args) {
-        return static_cast<T*>(scene.addEntity(std::make_unique<T>(renderable, std::forward<Args>(args)...)));
+    T* createEntity(Renderable* renderable, Shader* shader, Args&&... args) {
+        return static_cast<T*>(scene.addEntity(std::make_unique<T>(renderable, shader, std::forward<Args>(args)...)));
     }
 
     /* Create a standard entity to be rendered in the environment scene. */
-    Entity* createEntity(Renderable* renderable) { return createEntity<Entity>(renderable); }
+    Entity* createEntity(Renderable* renderable, Shader* shader) { return createEntity<Entity>(renderable, shader); }
     
     /* Invoked before the main loop starts iterating. */
     virtual void init() {}

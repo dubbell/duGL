@@ -1,8 +1,14 @@
 #include "dugl/modelling/scene.h"
+#include "dugl/modelling/opaque_pass.h"
 #include "dugl/utils/glad_include.h"
 
 #include <iostream>
 
+
+Scene::Scene()
+{
+    addRenderPass(std::make_unique<OpaquePass>());
+}
 
 void Scene::render()
 {
@@ -11,9 +17,27 @@ void Scene::render()
             shader->setDirectionalLight(directionalLight);
         }
     }
-    for (auto& [groupId, group] : entityGroups) {
-        group->render();
+
+    for (auto& passEntityList : passEntities) {
+        passEntityList.clear();
     }
+
+    for (auto& entity : entities)
+    {
+        // later passes take precedence, so each entity is drawn by exactly one pass
+        for (size_t pass_i = renderPasses.size(); pass_i-- > 0;)
+        {
+            if (renderPasses[pass_i]->accepts(*entity)) {
+                passEntities[pass_i].push_back(entity.get());
+                break;
+            }
+        }
+    }
+
+    for (size_t pass_i = 0; pass_i < renderPasses.size(); pass_i++) {
+        renderPasses[pass_i]->render(passEntities[pass_i]);
+    }
+
     skybox.draw();
 }
 
@@ -63,7 +87,9 @@ std::vector<Entity*> Scene::getEntities()
 
 void Scene::clearEntities()
 {
-    entityGroups.clear();
+    for (auto& passEntityList : passEntities) {
+        passEntityList.clear();
+    }
     entities.clear();
 }
 

@@ -1,18 +1,46 @@
 #include "dugl/modelling/entity.h"
+#include "dugl/common.h"
 
 #include <glm/gtc/matrix_transform.hpp>
 
 
-Entity::Entity(Renderable* renderable) : renderable(renderable), position(0.0f, 0.0f, 0.0f) {}
+Entity::Entity(Renderable* renderable, Shader* shader)
+    : renderable(renderable), shader(dugl::requireNonNull(shader)), position(0.0f, 0.0f, 0.0f) {}
 
 
-Entity::Entity(Renderable* renderable, glm::vec3 position) : renderable(renderable), position(position) {}
+Entity::Entity(Renderable* renderable, Shader* shader, glm::vec3 position)
+    : renderable(renderable), shader(dugl::requireNonNull(shader)), position(position) {}
 
 
 void Entity::render(Shader* shader)
 {
     shader->setMat4("model", getModelTransform());
     renderable->render(shader);
+}
+
+void Entity::setShader(Shader* shader)
+{
+    this->shader = dugl::requireNonNull(shader);
+}
+
+Shader* Entity::getShader() const
+{
+    return shader;
+}
+
+void Entity::setFlag(dugl::uint flag, bool value)
+{
+    if (value) {
+        flags |= std::uint64_t{1} << flag;
+    }
+    else {
+        flags &= ~(std::uint64_t{1} << flag);
+    }
+}
+
+bool Entity::hasFlag(dugl::uint flag) const
+{
+    return (flags >> flag & 1) != 0;
 }
 
 void Entity::setPosition(glm::vec3 position)

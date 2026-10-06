@@ -7,8 +7,7 @@
 
 #include "renderable.h"
 #include "entity.h"
-#include "entity_group.h"
-#include "standard_entity_group.h"
+#include "render_pass.h"
 #include "skybox.h"
 #include "dugl/shading/shader.h"
 #include "dugl/shading/material.h"
@@ -22,7 +21,8 @@ private:
 
     std::vector<std::unique_ptr<Renderable>> renderables;
     std::vector<std::unique_ptr<Entity>> entities;
-    std::map<dugl::uint, std::unique_ptr<EntityGroup>> entityGroups;
+    std::vector<std::unique_ptr<RenderPass>> renderPasses;
+    std::vector<std::vector<Entity*>> passEntities;
     std::map<dugl::uint, std::unique_ptr<Shader>> shaders;
 
     // a neutral overhead light, so a Scene renders sensibly before any lighting is set
@@ -35,6 +35,8 @@ private:
     std::vector<PointLight> pointLights;
 
 public:
+    Scene();
+
     void render();
 
     Shader* addShader(std::unique_ptr<Shader> shader);
@@ -53,18 +55,12 @@ public:
         return ptr;
     }
 
-    // Add an entity group to the scene. The scene takes ownership of the entity group's lifecycle.
-    template <class T> requires std::is_base_of_v<EntityGroup, T>
-    T* addGroup(dugl::uint groupId, std::unique_ptr<T> group) {
-        T* ptr = group.get();
-        entityGroups.insert_or_assign(groupId, std::move(group));
+    template <class T> requires std::is_base_of_v<RenderPass, T>
+    T* addRenderPass(std::unique_ptr<T> renderPass) {
+        T* ptr = renderPass.get();
+        renderPasses.push_back(std::move(renderPass));
+        passEntities.emplace_back();
         return ptr;
-    }
-
-    template <class T> requires std::is_base_of_v<EntityGroup, T>
-    T* getGroup(dugl::uint groupId) const {
-        auto it = entityGroups.find(groupId);
-        return it == entityGroups.end() ? nullptr : dynamic_cast<T*>(it->second.get());
     }
 
     std::vector<Entity*> getEntities();

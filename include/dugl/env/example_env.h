@@ -9,9 +9,6 @@
 #include "dugl/shading/uniform_buffer.h"
 #include "dugl/modelling/entity.h"
 #include "dugl/modelling/hoverable_entity.h"
-#include "dugl/modelling/entity_group.h"
-#include "dugl/modelling/standard_entity_group.h"
-#include "dugl/modelling/outlined_entity_group.h"
 #include "dugl/modelling/renderable.h"
 #include "dugl/modelling/renderable_builder.h"
 #include "dugl/modelling/skybox.h"
@@ -26,6 +23,8 @@ private:
 
     glm::vec4 clearColor;
 
+    std::vector<HoverableEntity*> hoverableEntities;
+
 public:
     ExampleEnvironment();
 
@@ -35,7 +34,7 @@ protected:
     void postRender() override;
 
 private:
-    void createPrimitives(StandardEntityGroup* entityGroup);
+    void createPrimitives(Shader* shader);
 
     void createImGuiFrame();
     void drawImGui();

@@ -14,7 +14,7 @@ protected:
     JPH::BodyID bodyId;
 
 public:
-    PhysicsEntity(Renderable* renderable, JPH::BodyInterface& bodyInterface, const JPH::BodyCreationSettings& settings);
+    PhysicsEntity(Renderable* renderable, Shader* shader, JPH::BodyInterface& bodyInterface, const JPH::BodyCreationSettings& settings);
     ~PhysicsEntity();
 
     PhysicsEntity(const PhysicsEntity&) = delete;

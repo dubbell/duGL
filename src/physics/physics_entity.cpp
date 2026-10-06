@@ -2,8 +2,8 @@
 #include "dugl/utils/jolt_adapter.h"
 
 
-PhysicsEntity::PhysicsEntity(Renderable* renderable, JPH::BodyInterface& bodyInterface, const JPH::BodyCreationSettings& settings)
-    : Entity(renderable),
+PhysicsEntity::PhysicsEntity(Renderable* renderable, Shader* shader, JPH::BodyInterface& bodyInterface, const JPH::BodyCreationSettings& settings)
+    : Entity(renderable, shader),
       bodyInterface(bodyInterface),
       bodyId(bodyInterface.CreateAndAddBody(settings, settings.mMotionType == JPH::EMotionType::Static
           ? JPH::EActivation::DontActivate

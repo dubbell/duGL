@@ -3,14 +3,14 @@
 #include "dugl/controllers/mouse.h"
 
 
-HoverableEntity::HoverableEntity(Renderable* renderable, MouseController* mouseController)
-    : Entity(renderable), hovered(false), hoverRadius(1.0f), mouseController(mouseController)
+HoverableEntity::HoverableEntity(Renderable* renderable, Shader* shader, MouseController* mouseController)
+    : Entity(renderable, shader), hovered(false), hoverRadius(1.0f), mouseController(mouseController)
 {
     mouseController->registerScreenRayObserver(this);
 }
 
-HoverableEntity::HoverableEntity(Renderable* renderable, glm::vec3 position, MouseController* mouseController)
-    : Entity(renderable, position), hovered(false), hoverRadius(1.0f), mouseController(mouseController)
+HoverableEntity::HoverableEntity(Renderable* renderable, Shader* shader, glm::vec3 position, MouseController* mouseController)
+    : Entity(renderable, shader, position), hovered(false), hoverRadius(1.0f), mouseController(mouseController)
 {
     mouseController->registerScreenRayObserver(this);
 }

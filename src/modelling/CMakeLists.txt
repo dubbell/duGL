@@ -1,7 +1,7 @@
 add_library(modelling STATIC 
 	skybox.cpp 
 	entity/entity.cpp entity/hoverable_entity.cpp
-	 group/standard_entity_group.cpp group/outlined_entity_group.cpp
+	pass/render_pass.cpp pass/opaque_pass.cpp pass/outline_pass.cpp
 	renderable/mesh.cpp renderable/renderable.cpp
 	renderable/renderable_builder.cpp renderable/model_builder.cpp renderable/primitive_builder.cpp scene.cpp)
 target_link_libraries(modelling

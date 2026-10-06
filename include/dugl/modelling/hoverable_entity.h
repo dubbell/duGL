@@ -15,8 +15,8 @@ protected:
     MouseController* mouseController;
 
 public:
-    HoverableEntity(Renderable* renderable, MouseController* mouseController);
-    HoverableEntity(Renderable* renderable, glm::vec3 position, MouseController* mouseController);
+    HoverableEntity(Renderable* renderable, Shader* shader, MouseController* mouseController);
+    HoverableEntity(Renderable* renderable, Shader* shader, glm::vec3 position, MouseController* mouseController);
     ~HoverableEntity();
 
     // registration with the mouse controller is tied to this object's lifetime; disable

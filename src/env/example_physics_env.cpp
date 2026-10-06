@@ -3,8 +3,6 @@
 
 #include <Jolt/Physics/Collision/Shape/PlaneShape.h>
 
-static constexpr dugl::uint DEFAULT_ENTITY_GROUP_ID = 0;
-
 void ExamplePhysicsEnvironment::init()
 {
     // disable cursor initially
@@ -15,7 +13,6 @@ void ExamplePhysicsEnvironment::init()
     activeCamera->turnUp(-10.0f);
 
     Shader* defaultShader = createShader("basic_texture.vert", "basic_texture.frag");
-    StandardEntityGroup* defaultGroup = createEntityGroup(DEFAULT_ENTITY_GROUP_ID, defaultShader);
     JPH::BodyInterface& bodyInterface = physicsSystem.GetBodyInterface();
 
     PlaneBuilder planeBuilder(20.0f, 20.0f);
@@ -25,7 +22,7 @@ void ExamplePhysicsEnvironment::init()
         JPH::Quat::sIdentity(),
         JPH::EMotionType::Static,
         Layers::NON_MOVING);
-    defaultGroup->addEntity(createEntity<PhysicsEntity>(createRenderable(planeBuilder), bodyInterface, planeSettings));
+    createEntity<PhysicsEntity>(createRenderable(planeBuilder), defaultShader, bodyInterface, planeSettings);
 
     BoxBuilder boxBuilder(glm::vec3(1.0f));
     JPH::BodyCreationSettings boxSettings(
@@ -34,7 +31,7 @@ void ExamplePhysicsEnvironment::init()
         JPH::Quat::sRotation(JPH::Vec3(1.0f, 0.0f, 1.0f).Normalized(), 0.4f),
         JPH::EMotionType::Dynamic,
         Layers::MOVING);
-    defaultGroup->addEntity(createEntity<PhysicsEntity>(createRenderable(boxBuilder), bodyInterface, boxSettings));
+    createEntity<PhysicsEntity>(createRenderable(boxBuilder), defaultShader, bodyInterface, boxSettings);
 
     physicsSystem.OptimizeBroadPhase();
 }
