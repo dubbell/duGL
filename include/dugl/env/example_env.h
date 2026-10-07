@@ -8,7 +8,6 @@
 #include "dugl/controllers/flight_controller.h"
 #include "dugl/shading/uniform_buffer.h"
 #include "dugl/modelling/entity.h"
-#include "dugl/modelling/hoverable_entity.h"
 #include "dugl/modelling/renderable.h"
 #include "dugl/modelling/renderable_builder.h"
 #include "dugl/modelling/skybox.h"
@@ -22,8 +21,6 @@ private:
     UniformBuffer perspectiveUbo;
 
     glm::vec4 clearColor;
-
-    std::vector<HoverableEntity*> hoverableEntities;
 
 public:
     ExampleEnvironment();

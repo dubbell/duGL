@@ -39,16 +39,15 @@ void ExampleEnvironment::init()
     Shader* cubeMapShader = createShader("skybox.vert", "skybox.frag");
 
     // create render passes
-    createRenderPass<OutlinePass>(outlineShader);
+    createRenderPass<OutlinePass>(outlineShader, flagMask(EntityFlag::Hovered));
 
     // create entities
-    HoverableEntity* backpack1 = createEntity<HoverableEntity>(backpackRenderable, objectShader, &mouseController);
+    Entity* backpack1 = createEntity(backpackRenderable, objectShader);
     backpack1->setPosition(glm::vec3(1.0f, 1.0f, 6.0f));
-    HoverableEntity* backpack2 = createEntity<HoverableEntity>(backpackRenderable, objectShader, &mouseController);
+    backpack1->setFlag(EntityFlag::Hoverable, true);
+    Entity* backpack2 = createEntity(backpackRenderable, objectShader);
     backpack2->setPosition(glm::vec3(-2.0f, 1.0f, 1.0f));
-
-    hoverableEntities.push_back(backpack1);
-    hoverableEntities.push_back(backpack2);
+    backpack2->setFlag(EntityFlag::Hoverable, true);
 
     createPrimitives(objectShader);
 
@@ -117,10 +116,6 @@ void ExampleEnvironment::createPrimitives(Shader* shader)
 
 void ExampleEnvironment::update(float dt)
 {
-    for (HoverableEntity* entity : hoverableEntities) {
-        entity->setFlag(EntityFlag::Outlined, entity->isHovered());
-    }
-
     createImGuiFrame();
 }
 

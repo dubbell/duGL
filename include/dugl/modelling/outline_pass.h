@@ -8,11 +8,12 @@ class OutlinePass : public RenderPass
 {
 private:
     Shader* outlineShader;
+    std::uint64_t acceptedFlags;
 
     float outlineThickness;
 
 public:
-    OutlinePass(Shader* outlineShader);
+    OutlinePass(Shader* outlineShader, std::uint64_t acceptedFlags);
 
     bool accepts(const Entity& entity) const override;
     void render(std::span<Entity* const> entities) override;

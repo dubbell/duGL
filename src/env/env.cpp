@@ -2,6 +2,7 @@
 #include "dugl/utils/glfw_include.h"
 #include "dugl/shading/ubo_templates.h"
 #include "dugl/async/job.h"
+#include "dugl/utils/common.h"
 
 #include <algorithm>
 #include <stdexcept>
@@ -46,6 +47,7 @@ Environment::Environment()
     glViewport(0, 0, viewportWidth, viewportHeight);
 
     keyboardController.setWindow(window);
+    mouseController.registerScreenRayObserver(this);
 
     glfwSetFramebufferSizeCallback(window, Environment::glfwFrameBufferResizeCallback);
     glfwSetWindowUserPointer(window, this);
@@ -137,6 +139,16 @@ bool Environment::getFreeCursor()
 void Environment::setFreeCursor(bool freeCursor)
 {
     this->freeCursor = freeCursor;
+}
+
+void Environment::observeRay(glm::vec3 rayOrigin, glm::vec3 rayDirection)
+{
+    for (Entity* entity : scene.getEntities())
+    {
+        bool hovered = entity->hasFlag(EntityFlag::Hoverable) && checkRayIntersection(
+            entity->getPosition(), entity->getProperty(EntityProperty::HoverRadius, 1.0f), rayOrigin, rayDirection);
+        entity->setFlag(EntityFlag::Hovered, hovered);
+    }
 }
 
 Shader* Environment::createShader(const char* vertexShader, const char* fragmentShader)

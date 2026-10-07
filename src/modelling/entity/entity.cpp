@@ -43,6 +43,27 @@ bool Entity::hasFlag(dugl::uint flag) const
     return (flags >> flag & 1) != 0;
 }
 
+bool Entity::hasAnyFlag(std::uint64_t mask) const
+{
+    return (flags & mask) != 0;
+}
+
+void Entity::setProperty(dugl::uint property, float value)
+{
+    properties[property] = value;
+}
+
+float Entity::getProperty(dugl::uint property, float defaultValue) const
+{
+    auto it = properties.find(property);
+    return it == properties.end() ? defaultValue : it->second;
+}
+
+void Entity::removeProperty(dugl::uint property)
+{
+    properties.erase(property);
+}
+
 void Entity::setPosition(glm::vec3 position)
 {
     this->position = position;

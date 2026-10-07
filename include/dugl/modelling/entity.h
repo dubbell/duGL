@@ -7,15 +7,32 @@
 #include <glm/gtc/quaternion.hpp>
 
 #include <cstdint>
+#include <unordered_map>
 
 
 namespace EntityFlag
 {
     enum : dugl::uint
     {
-        Outlined = 0,
+        Hoverable = 0,
+        Hovered = 1,
         UserBegin = 32
     };
+}
+
+namespace EntityProperty
+{
+    enum : dugl::uint
+    {
+        HoverRadius = 0,
+        UserBegin = 32
+    };
+}
+
+template <typename... Flags>
+constexpr std::uint64_t flagMask(Flags... flags)
+{
+    return ((std::uint64_t{1} << flags) | ...);
 }
 
 // An Entity is the world space representation of a Renderable. While
@@ -31,6 +48,7 @@ protected:
     glm::vec3 velocity{ 0.0f };
     glm::vec3 angularVelocity{ 0.0f };
     std::uint64_t flags = 0;
+    std::unordered_map<dugl::uint, float> properties;
 
 public:
     Entity(Renderable* model, Shader* shader);
@@ -45,6 +63,11 @@ public:
 
     void setFlag(dugl::uint flag, bool value);
     bool hasFlag(dugl::uint flag) const;
+    bool hasAnyFlag(std::uint64_t mask) const;
+
+    void setProperty(dugl::uint property, float value);
+    float getProperty(dugl::uint property, float defaultValue) const;
+    void removeProperty(dugl::uint property);
 
     void setPosition(glm::vec3 position);
     glm::vec3& getPosition();

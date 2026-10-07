@@ -18,7 +18,7 @@
 
 
 /* Base class for starting a duGL session. Initializes the GLFW window. */
-class Environment : public PerspectiveInterface
+class Environment : public PerspectiveInterface, public ScreenRayObserver
 {
 protected:
     GLFWwindow* window;
@@ -37,8 +37,7 @@ protected:
     MouseController mouseController;
 
     // declared after the controllers so its entities (which may reference
-    // them, e.g. HoverableEntity unregistering itself on destruction) are
-    // destroyed first
+    // them) are destroyed first
     Scene scene;
     glm::vec4 clearColor;
 
@@ -62,6 +61,8 @@ public:
 
     bool getFreeCursor() override;
     void setFreeCursor(bool freeCursor) override;
+
+    void observeRay(glm::vec3 rayOrigin, glm::vec3 rayDirection) override;
     
 protected:
     /* Create a shader program with the provided vertex and fragment shaders. */

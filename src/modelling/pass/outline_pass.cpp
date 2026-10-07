@@ -3,13 +3,13 @@
 #include "dugl/common.h"
 
 
-OutlinePass::OutlinePass(Shader* outlineShader)
-    : outlineShader(dugl::requireNonNull(outlineShader)), outlineThickness(0.15f) {}
+OutlinePass::OutlinePass(Shader* outlineShader, std::uint64_t acceptedFlags)
+    : outlineShader(dugl::requireNonNull(outlineShader)), acceptedFlags(acceptedFlags), outlineThickness(0.15f) {}
 
 
 bool OutlinePass::accepts(const Entity& entity) const
 {
-    return entity.hasFlag(EntityFlag::Outlined);
+    return entity.hasAnyFlag(acceptedFlags);
 }
 
 void OutlinePass::render(std::span<Entity* const> entities)
