@@ -3,10 +3,12 @@
 #include "dugl/shading/shader.h"
 #include "dugl/modelling/renderable.h"
 #include "dugl/common.h"
+#include "dugl/utils/common.h"
 
 #include <glm/gtc/quaternion.hpp>
 
 #include <cstdint>
+#include <optional>
 #include <unordered_map>
 
 
@@ -35,11 +37,26 @@ constexpr std::uint64_t flagMask(Flags... flags)
     return ((std::uint64_t{1} << flags) | ...);
 }
 
+struct EntityUpdateContext
+{
+    float dt;
+    std::optional<Ray> hoverRay;
+};
+
+DUGL_NAMESPACE_BEGIN
+class EntityUpdateJob;
+DUGL_NAMESPACE_END
+
 // An Entity is the world space representation of a Renderable. While
 // each Renderable is singular, multiple Entity objects with the same
 // Renderable can exist and be rendered on the screen simultaneously.
 class Entity
 {
+    friend class dugl::EntityUpdateJob;
+
+private:
+    void tick(const EntityUpdateContext& context);
+
 protected:
     Renderable* renderable;
     Shader* shader;
@@ -50,12 +67,13 @@ protected:
     std::uint64_t flags = 0;
     std::unordered_map<dugl::uint, float> properties;
 
+    virtual void update(float dt) {}
+
 public:
     Entity(Renderable* model, Shader* shader);
     Entity(Renderable* model, Shader* shader, glm::vec3 position);
     virtual ~Entity() = default;
 
-    virtual void update(float dt) {}
     virtual void render(Shader* shader);
 
     void setShader(Shader* shader);

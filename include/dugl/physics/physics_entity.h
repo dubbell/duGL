@@ -13,14 +13,14 @@ protected:
     JPH::BodyInterface& bodyInterface;
     JPH::BodyID bodyId;
 
+    void update(float dt) override;
+
 public:
     PhysicsEntity(Renderable* renderable, Shader* shader, JPH::BodyInterface& bodyInterface, const JPH::BodyCreationSettings& settings);
     ~PhysicsEntity();
 
     PhysicsEntity(const PhysicsEntity&) = delete;
     PhysicsEntity& operator=(const PhysicsEntity&) = delete;
-
-    void update(float dt) override;
 
     JPH::BodyID getBodyId() const;
 };

@@ -18,16 +18,16 @@ public:
 class EntityUpdateJob : public Job
 {
 private:
-	float dt;
+	const EntityUpdateContext& context;
 	std::vector<Entity*> entities;
 
 public:
-	EntityUpdateJob(float dt, Entity* entity) : dt(dt), entities{entity} {}
-	EntityUpdateJob(float dt, std::vector<Entity*> entities) : dt(dt), entities(std::move(entities)) {}
+	EntityUpdateJob(const EntityUpdateContext& context, Entity* entity) : context(context), entities{entity} {}
+	EntityUpdateJob(const EntityUpdateContext& context, std::vector<Entity*> entities) : context(context), entities(std::move(entities)) {}
 
 	void execute() override {
 		for (auto& entity : entities) {
-			entity->update(dt);
+			entity->tick(context);
 		}
 	}
 };

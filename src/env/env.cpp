@@ -102,7 +102,6 @@ void Environment::start()
         // Process environment logic.
         float dt = stopwatch.tick();
         update(dt);
-        updateHoverStates();
         updateEntities(dt);
 
         // Write data to the GPU (transforms, lighting, UBOs, ...)
@@ -153,17 +152,6 @@ Renderable* Environment::createRenderable(RenderableBuilder& builder)
     return scene.addRenderable(std::make_unique<Renderable>(builder.build()));
 }
 
-void Environment::updateHoverStates()
-{
-    std::optional<Ray> ray = mouseController.getScreenRay();
-    for (Entity* entity : scene.getEntities())
-    {
-        bool hovered = ray && entity->hasFlag(EntityFlag::Hoverable) && checkRayIntersection(
-            entity->getPosition(), entity->getProperty(EntityProperty::HoverRadius, 1.0f), ray->origin, ray->direction);
-        entity->setFlag(EntityFlag::Hovered, hovered);
-    }
-}
-
 void Environment::updateEntities(float dt)
 {
     std::vector<Entity*> entities = scene.getEntities();
@@ -177,6 +165,8 @@ void Environment::updateEntities(float dt)
     // Add largest possible remainder numJobs-1 so that last batch of entities are not discarded.
     size_t entitiesPerJob = (entities.size() + numJobs - 1) / numJobs;
 
+    EntityUpdateContext context{ dt, mouseController.getScreenRay() };
+
     std::vector<std::unique_ptr<dugl::EntityUpdateJob>> jobs;
     dugl::JobBarrier* barrier = dispatcher.createBarrier();
 
@@ -189,7 +179,7 @@ void Environment::updateEntities(float dt)
         }
 
         auto& job = jobs.emplace_back(std::make_unique<dugl::EntityUpdateJob>(
-            dt, std::vector<Entity*>(entities.begin() + begin, entities.begin() + end)));
+            context, std::vector<Entity*>(entities.begin() + begin, entities.begin() + end)));
         dispatcher.submitJob("EntityUpdate", job.get(), barrier);
     }
 

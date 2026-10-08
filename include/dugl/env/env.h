@@ -93,7 +93,6 @@ protected:
     virtual void frameBufferResizeCallback(int width, int height) {}
 
 private:
-    void updateHoverStates();
     void updateEntities(float dt);
 
     void clearBuffers();

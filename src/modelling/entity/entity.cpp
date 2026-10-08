@@ -12,6 +12,16 @@ Entity::Entity(Renderable* renderable, Shader* shader, glm::vec3 position)
     : renderable(renderable), shader(dugl::requireNonNull(shader)), position(position) {}
 
 
+void Entity::tick(const EntityUpdateContext& context)
+{
+    update(context.dt);
+
+    const std::optional<Ray>& ray = context.hoverRay;
+    bool hovered = ray && hasFlag(EntityFlag::Hoverable) && checkRayIntersection(
+        position, getProperty(EntityProperty::HoverRadius, 1.0f), ray->origin, ray->direction);
+    setFlag(EntityFlag::Hovered, hovered);
+}
+
 void Entity::render(Shader* shader)
 {
     shader->setMat4("model", getModelTransform());
