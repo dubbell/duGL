@@ -8,7 +8,9 @@ PhysicsEntity::PhysicsEntity(Renderable* renderable, Shader* shader, JPH::BodyIn
       bodyId(bodyInterface.CreateAndAddBody(settings, settings.mMotionType == JPH::EMotionType::Static
           ? JPH::EActivation::DontActivate
           : JPH::EActivation::Activate))
-{}
+{
+    bodyInterface.SetUserData(bodyId, reinterpret_cast<JPH::uint64>(this));
+}
 
 PhysicsEntity::~PhysicsEntity()
 {
@@ -16,12 +18,17 @@ PhysicsEntity::~PhysicsEntity()
     bodyInterface.DestroyBody(bodyId);
 }
 
-void PhysicsEntity::update(float dt)
+void PhysicsEntity::preUpdate(float dt)
 {
     position = toGlm(bodyInterface.GetPosition(bodyId));
     rotation = toGlm(bodyInterface.GetRotation(bodyId));
     velocity = toGlm(bodyInterface.GetLinearVelocity(bodyId));
     angularVelocity = toGlm(bodyInterface.GetAngularVelocity(bodyId));
+
+    for (const CollisionEvent& event : pendingCollisions) {
+        onCollision(event, event.first == this ? event.second : event.first);
+    }
+    pendingCollisions.clear();
 }
 
 JPH::BodyID PhysicsEntity::getBodyId() const

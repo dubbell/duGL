@@ -1,5 +1,11 @@
 #pragma once
 
+#include "dugl/physics/collision.h"
+
+#include <mutex>
+#include <unordered_map>
+#include <vector>
+
 #include <Jolt/Jolt.h>
 #include <Jolt/RegisterTypes.h>
 #include <Jolt/Core/Factory.h>
@@ -56,12 +62,28 @@ public:
     bool ShouldCollide(JPH::ObjectLayer objectLayer, JPH::BroadPhaseLayer broadPhaseLayer) const override;
 };
 
+struct RecordedContact
+{
+    CollisionPhase phase;
+    JPH::BodyID body1;
+    JPH::BodyID body2;
+    JPH::RVec3 point = JPH::RVec3::sZero();
+    JPH::Vec3 normal = JPH::Vec3::sZero();
+    float penetrationDepth = 0.0f;
+    JPH::Vec3 relativeVelocity = JPH::Vec3::sZero();
+};
+
 // Listens to collisions between objects.
-class BasicContactListener : public JPH::ContactListener
+class ContactRecorder : public JPH::ContactListener
 {
 public:
-    JPH::ValidateResult OnContactValidate(const JPH::Body& body1, const JPH::Body& body2, JPH::RVec3Arg inBaseOffset, const JPH::CollideShapeResult& colShapeResult) override;
     void OnContactAdded(const JPH::Body& body1, const JPH::Body& body2, const JPH::ContactManifold& manifold, JPH::ContactSettings& settings) override;
-    void OnContactPersisted(const JPH::Body& body1, const JPH::Body& body2, const JPH::ContactManifold& manifold, JPH::ContactSettings& settings) override;
     void OnContactRemoved(const JPH::SubShapeIDPair& subShapePair) override;
+
+    std::vector<RecordedContact> drain();
+
+private:
+    std::mutex mutex;
+    std::unordered_map<JPH::uint64, int> contactCounts;
+    std::vector<RecordedContact> contacts;
 };

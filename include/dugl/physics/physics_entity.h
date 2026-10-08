@@ -1,19 +1,31 @@
 #pragma once
 
 #include "dugl/modelling/entity.h"
+#include "dugl/physics/collision.h"
 
 #include <Jolt/Jolt.h>
 #include <Jolt/Physics/Body/BodyInterface.h>
 #include <Jolt/Physics/Body/BodyCreationSettings.h>
 
+#include <vector>
+
+
+class PhysicsEnvironment;
 
 class PhysicsEntity : public Entity
 {
+    friend class PhysicsEnvironment;
+
+private:
+    std::vector<CollisionEvent> pendingCollisions;
+
+    void preUpdate(float dt) override final;
+
 protected:
     JPH::BodyInterface& bodyInterface;
     JPH::BodyID bodyId;
 
-    void update(float dt) override;
+    virtual void onCollision(const CollisionEvent& event, PhysicsEntity* other) {}
 
 public:
     PhysicsEntity(Renderable* renderable, Shader* shader, JPH::BodyInterface& bodyInterface, const JPH::BodyCreationSettings& settings);

@@ -67,6 +67,7 @@ protected:
     std::uint64_t flags = 0;
     std::unordered_map<dugl::uint, float> properties;
 
+    virtual void preUpdate(float dt) {}
     virtual void update(float dt) {}
 
 public:

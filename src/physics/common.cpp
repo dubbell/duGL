@@ -1,14 +1,14 @@
 #include "dugl/physics/common.h"
 
-#include <iostream>
+#include <utility>
 
 using JPH::uint;
+using JPH::uint64;
 using JPH::BroadPhaseLayer;
 using JPH::ObjectLayer;
-using JPH::ValidateResult;
 using JPH::Body;
-using JPH::RVec3Arg;
-using JPH::CollideShapeResult;
+using JPH::BodyID;
+using JPH::RVec3;
 using JPH::ContactManifold;
 using JPH::ContactSettings;
 using JPH::SubShapeIDPair;
@@ -68,22 +68,51 @@ bool ObjectBroadPhaseFilter::ShouldCollide(ObjectLayer objectLayer, BroadPhaseLa
 }
 
 
-ValidateResult BasicContactListener::OnContactValidate(const Body& body1, const Body& body2, RVec3Arg inBaseOffset, const CollideShapeResult& colShapeResult)
+static uint64 bodyPairKey(const BodyID& body1, const BodyID& body2)
 {
-    return ValidateResult::AcceptAllContactsForThisBodyPair;
+    return (uint64(body1.GetIndexAndSequenceNumber()) << 32) | body2.GetIndexAndSequenceNumber();
 }
 
-void BasicContactListener::OnContactAdded(const Body& body1, const Body& body2, const ContactManifold& manifold, ContactSettings& settings)
+void ContactRecorder::OnContactAdded(const Body& body1, const Body& body2, const ContactManifold& manifold, ContactSettings& settings)
 {
-    std::cout << "A contact was added" << std::endl;
+    std::lock_guard lock(mutex);
+
+    if (contactCounts[bodyPairKey(body1.GetID(), body2.GetID())]++ > 0) {
+        return;
+    }
+
+    uint numPoints = manifold.mRelativeContactPointsOn1.size();
+    RVec3 point = RVec3::sZero();
+    for (uint point_i = 0; point_i < numPoints; point_i++) {
+        point += manifold.GetWorldSpaceContactPointOn1(point_i);
+    }
+    point /= float(numPoints);
+
+    contacts.push_back({
+        CollisionPhase::Begin,
+        body1.GetID(),
+        body2.GetID(),
+        point,
+        manifold.mWorldSpaceNormal,
+        manifold.mPenetrationDepth,
+        body2.GetPointVelocity(point) - body1.GetPointVelocity(point) });
 }
 
-void BasicContactListener::OnContactPersisted(const Body& body1, const Body& body2, const ContactManifold& manifold, ContactSettings& settings)
+void ContactRecorder::OnContactRemoved(const SubShapeIDPair& subShapePair)
 {
-    std::cout << "A contact was persisted" << std::endl;
+    std::lock_guard lock(mutex);
+
+    auto it = contactCounts.find(bodyPairKey(subShapePair.GetBody1ID(), subShapePair.GetBody2ID()));
+    if (it == contactCounts.end() || --it->second > 0) {
+        return;
+    }
+
+    contactCounts.erase(it);
+    contacts.push_back({ CollisionPhase::End, subShapePair.GetBody1ID(), subShapePair.GetBody2ID() });
 }
 
-void BasicContactListener::OnContactRemoved(const SubShapeIDPair& subShapePair)
+std::vector<RecordedContact> ContactRecorder::drain()
 {
-    std::cout << "A contact was removed" << std::endl;
+    std::lock_guard lock(mutex);
+    return std::exchange(contacts, {});
 }

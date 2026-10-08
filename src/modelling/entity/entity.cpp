@@ -14,6 +14,7 @@ Entity::Entity(Renderable* renderable, Shader* shader, glm::vec3 position)
 
 void Entity::tick(const EntityUpdateContext& context)
 {
+    preUpdate(context.dt);
     update(context.dt);
 
     const std::optional<Ray>& ray = context.hoverRay;
