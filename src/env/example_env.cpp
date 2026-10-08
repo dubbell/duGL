@@ -35,11 +35,12 @@ void ExampleEnvironment::init()
 
     // create shader programs
     Shader* objectShader = createShader("basic_texture.vert", "basic_texture.frag");
+    Shader* outlineMaskShader = createShader("outline_mask.vert", "outline_mask.frag");
     Shader* outlineShader = createShader("outline.vert", "outline.frag");
     Shader* cubeMapShader = createShader("skybox.vert", "skybox.frag");
 
     // create render passes
-    createRenderPass<OutlinePass>(outlineShader, flagMask(EntityFlag::Hovered));
+    createRenderPass<OutlinePass>(outlineMaskShader, outlineShader, flagMask(EntityFlag::Hovered));
 
     // create entities
     Entity* backpack1 = createEntity(backpackRenderable, objectShader);

@@ -1,5 +1,6 @@
 #include "dugl/env/example_physics_env.h"
 #include "dugl/modelling/primitive_builder.h"
+#include "dugl/modelling/outline_pass.h"
 
 #include <Jolt/Physics/Collision/Shape/PlaneShape.h>
 
@@ -31,7 +32,12 @@ void ExamplePhysicsEnvironment::init()
         JPH::Quat::sRotation(JPH::Vec3(1.0f, 0.0f, 1.0f).Normalized(), 0.4f),
         JPH::EMotionType::Dynamic,
         Layers::MOVING);
-    createEntity<PhysicsEntity>(createRenderable(boxBuilder), defaultShader, bodyInterface, boxSettings);
+    Entity* box = createEntity<PhysicsEntity>(createRenderable(boxBuilder), defaultShader, bodyInterface, boxSettings);
+    box->setFlag(EntityFlag::Hoverable, true);
+
+    Shader* outlineMaskShader = createShader("outline_mask.vert", "outline_mask.frag");
+    Shader* outlineShader = createShader("outline.vert", "outline.frag");
+    createRenderPass<OutlinePass>(outlineMaskShader, outlineShader, flagMask(EntityFlag::Hovered));
 
     physicsSystem.OptimizeBroadPhase();
 }
