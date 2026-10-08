@@ -29,7 +29,7 @@ PhysicsEnvironment::~PhysicsEnvironment()
     scene.clearEntities();
 }
 
-void PhysicsEnvironment::update(float dt)
+void PhysicsEnvironment::physicsUpdate(float dt)
 {
     accumulator = std::min(accumulator + dt, MAX_ACCUMULATED_TIME);
     while (accumulator >= PHYSICS_STEP)

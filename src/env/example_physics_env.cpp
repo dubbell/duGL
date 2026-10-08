@@ -41,3 +41,8 @@ void ExamplePhysicsEnvironment::init()
 
     physicsSystem.OptimizeBroadPhase();
 }
+
+void ExamplePhysicsEnvironment::update(float dt)
+{
+    physicsUpdate(dt);
+}

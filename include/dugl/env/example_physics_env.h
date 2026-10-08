@@ -14,4 +14,5 @@ public:
 
 protected:
     void init() override;
+    void update(float dt) override;
 };

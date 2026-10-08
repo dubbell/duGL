@@ -29,5 +29,5 @@ public:
     virtual ~PhysicsEnvironment();
 
 protected:
-    void update(float dt) override;
+    void physicsUpdate(float dt);
 };
