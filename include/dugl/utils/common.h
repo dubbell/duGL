@@ -6,6 +6,12 @@
 #include <glm/gtx/norm.hpp>
 
 
+struct Ray
+{
+    glm::vec3 origin;
+    glm::vec3 direction;
+};
+
 // Computes a vector in world space from a point in screen space.
 inline glm::vec3 castScreenRay(float screenX, float screenY, int viewportWidth, int viewportHeight, glm::mat4 viewMatrix, glm::mat4 projectionMatrix)
 {

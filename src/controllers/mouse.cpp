@@ -17,16 +17,6 @@ void MouseController::unregisterOffsetObserver(MouseOffsetObserver* observer)
     mouseOffsetObservers.erase(observer);
 }
 
-void MouseController::registerScreenRayObserver(ScreenRayObserver* observer)
-{
-    screenRayObservers.insert(observer);
-}
-
-void MouseController::unregisterScreenRayObserver(ScreenRayObserver* observer)
-{
-    screenRayObservers.erase(observer);
-}
-
 void MouseController::handleCursorPosition(float xPos, float yPos)
 {
     if (firstMouse)
@@ -47,20 +37,17 @@ void MouseController::handleCursorPosition(float xPos, float yPos)
     }
 }
 
-void MouseController::handleScreenRay(float xPos, float yPos)
+Ray MouseController::computeScreenRay(float xPos, float yPos)
 {
     Camera* camera = perspective->getActiveCamera();
     glm::mat4 view = camera->getViewMatrix();
     glm::mat4 projection = camera->getProjectionMatrix();
     auto [viewportWidth, viewportHeight] = perspective->getViewportSize();
-    
+
     glm::vec3 origin = camera->getPosition();
     glm::vec3 direction = castScreenRay(xPos, yPos, viewportWidth, viewportHeight, view, projection);
 
-    for (auto& observer : screenRayObservers)
-    {
-        observer->observeRay(origin, direction);
-    }
+    return { origin, direction };
 }
 
 void MouseController::processInput()
@@ -70,8 +57,15 @@ void MouseController::processInput()
 
     handleCursorPosition(xPos, yPos);
 
-    if (perspective->getFreeCursor())
-    {
-        handleScreenRay(xPos, yPos);
+    if (perspective->getFreeCursor()) {
+        screenRay = computeScreenRay(xPos, yPos);
     }
+    else {
+        screenRay.reset();
+    }
+}
+
+std::optional<Ray> MouseController::getScreenRay() const
+{
+    return screenRay;
 }

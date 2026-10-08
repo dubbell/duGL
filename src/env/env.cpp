@@ -47,7 +47,6 @@ Environment::Environment()
     glViewport(0, 0, viewportWidth, viewportHeight);
 
     keyboardController.setWindow(window);
-    mouseController.registerScreenRayObserver(this);
 
     glfwSetFramebufferSizeCallback(window, Environment::glfwFrameBufferResizeCallback);
     glfwSetWindowUserPointer(window, this);
@@ -103,6 +102,7 @@ void Environment::start()
         // Process environment logic.
         float dt = stopwatch.tick();
         update(dt);
+        updateHoverStates();
         updateEntities(dt);
 
         // Write data to the GPU (transforms, lighting, UBOs, ...)
@@ -141,16 +141,6 @@ void Environment::setFreeCursor(bool freeCursor)
     this->freeCursor = freeCursor;
 }
 
-void Environment::observeRay(glm::vec3 rayOrigin, glm::vec3 rayDirection)
-{
-    for (Entity* entity : scene.getEntities())
-    {
-        bool hovered = entity->hasFlag(EntityFlag::Hoverable) && checkRayIntersection(
-            entity->getPosition(), entity->getProperty(EntityProperty::HoverRadius, 1.0f), rayOrigin, rayDirection);
-        entity->setFlag(EntityFlag::Hovered, hovered);
-    }
-}
-
 Shader* Environment::createShader(const char* vertexShader, const char* fragmentShader)
 {
     return scene.addShader(std::make_unique<Shader>(
@@ -161,6 +151,17 @@ Shader* Environment::createShader(const char* vertexShader, const char* fragment
 Renderable* Environment::createRenderable(RenderableBuilder& builder)
 {
     return scene.addRenderable(std::make_unique<Renderable>(builder.build()));
+}
+
+void Environment::updateHoverStates()
+{
+    std::optional<Ray> ray = mouseController.getScreenRay();
+    for (Entity* entity : scene.getEntities())
+    {
+        bool hovered = ray && entity->hasFlag(EntityFlag::Hoverable) && checkRayIntersection(
+            entity->getPosition(), entity->getProperty(EntityProperty::HoverRadius, 1.0f), ray->origin, ray->direction);
+        entity->setFlag(EntityFlag::Hovered, hovered);
+    }
 }
 
 void Environment::updateEntities(float dt)

@@ -18,7 +18,7 @@
 
 
 /* Base class for starting a duGL session. Initializes the GLFW window. */
-class Environment : public PerspectiveInterface, public ScreenRayObserver
+class Environment : public PerspectiveInterface
 {
 protected:
     GLFWwindow* window;
@@ -62,8 +62,6 @@ public:
     bool getFreeCursor() override;
     void setFreeCursor(bool freeCursor) override;
 
-    void observeRay(glm::vec3 rayOrigin, glm::vec3 rayDirection) override;
-    
 protected:
     /* Create a shader program with the provided vertex and fragment shaders. */
     Shader* createShader(const char* vertexShader, const char* fragmentShader);
@@ -95,6 +93,7 @@ protected:
     virtual void frameBufferResizeCallback(int width, int height) {}
 
 private:
+    void updateHoverStates();
     void updateEntities(float dt);
 
     void clearBuffers();
