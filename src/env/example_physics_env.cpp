@@ -4,6 +4,9 @@
 
 #include <Jolt/Physics/Collision/Shape/PlaneShape.h>
 
+static constexpr float THRUST_FORCE = 20000.0f;
+static constexpr float KICK_IMPULSE = 3000.0f;
+
 void ExamplePhysicsEnvironment::init()
 {
     // disable cursor initially
@@ -32,7 +35,7 @@ void ExamplePhysicsEnvironment::init()
         JPH::Quat::sRotation(JPH::Vec3(1.0f, 0.0f, 1.0f).Normalized(), 0.4f),
         JPH::EMotionType::Dynamic,
         Layers::MOVING);
-    Entity* box = createEntity<PhysicsEntity>(createRenderable(boxBuilder), defaultShader, bodyInterface, boxSettings);
+    box = createEntity<PhysicsEntity>(createRenderable(boxBuilder), defaultShader, bodyInterface, boxSettings);
     box->setFlag(EntityFlag::Hoverable, true);
 
     Shader* outlineMaskShader = createShader("outline_mask.vert", "outline_mask.frag");
@@ -44,5 +47,18 @@ void ExamplePhysicsEnvironment::init()
 
 void ExamplePhysicsEnvironment::update(float dt)
 {
+    bool kick = glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS;
+    if (kick && !kickHeld) {
+        box->applyImpulse(glm::vec3(0.0f, 0.0f, KICK_IMPULSE));
+    }
+    kickHeld = kick;
+
     physicsUpdate(dt);
+}
+
+void ExamplePhysicsEnvironment::prePhysicsStep(float stepDt)
+{
+    if (glfwGetKey(window, GLFW_KEY_F) == GLFW_PRESS) {
+        box->applyForce(glm::vec3(0.0f, THRUST_FORCE, 0.0f));
+    }
 }

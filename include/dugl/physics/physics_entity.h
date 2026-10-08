@@ -23,4 +23,12 @@ public:
     PhysicsEntity& operator=(const PhysicsEntity&) = delete;
 
     JPH::BodyID getBodyId() const;
+
+    void applyForce(glm::vec3 force);
+    void applyForce(glm::vec3 force, glm::vec3 point);
+    void applyTorque(glm::vec3 torque);
+
+    void applyImpulse(glm::vec3 impulse);
+    void applyImpulse(glm::vec3 impulse, glm::vec3 point);
+    void applyAngularImpulse(glm::vec3 angularImpulse);
 };

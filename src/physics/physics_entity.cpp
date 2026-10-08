@@ -28,3 +28,33 @@ JPH::BodyID PhysicsEntity::getBodyId() const
 {
     return bodyId;
 }
+
+void PhysicsEntity::applyForce(glm::vec3 force)
+{
+    bodyInterface.AddForce(bodyId, toJolt(force));
+}
+
+void PhysicsEntity::applyForce(glm::vec3 force, glm::vec3 point)
+{
+    bodyInterface.AddForce(bodyId, toJolt(force), toJolt(point));
+}
+
+void PhysicsEntity::applyTorque(glm::vec3 torque)
+{
+    bodyInterface.AddTorque(bodyId, toJolt(torque));
+}
+
+void PhysicsEntity::applyImpulse(glm::vec3 impulse)
+{
+    bodyInterface.AddImpulse(bodyId, toJolt(impulse));
+}
+
+void PhysicsEntity::applyImpulse(glm::vec3 impulse, glm::vec3 point)
+{
+    bodyInterface.AddImpulse(bodyId, toJolt(impulse), toJolt(point));
+}
+
+void PhysicsEntity::applyAngularImpulse(glm::vec3 angularImpulse)
+{
+    bodyInterface.AddAngularImpulse(bodyId, toJolt(angularImpulse));
+}

@@ -30,4 +30,5 @@ public:
 
 protected:
     void physicsUpdate(float dt);
+    virtual void prePhysicsStep(float stepDt) {}
 };
