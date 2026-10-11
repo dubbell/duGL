@@ -45,10 +45,10 @@ void ExampleEnvironment::init()
     // create entities
     Entity* backpack1 = createEntity(backpackRenderable, objectShader);
     backpack1->setPosition(glm::vec3(1.0f, 1.0f, 6.0f));
-    backpack1->setFlag(EntityFlag::Hoverable, true);
+    backpack1->setFeature(EntityFeature::Hoverable, true);
     Entity* backpack2 = createEntity(backpackRenderable, objectShader);
     backpack2->setPosition(glm::vec3(-2.0f, 1.0f, 1.0f));
-    backpack2->setFlag(EntityFlag::Hoverable, true);
+    backpack2->setFeature(EntityFeature::Hoverable, true);
 
     createPrimitives(objectShader);
 

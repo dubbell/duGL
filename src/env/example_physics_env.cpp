@@ -41,7 +41,7 @@ void ExamplePhysicsEnvironment::init()
         JPH::EMotionType::Dynamic,
         Layers::MOVING);
     box = createEntity<PhysicsEntity>(createRenderable(boxBuilder), defaultShader, bodyInterface, boxSettings);
-    box->setFlag(EntityFlag::Hoverable, true);
+    box->setFeature(EntityFeature::Hoverable, true);
 
     Shader* outlineMaskShader = createShader("outline_mask.vert", "outline_mask.frag");
     Shader* outlineShader = createShader("outline.vert", "outline.frag");

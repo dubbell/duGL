@@ -18,7 +18,7 @@ void Entity::tick(const EntityUpdateContext& context)
     update(context.dt);
 
     const std::optional<Ray>& ray = context.hoverRay;
-    bool hovered = ray && hasFlag(EntityFlag::Hoverable) && checkRayIntersection(
+    bool hovered = ray && hasFeature(EntityFeature::Hoverable) && checkRayIntersection(
         position, getProperty(EntityProperty::HoverRadius, 1.0f), ray->origin, ray->direction);
     setFlag(EntityFlag::Hovered, hovered);
 }
@@ -57,6 +57,26 @@ bool Entity::hasFlag(dugl::uint flag) const
 bool Entity::hasAnyFlag(std::uint64_t mask) const
 {
     return (flags & mask) != 0;
+}
+
+void Entity::setFeature(dugl::uint feature, bool value)
+{
+    if (value) {
+        features |= std::uint64_t{1} << feature;
+    }
+    else {
+        features &= ~(std::uint64_t{1} << feature);
+    }
+}
+
+bool Entity::hasFeature(dugl::uint feature) const
+{
+    return (features >> feature & 1) != 0;
+}
+
+bool Entity::hasAnyFeature(std::uint64_t mask) const
+{
+    return (features & mask) != 0;
 }
 
 void Entity::setProperty(dugl::uint property, float value)

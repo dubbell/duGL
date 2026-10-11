@@ -16,8 +16,16 @@ namespace EntityFlag
 {
     enum : dugl::uint
     {
+        Hovered = 0,
+        UserBegin = 32
+    };
+}
+
+namespace EntityFeature
+{
+    enum : dugl::uint
+    {
         Hoverable = 0,
-        Hovered = 1,
         UserBegin = 32
     };
 }
@@ -60,11 +68,14 @@ private:
 protected:
     Renderable* renderable;
     Shader* shader;
+
     glm::vec3 position;
     glm::quat rotation{ 1.0f, 0.0f, 0.0f, 0.0f };
     glm::vec3 velocity{ 0.0f };
     glm::vec3 angularVelocity{ 0.0f };
+
     std::uint64_t flags = 0;
+    std::uint64_t features = 0;
     std::unordered_map<dugl::uint, float> properties;
 
     virtual void preUpdate(float dt) {}
@@ -83,6 +94,10 @@ public:
     void setFlag(dugl::uint flag, bool value);
     bool hasFlag(dugl::uint flag) const;
     bool hasAnyFlag(std::uint64_t mask) const;
+
+    void setFeature(dugl::uint feature, bool value);
+    bool hasFeature(dugl::uint feature) const;
+    bool hasAnyFeature(std::uint64_t mask) const;
 
     void setProperty(dugl::uint property, float value);
     float getProperty(dugl::uint property, float defaultValue) const;
