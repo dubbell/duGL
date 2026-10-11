@@ -20,6 +20,10 @@ private:
     float sensitivity;
     bool firstMouse;
 
+    int leftButtonState;
+    bool leftButtonPressedState;
+    bool leftButtonReleasedState;
+
     void handleCursorPosition(float xPos, float yPos);
     Ray computeScreenRay(float xPos, float yPos);
 
@@ -32,4 +36,7 @@ public:
     void processInput();
 
     std::optional<Ray> getScreenRay() const;
+
+    bool leftButtonPressed() const;
+    bool leftButtonReleased() const;
 };

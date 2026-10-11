@@ -41,14 +41,18 @@ void ExampleEnvironment::init()
 
     // create render passes
     createRenderPass<OutlinePass>(outlineMaskShader, outlineShader, flagMask(EntityFlag::Hovered));
+    OutlinePass* selectedPass = createRenderPass<OutlinePass>(outlineMaskShader, outlineShader, flagMask(EntityFlag::Selected));
+    selectedPass->setOutlineColor(glm::vec3(1.0f, 0.6f, 0.1f));
 
     // create entities
     Entity* backpack1 = createEntity(backpackRenderable, objectShader);
     backpack1->setPosition(glm::vec3(1.0f, 1.0f, 6.0f));
     backpack1->setFeature(EntityFeature::Hoverable, true);
+    backpack1->setFeature(EntityFeature::Selectable, true);
     Entity* backpack2 = createEntity(backpackRenderable, objectShader);
     backpack2->setPosition(glm::vec3(-2.0f, 1.0f, 1.0f));
     backpack2->setFeature(EntityFeature::Hoverable, true);
+    backpack2->setFeature(EntityFeature::Selectable, true);
 
     createPrimitives(objectShader);
 

@@ -47,6 +47,7 @@ Environment::Environment()
     glViewport(0, 0, viewportWidth, viewportHeight);
 
     keyboardController.setWindow(window);
+    glfwSetInputMode(window, GLFW_STICKY_MOUSE_BUTTONS, GLFW_TRUE);
 
     glfwSetFramebufferSizeCallback(window, Environment::glfwFrameBufferResizeCallback);
     glfwSetWindowUserPointer(window, this);
@@ -152,6 +153,16 @@ Renderable* Environment::createRenderable(RenderableBuilder& builder)
     return scene.addRenderable(std::make_unique<Renderable>(builder.build()));
 }
 
+EntityUpdateContext Environment::createEntityUpdateContext(float dt) const
+{
+    return { 
+        dt, 
+        mouseController.getScreenRay(),
+        mouseController.leftButtonPressed(), 
+        mouseController.leftButtonReleased() 
+    };
+}
+
 void Environment::updateEntities(float dt)
 {
     std::vector<Entity*> entities = scene.getEntities();
@@ -165,7 +176,7 @@ void Environment::updateEntities(float dt)
     // Add largest possible remainder numJobs-1 so that last batch of entities are not discarded.
     size_t entitiesPerJob = (entities.size() + numJobs - 1) / numJobs;
 
-    EntityUpdateContext context{ dt, mouseController.getScreenRay() };
+    EntityUpdateContext context = createEntityUpdateContext(dt);
 
     std::vector<std::unique_ptr<dugl::EntityUpdateJob>> jobs;
     dugl::JobBarrier* barrier = dispatcher.createBarrier();

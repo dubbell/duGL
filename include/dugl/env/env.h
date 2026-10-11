@@ -93,6 +93,7 @@ protected:
     virtual void frameBufferResizeCallback(int width, int height) {}
 
 private:
+    EntityUpdateContext createEntityUpdateContext(float dt) const;
     void updateEntities(float dt);
 
     void clearBuffers();

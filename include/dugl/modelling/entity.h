@@ -17,6 +17,7 @@ namespace EntityFlag
     enum : dugl::uint
     {
         Hovered = 0,
+        Selected = 1,
         UserBegin = 32
     };
 }
@@ -26,6 +27,7 @@ namespace EntityFeature
     enum : dugl::uint
     {
         Hoverable = 0,
+        Selectable = 1,
         UserBegin = 32
     };
 }
@@ -49,6 +51,8 @@ struct EntityUpdateContext
 {
     float dt;
     std::optional<Ray> hoverRay;
+    bool leftMousePressed = false;
+    bool leftMouseReleased = false;
 };
 
 DUGL_NAMESPACE_BEGIN
@@ -63,6 +67,8 @@ class Entity
     friend class dugl::EntityUpdateJob;
 
 private:
+    bool selectArmed = false;
+
     void tick(const EntityUpdateContext& context);
 
 protected:

@@ -42,10 +42,11 @@ void ExamplePhysicsEnvironment::init()
         Layers::MOVING);
     box = createEntity<PhysicsEntity>(createRenderable(boxBuilder), defaultShader, bodyInterface, boxSettings);
     box->setFeature(EntityFeature::Hoverable, true);
+    box->setFeature(EntityFeature::Selectable, true);
 
     Shader* outlineMaskShader = createShader("outline_mask.vert", "outline_mask.frag");
     Shader* outlineShader = createShader("outline.vert", "outline.frag");
-    createRenderPass<OutlinePass>(outlineMaskShader, outlineShader, flagMask(EntityFlag::Hovered));
+    createRenderPass<OutlinePass>(outlineMaskShader, outlineShader, flagMask(EntityFlag::Hovered, EntityFlag::Selected));
 
     physicsSystem.OptimizeBroadPhase();
 }

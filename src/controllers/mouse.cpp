@@ -3,7 +3,8 @@
 #include "dugl/view/camera.h"
 
 MouseController::MouseController(PerspectiveInterface* perspective)
-    : perspective(perspective), lastX(0.0f), lastY(0.0f), sensitivity(0.05f), firstMouse(true)
+    : perspective(perspective), lastX(0.0f), lastY(0.0f), sensitivity(0.05f), firstMouse(true),
+      leftButtonState(GLFW_RELEASE), leftButtonPressedState(false), leftButtonReleasedState(false)
 {}
 
 
@@ -63,9 +64,24 @@ void MouseController::processInput()
     else {
         screenRay.reset();
     }
+
+    int nextLeftButtonState = glfwGetMouseButton(perspective->getWindow(), GLFW_MOUSE_BUTTON_LEFT);
+    leftButtonPressedState = leftButtonState == GLFW_RELEASE && nextLeftButtonState == GLFW_PRESS;
+    leftButtonReleasedState = leftButtonState == GLFW_PRESS && nextLeftButtonState == GLFW_RELEASE;
+    leftButtonState = nextLeftButtonState;
 }
 
 std::optional<Ray> MouseController::getScreenRay() const
 {
     return screenRay;
+}
+
+bool MouseController::leftButtonPressed() const
+{
+    return leftButtonPressedState;
+}
+
+bool MouseController::leftButtonReleased() const
+{
+    return leftButtonReleasedState;
 }

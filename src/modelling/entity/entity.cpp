@@ -21,6 +21,20 @@ void Entity::tick(const EntityUpdateContext& context)
     bool hovered = ray && hasFeature(EntityFeature::Hoverable) && checkRayIntersection(
         position, getProperty(EntityProperty::HoverRadius, 1.0f), ray->origin, ray->direction);
     setFlag(EntityFlag::Hovered, hovered);
+
+    if (hasFeature(EntityFeature::Selectable))
+    {
+        if (!hovered) {
+            selectArmed = false;
+        } else if (context.leftMousePressed) {
+            selectArmed = true;
+        }
+
+        if (ray && context.leftMouseReleased) {
+            setFlag(EntityFlag::Selected, selectArmed);
+            selectArmed = false;
+        }
+    }
 }
 
 void Entity::render(Shader* shader)
@@ -43,8 +57,7 @@ void Entity::setFlag(dugl::uint flag, bool value)
 {
     if (value) {
         flags |= std::uint64_t{1} << flag;
-    }
-    else {
+    } else {
         flags &= ~(std::uint64_t{1} << flag);
     }
 }
@@ -63,8 +76,7 @@ void Entity::setFeature(dugl::uint feature, bool value)
 {
     if (value) {
         features |= std::uint64_t{1} << feature;
-    }
-    else {
+    } else {
         features &= ~(std::uint64_t{1} << feature);
     }
 }
