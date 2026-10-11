@@ -13,6 +13,9 @@
 // Interface for an OpenGL shader program in the GPU.
 class Shader
 {
+public:
+    dugl::uint ID;
+
 private:
     /* Vertex attribute locations in the linked shader program. */
     VertexAttributeMask requiredAttributes;
@@ -20,8 +23,6 @@ private:
     std::unordered_set<std::string> activeUniforms;
     
 public:
-    dugl::uint ID;
-
     Shader(const char* vertexPath, const char* fragmentPath);
 
     // enable move functionality

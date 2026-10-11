@@ -66,11 +66,6 @@ class Entity
 {
     friend class dugl::EntityUpdateJob;
 
-private:
-    bool selectArmed = false;
-
-    void tick(const EntityUpdateContext& context);
-
 protected:
     Renderable* renderable;
     Shader* shader;
@@ -84,8 +79,8 @@ protected:
     std::uint64_t features = 0;
     std::unordered_map<dugl::uint, float> properties;
 
-    virtual void preUpdate(float dt) {}
-    virtual void update(float dt) {}
+private:
+    bool selectArmed = false;
 
 public:
     Entity(Renderable* model, Shader* shader);
@@ -122,4 +117,11 @@ public:
     glm::vec3& getAngularVelocity();
 
     glm::mat4 getModelTransform();
+
+protected:
+    virtual void preUpdate(float dt) {}
+    virtual void update(float dt) {}
+
+private:
+    void tick(const EntityUpdateContext& context);
 };

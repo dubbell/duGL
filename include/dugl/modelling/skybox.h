@@ -13,8 +13,6 @@ private:
     dugl::uint textureId = 0;
     Shader* shader = nullptr;
 
-    void release();
-
 public:
     Skybox() = default;
     ~Skybox();
@@ -25,4 +23,7 @@ public:
 
     void init(const char* path, Shader* shader);
     void draw();
+
+private:
+    void release();
 };

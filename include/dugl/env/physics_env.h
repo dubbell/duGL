@@ -18,10 +18,6 @@
 // An Environment with Jolt physics enabled.
 class PhysicsEnvironment : public Environment
 {
-private:
-    std::vector<CollisionEvent> collisionEvents;
-    std::map<std::pair<JPH::BodyID, JPH::BodyID>, bool> sleepingContacts;
-
 protected:
     JPH::TempAllocatorImpl tempAllocator;
 
@@ -33,6 +29,10 @@ protected:
     JPH::PhysicsSystem physicsSystem;
 
     float accumulator = 0.0f;
+
+private:
+    std::vector<CollisionEvent> collisionEvents;
+    std::map<std::pair<JPH::BodyID, JPH::BodyID>, bool> sleepingContacts;
 
 public:
     PhysicsEnvironment();

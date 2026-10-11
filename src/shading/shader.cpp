@@ -160,7 +160,8 @@ void Shader::queryActiveUniforms()
     }
 }
 
-Shader::Shader(Shader&& other) noexcept : requiredAttributes(other.requiredAttributes), ID(other.ID)
+Shader::Shader(Shader&& other) noexcept
+    : ID(other.ID), requiredAttributes(other.requiredAttributes), activeUniforms(std::move(other.activeUniforms))
 {
     other.ID = 0;
 }
@@ -175,6 +176,7 @@ Shader& Shader::operator=(Shader&& other) noexcept
 
         ID = other.ID;
         requiredAttributes = other.requiredAttributes;
+        activeUniforms = std::move(other.activeUniforms);
         other.ID = 0;
     }
     return *this;

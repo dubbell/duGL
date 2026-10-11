@@ -16,16 +16,12 @@ class PhysicsEntity : public Entity
 {
     friend class PhysicsEnvironment;
 
-private:
-    std::vector<CollisionEvent> pendingCollisions;
-
-    void preUpdate(float dt) override final;
-
 protected:
     JPH::BodyInterface& bodyInterface;
     JPH::BodyID bodyId;
 
-    virtual void onCollision(const CollisionEvent& event, PhysicsEntity* other) {}
+private:
+    std::vector<CollisionEvent> pendingCollisions;
 
 public:
     PhysicsEntity(Renderable* renderable, Shader* shader, JPH::BodyInterface& bodyInterface, const JPH::BodyCreationSettings& settings);
@@ -43,4 +39,10 @@ public:
     void applyImpulse(glm::vec3 impulse);
     void applyImpulse(glm::vec3 impulse, glm::vec3 point);
     void applyAngularImpulse(glm::vec3 angularImpulse);
+
+protected:
+    virtual void onCollision(const CollisionEvent& event, PhysicsEntity* other) {}
+
+private:
+    void preUpdate(float dt) override final;
 };

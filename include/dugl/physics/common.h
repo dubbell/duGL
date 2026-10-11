@@ -37,6 +37,9 @@ namespace BroadPhaseLayers
 // Maps objects to broad phase layers.
 class ObjectToBroadPhaseMapper final : public JPH::BroadPhaseLayerInterface
 {
+private:
+    JPH::BroadPhaseLayer objectToBroadPhase[Layers::NUM_LAYERS];
+
 public:
     ObjectToBroadPhaseMapper();
     JPH::uint GetNumBroadPhaseLayers() const override;
@@ -44,8 +47,6 @@ public:
 #if defined(JPH_EXTERNAL_PROFILE) || defined(JPH_PROFILE_ENABLED)
     const char* GetBroadPhaseLayerName(JPH::BroadPhaseLayer inLayer) const override;
 #endif
-private:
-    JPH::BroadPhaseLayer objectToBroadPhase[Layers::NUM_LAYERS];
 };
 
 // Determines if two object layers can collide.
@@ -76,14 +77,14 @@ struct RecordedContact
 // Listens to collisions between objects.
 class ContactRecorder : public JPH::ContactListener
 {
+private:
+    std::mutex mutex;
+    std::unordered_map<JPH::uint64, int> contactCounts;
+    std::vector<RecordedContact> contacts;
+
 public:
     void OnContactAdded(const JPH::Body& body1, const JPH::Body& body2, const JPH::ContactManifold& manifold, JPH::ContactSettings& settings) override;
     void OnContactRemoved(const JPH::SubShapeIDPair& subShapePair) override;
 
     std::vector<RecordedContact> drain();
-
-private:
-    std::mutex mutex;
-    std::unordered_map<JPH::uint64, int> contactCounts;
-    std::vector<RecordedContact> contacts;
 };

@@ -24,9 +24,6 @@ private:
     bool leftButtonPressedState;
     bool leftButtonReleasedState;
 
-    void handleCursorPosition(float xPos, float yPos);
-    Ray computeScreenRay(float xPos, float yPos);
-
 public:
     MouseController(PerspectiveInterface* perspective);
 
@@ -39,4 +36,8 @@ public:
 
     bool leftButtonPressed() const;
     bool leftButtonReleased() const;
+
+private:
+    void handleCursorPosition(float xPos, float yPos);
+    Ray computeScreenRay(float xPos, float yPos);
 };

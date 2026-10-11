@@ -20,10 +20,6 @@
 /* Base class for starting a duGL session. Initializes the GLFW window. */
 class Environment : public PerspectiveInterface
 {
-private:
-    GLFWcursor* handCursor = nullptr;
-    bool handCursorActive = false;
-
 protected:
     GLFWwindow* window;
     int viewportWidth;
@@ -46,6 +42,10 @@ protected:
     glm::vec4 clearColor;
 
     Stopwatch stopwatch;
+
+private:
+    GLFWcursor* handCursor = nullptr;
+    bool handCursorActive = false;
 
 public:
     Environment();

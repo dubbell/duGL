@@ -18,10 +18,6 @@ private:
     bool viewInvalidated, projectionInvalidated;
     glm::mat4 cachedViewMatrix, cachedProjectionMatrix;
 
-    glm::mat3 getLocalBasis();
-
-    glm::vec3 toGlobal(glm::vec3 local);
-
 public:
     Camera();
 
@@ -48,4 +44,9 @@ public:
     void setFov(float fov);
     void setAspectRatio(float aspectRatio);
     void setRenderDistance(float volumeNear, float volumeFar);
+
+private:
+    glm::mat3 getLocalBasis();
+
+    glm::vec3 toGlobal(glm::vec3 local);
 };
