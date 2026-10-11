@@ -48,6 +48,7 @@ Environment::Environment()
 
     keyboardController.setWindow(window);
     glfwSetInputMode(window, GLFW_STICKY_MOUSE_BUTTONS, GLFW_TRUE);
+    handCursor = glfwCreateStandardCursor(GLFW_POINTING_HAND_CURSOR);
 
     glfwSetFramebufferSizeCallback(window, Environment::glfwFrameBufferResizeCallback);
     glfwSetWindowUserPointer(window, this);
@@ -73,6 +74,7 @@ void Environment::stop()
 {
     if (window != nullptr)
     {
+        glfwDestroyCursor(handCursor);
         glfwDestroyWindow(window);
         window = nullptr;
         glfwTerminate();
@@ -104,6 +106,7 @@ void Environment::start()
         float dt = stopwatch.tick();
         update(dt);
         updateEntities(dt);
+        updateCursor();
 
         // Write data to the GPU (transforms, lighting, UBOs, ...)
         writeData();
@@ -195,6 +198,18 @@ void Environment::updateEntities(float dt)
     }
 
     dispatcher.waitAndDestroyBarrier(barrier);
+}
+
+void Environment::updateCursor()
+{
+    bool hoveringSelectable = std::ranges::any_of(scene.getEntities(), [](const Entity* entity) {
+        return entity->hasFeature(EntityFeature::Selectable) && entity->hasFlag(EntityFlag::Hovered);
+    });
+
+    if (hoveringSelectable != handCursorActive) {
+        glfwSetCursor(window, hoveringSelectable ? handCursor : nullptr);
+        handCursorActive = hoveringSelectable;
+    }
 }
 
 void Environment::clearBuffers()

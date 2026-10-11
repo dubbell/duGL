@@ -20,6 +20,10 @@
 /* Base class for starting a duGL session. Initializes the GLFW window. */
 class Environment : public PerspectiveInterface
 {
+private:
+    GLFWcursor* handCursor = nullptr;
+    bool handCursorActive = false;
+
 protected:
     GLFWwindow* window;
     int viewportWidth;
@@ -95,6 +99,7 @@ protected:
 private:
     EntityUpdateContext createEntityUpdateContext(float dt) const;
     void updateEntities(float dt);
+    void updateCursor();
 
     void clearBuffers();
     void writeData();
