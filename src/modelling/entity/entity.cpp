@@ -4,6 +4,18 @@
 #include <glm/gtc/matrix_transform.hpp>
 
 
+template <typename T>
+static T findProperty(const std::unordered_map<dugl::uint, EntityPropertyValue>& properties, dugl::uint property, T defaultValue)
+{
+    auto it = properties.find(property);
+    if (it == properties.end()) {
+        return defaultValue;
+    }
+
+    const T* value = std::get_if<T>(&it->second);
+    return value ? *value : defaultValue;
+}
+
 Entity::Entity(Renderable* renderable, Shader* shader)
     : renderable(renderable), shader(dugl::requireNonNull(shader)), position(0.0f, 0.0f, 0.0f) {}
 
@@ -18,8 +30,9 @@ void Entity::tick(const EntityUpdateContext& context)
     update(context.dt);
 
     const std::optional<Ray>& ray = context.hoverRay;
-    bool hovered = ray && hasFeature(EntityFeature::Hoverable) && checkRayIntersection(
-        position, getProperty(EntityProperty::HoverRadius, 1.0f), ray->origin, ray->direction);
+    float hoverRadius = getProperty(EntityProperty::HoverRadius, 1.0f);
+    bool hovered = ray && hasFeature(EntityFeature::Hoverable) && 
+        checkRayIntersection(position, hoverRadius, ray->origin, ray->direction);
     setFlag(EntityFlag::Hovered, hovered);
 
     if (hasFeature(EntityFeature::Selectable))
@@ -34,6 +47,21 @@ void Entity::tick(const EntityUpdateContext& context)
             setFlag(EntityFlag::Selected, selectArmed);
             selectArmed = false;
         }
+    }
+
+    if (hovered && hasFeature(EntityFeature::Holdable) && context.leftMousePressed)
+    {
+        std::optional<glm::vec3> heldPoint = intersectRaySphere(position, hoverRadius, ray->origin, ray->direction);
+        if (heldPoint) {
+            setProperty(EntityProperty::HeldInEntitySpace, glm::inverse(rotation) * (*heldPoint - position));
+            setProperty(EntityProperty::HeldInWorldSpace, *heldPoint);
+            setFlag(EntityFlag::Held, true);
+        }
+    }
+    else if (hasFlag(EntityFlag::Held) && (context.leftMouseReleased || !hasFeature(EntityFeature::Holdable))) {
+        setFlag(EntityFlag::Held, false);
+        removeProperty(EntityProperty::HeldInEntitySpace);
+        removeProperty(EntityProperty::HeldInWorldSpace);
     }
 }
 
@@ -96,10 +124,19 @@ void Entity::setProperty(dugl::uint property, float value)
     properties[property] = value;
 }
 
+void Entity::setProperty(dugl::uint property, glm::vec3 value)
+{
+    properties[property] = value;
+}
+
 float Entity::getProperty(dugl::uint property, float defaultValue) const
 {
-    auto it = properties.find(property);
-    return it == properties.end() ? defaultValue : it->second;
+    return findProperty(properties, property, defaultValue);
+}
+
+glm::vec3 Entity::getProperty(dugl::uint property, glm::vec3 defaultValue) const
+{
+    return findProperty(properties, property, defaultValue);
 }
 
 void Entity::removeProperty(dugl::uint property)

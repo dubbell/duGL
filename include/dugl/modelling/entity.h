@@ -10,6 +10,7 @@
 #include <cstdint>
 #include <optional>
 #include <unordered_map>
+#include <variant>
 
 
 namespace EntityFlag
@@ -18,6 +19,7 @@ namespace EntityFlag
     {
         Hovered = 0,
         Selected = 1,
+        Held = 2,
         UserBegin = 32
     };
 }
@@ -28,6 +30,7 @@ namespace EntityFeature
     {
         Hoverable = 0,
         Selectable = 1,
+        Holdable = 2,
         UserBegin = 32
     };
 }
@@ -37,9 +40,13 @@ namespace EntityProperty
     enum : dugl::uint
     {
         HoverRadius = 0,
+        HeldInEntitySpace = 1,
+        HeldInWorldSpace = 2,
         UserBegin = 32
     };
 }
+
+using EntityPropertyValue = std::variant<float, glm::vec3>;
 
 template <typename... Flags>
 constexpr std::uint64_t flagMask(Flags... flags)
@@ -77,7 +84,7 @@ protected:
 
     std::uint64_t flags = 0;
     std::uint64_t features = 0;
-    std::unordered_map<dugl::uint, float> properties;
+    std::unordered_map<dugl::uint, EntityPropertyValue> properties;
 
 private:
     bool selectArmed = false;
@@ -101,7 +108,9 @@ public:
     bool hasAnyFeature(std::uint64_t mask) const;
 
     void setProperty(dugl::uint property, float value);
+    void setProperty(dugl::uint property, glm::vec3 value);
     float getProperty(dugl::uint property, float defaultValue) const;
+    glm::vec3 getProperty(dugl::uint property, glm::vec3 defaultValue) const;
     void removeProperty(dugl::uint property);
 
     void setPosition(glm::vec3 position);

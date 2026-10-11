@@ -49,10 +49,12 @@ void ExampleEnvironment::init()
     backpack1->setPosition(glm::vec3(1.0f, 1.0f, 6.0f));
     backpack1->setFeature(EntityFeature::Hoverable, true);
     backpack1->setFeature(EntityFeature::Selectable, true);
+    backpack1->setFeature(EntityFeature::Holdable, true);
     Entity* backpack2 = createEntity(backpackRenderable, objectShader);
     backpack2->setPosition(glm::vec3(-2.0f, 1.0f, 1.0f));
     backpack2->setFeature(EntityFeature::Hoverable, true);
     backpack2->setFeature(EntityFeature::Selectable, true);
+    backpack2->setFeature(EntityFeature::Holdable, true);
 
     createPrimitives(objectShader);
 

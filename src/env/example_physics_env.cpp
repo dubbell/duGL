@@ -44,6 +44,7 @@ void ExamplePhysicsEnvironment::init()
     box = createEntity<PhysicsEntity>(boxRenderable, defaultShader, bodyInterface, boxSettings);
     box->setFeature(EntityFeature::Hoverable, true);
     box->setFeature(EntityFeature::Selectable, true);
+    box->setFeature(EntityFeature::Holdable, true);
     box->setFrozen(true);
 
     boxSettings.mPosition = JPH::RVec3(0.0f, 9.0f, 0.0f);
@@ -52,6 +53,8 @@ void ExamplePhysicsEnvironment::init()
     Shader* outlineMaskShader = createShader("outline_mask.vert", "outline_mask.frag");
     Shader* outlineShader = createShader("outline.vert", "outline.frag");
     createRenderPass<OutlinePass>(outlineMaskShader, outlineShader, flagMask(EntityFlag::Hovered, EntityFlag::Selected));
+    OutlinePass* heldPass = createRenderPass<OutlinePass>(outlineMaskShader, outlineShader, flagMask(EntityFlag::Held));
+    heldPass->setOutlineColor(glm::vec3(0.2f, 0.9f, 0.3f));
 
     physicsSystem.OptimizeBroadPhase();
 }

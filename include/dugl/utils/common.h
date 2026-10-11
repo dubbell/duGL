@@ -5,6 +5,9 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtx/norm.hpp>
 
+#include <cmath>
+#include <optional>
+
 
 struct Ray
 {
@@ -51,4 +54,25 @@ inline bool checkRayIntersection(glm::vec3 target, float distance, glm::vec3 ori
     glm::vec3 closestPoint = origin + t * direction;
 
     return glm::length2(closestPoint - target) <= (distance * distance);
+}
+
+inline std::optional<glm::vec3> intersectRaySphere(glm::vec3 center, float radius, glm::vec3 origin, glm::vec3 direction)
+{
+    glm::vec3 toCenter = center - origin;
+
+    float t = glm::dot(toCenter, direction);
+    float halfChord2 = radius * radius - glm::length2(toCenter - t * direction);
+
+    if (halfChord2 < 0.0f) {
+        return std::nullopt;
+    }
+
+    float halfChord = std::sqrt(halfChord2);
+    float nearest = t - halfChord >= 0.0f ? t - halfChord : t + halfChord;
+
+    if (nearest < 0.0f) {
+        return std::nullopt;
+    }
+
+    return origin + nearest * direction;
 }
