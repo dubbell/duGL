@@ -40,9 +40,14 @@ void ExamplePhysicsEnvironment::init()
         JPH::Quat::sRotation(JPH::Vec3(1.0f, 0.0f, 1.0f).Normalized(), 0.4f),
         JPH::EMotionType::Dynamic,
         Layers::MOVING);
-    box = createEntity<PhysicsEntity>(createRenderable(boxBuilder), defaultShader, bodyInterface, boxSettings);
+    Renderable* boxRenderable = createRenderable(boxBuilder);
+    box = createEntity<PhysicsEntity>(boxRenderable, defaultShader, bodyInterface, boxSettings);
     box->setFeature(EntityFeature::Hoverable, true);
     box->setFeature(EntityFeature::Selectable, true);
+    box->setFrozen(true);
+
+    boxSettings.mPosition = JPH::RVec3(0.0f, 9.0f, 0.0f);
+    createEntity<PhysicsEntity>(boxRenderable, defaultShader, bodyInterface, boxSettings);
 
     Shader* outlineMaskShader = createShader("outline_mask.vert", "outline_mask.frag");
     Shader* outlineShader = createShader("outline.vert", "outline.frag");
@@ -58,6 +63,12 @@ void ExamplePhysicsEnvironment::update(float dt)
         box->applyImpulse(glm::vec3(0.0f, 0.0f, KICK_IMPULSE));
     }
     kickHeld = kick;
+
+    bool freeze = glfwGetKey(window, GLFW_KEY_G) == GLFW_PRESS;
+    if (freeze && !freezeHeld) {
+        box->setFrozen(!box->isFrozen());
+    }
+    freezeHeld = freeze;
 
     physicsUpdate(dt);
 

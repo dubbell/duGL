@@ -11,6 +11,7 @@ private:
 
     PhysicsEntity* box = nullptr;
     bool kickHeld = false;
+    bool freezeHeld = false;
 
 public:
     ExamplePhysicsEnvironment() : flightController(this, &keyboardController, &mouseController) {}

@@ -21,6 +21,8 @@ protected:
     JPH::BodyID bodyId;
 
 private:
+    JPH::EMotionType motionType;
+    bool frozen = false;
     std::vector<CollisionEvent> pendingCollisions;
 
 public:
@@ -39,6 +41,9 @@ public:
     void applyImpulse(glm::vec3 impulse);
     void applyImpulse(glm::vec3 impulse, glm::vec3 point);
     void applyAngularImpulse(glm::vec3 angularImpulse);
+
+    void setFrozen(bool frozen);
+    bool isFrozen() const;
 
 protected:
     virtual void onCollision(const CollisionEvent& event, PhysicsEntity* other) {}

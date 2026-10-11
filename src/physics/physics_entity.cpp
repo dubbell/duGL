@@ -7,7 +7,8 @@ PhysicsEntity::PhysicsEntity(Renderable* renderable, Shader* shader, JPH::BodyIn
       bodyInterface(bodyInterface),
       bodyId(bodyInterface.CreateAndAddBody(settings, settings.mMotionType == JPH::EMotionType::Static
           ? JPH::EActivation::DontActivate
-          : JPH::EActivation::Activate))
+          : JPH::EActivation::Activate)),
+      motionType(settings.mMotionType)
 {
     bodyInterface.SetUserData(bodyId, reinterpret_cast<JPH::uint64>(this));
 }
@@ -64,4 +65,18 @@ void PhysicsEntity::applyImpulse(glm::vec3 impulse, glm::vec3 point)
 void PhysicsEntity::applyAngularImpulse(glm::vec3 angularImpulse)
 {
     bodyInterface.AddAngularImpulse(bodyId, toJolt(angularImpulse));
+}
+
+void PhysicsEntity::setFrozen(bool frozen)
+{
+    if (this->frozen == frozen) {
+        return;
+    }
+    this->frozen = frozen;
+    bodyInterface.SetMotionType(bodyId, frozen ? JPH::EMotionType::Static : motionType, JPH::EActivation::Activate);
+}
+
+bool PhysicsEntity::isFrozen() const
+{
+    return frozen;
 }
