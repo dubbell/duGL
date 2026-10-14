@@ -21,10 +21,7 @@ Camera::Camera()
 
 glm::mat3 Camera::getLocalBasis()
 {
-    glm::vec3 front = glm::normalize(glm::vec3(
-        cos(glm::radians(yaw)) * cos(glm::radians(pitch)),
-        sin(glm::radians(pitch)),
-        sin(glm::radians(yaw)) * cos(glm::radians(pitch))));
+    glm::vec3 front = getFront();
 
     glm::vec3 right = glm::normalize(glm::cross(front, glm::vec3(0.0f, 1.0f, 0.0f)));
 
@@ -84,6 +81,8 @@ void Camera::turnRight(float deltaYaw)
     else if (yaw > 180.0f) {
         yaw -= 360.0f;
     }
+
+    invalidateCachedViewMatrix();
 }
 
 void Camera::turnUp(float deltaPitch)
@@ -95,6 +94,8 @@ void Camera::turnUp(float deltaPitch)
     else if (pitch > 89.0f) {
         pitch = 89.0f;
     }
+
+    invalidateCachedViewMatrix();
 }
 
 
@@ -103,14 +104,19 @@ const glm::vec3& Camera::getPosition()
     return position;
 }
 
+glm::vec3 Camera::getFront() const
+{
+    return glm::normalize(glm::vec3(
+        cos(glm::radians(yaw)) * cos(glm::radians(pitch)),
+        sin(glm::radians(pitch)),
+        sin(glm::radians(yaw)) * cos(glm::radians(pitch))));
+}
+
 const glm::mat4& Camera::getViewMatrix()
 {
     if (viewInvalidated)
     {
-        glm::vec3 front = glm::normalize(glm::vec3(
-            cos(glm::radians(yaw)) * cos(glm::radians(pitch)),
-            sin(glm::radians(pitch)),
-            sin(glm::radians(yaw)) * cos(glm::radians(pitch))));
+        glm::vec3 front = getFront();
 
         glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f);
 
@@ -130,7 +136,7 @@ const glm::mat4& Camera::getProjectionMatrix()
 {
     if (projectionInvalidated)
     {
-        cachedProjectionMatrix = glm::perspective(glm::radians(fov), aspectRatio, 0.1f, 500.0f);
+        cachedProjectionMatrix = glm::perspective(glm::radians(fov), aspectRatio, volumeNear, volumeFar);
         projectionInvalidated = false;
     }
 

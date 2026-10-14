@@ -161,7 +161,8 @@ EntityUpdateContext Environment::createEntityUpdateContext(float dt) const
     return { 
         dt, 
         mouseController.getScreenRay(),
-        mouseController.leftButtonPressed(), 
+        activeCamera->getFront(),
+        mouseController.leftButtonPressed(),
         mouseController.leftButtonReleased() 
     };
 }

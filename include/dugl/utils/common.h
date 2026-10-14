@@ -76,3 +76,20 @@ inline std::optional<glm::vec3> intersectRaySphere(glm::vec3 center, float radiu
 
     return origin + nearest * direction;
 }
+
+inline std::optional<glm::vec3> intersectRayPlane(glm::vec3 planePoint, glm::vec3 planeNormal, glm::vec3 origin, glm::vec3 direction)
+{
+    float alignment = glm::dot(direction, planeNormal);
+
+    if (std::abs(alignment) < 1e-6f) {
+        return std::nullopt;
+    }
+
+    float t = glm::dot(planePoint - origin, planeNormal) / alignment;
+
+    if (t < 0.0f) {
+        return std::nullopt;
+    }
+
+    return origin + t * direction;
+}

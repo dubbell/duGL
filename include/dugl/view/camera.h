@@ -34,6 +34,7 @@ public:
     void turnUp(float deltaPitch);
 
     const glm::vec3& getPosition();
+    glm::vec3 getFront() const;
 
     void invalidateCachedViewMatrix();
     const glm::mat4& getViewMatrix();

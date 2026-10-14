@@ -28,13 +28,19 @@ void Entity::tick(const EntityUpdateContext& context)
 {
     preUpdate(context.dt);
     update(context.dt);
+    updateState(context);
+}
 
+void Entity::updateState(const EntityUpdateContext& context)
+{
+    // Hover state.
     const std::optional<Ray>& ray = context.hoverRay;
     float hoverRadius = getProperty(EntityProperty::HoverRadius, 1.0f);
     bool hovered = ray && hasFeature(EntityFeature::Hoverable) && 
         checkRayIntersection(position, hoverRadius, ray->origin, ray->direction);
     setFlag(EntityFlag::Hovered, hovered);
 
+    // Selection state.
     if (hasFeature(EntityFeature::Selectable))
     {
         if (!hovered) {
@@ -49,6 +55,7 @@ void Entity::tick(const EntityUpdateContext& context)
         }
     }
 
+    // Hold state.
     if (hovered && hasFeature(EntityFeature::Holdable) && context.leftMousePressed)
     {
         std::optional<glm::vec3> heldPoint = intersectRaySphere(position, hoverRadius, ray->origin, ray->direction);
@@ -58,10 +65,19 @@ void Entity::tick(const EntityUpdateContext& context)
             setFlag(EntityFlag::Held, true);
         }
     }
-    else if (hasFlag(EntityFlag::Held) && (context.leftMouseReleased || !hasFeature(EntityFeature::Holdable))) {
+    else if (hasFlag(EntityFlag::Held) && (context.leftMouseReleased || !hasFeature(EntityFeature::Holdable))) 
+    {
         setFlag(EntityFlag::Held, false);
         removeProperty(EntityProperty::HeldInEntitySpace);
         removeProperty(EntityProperty::HeldInWorldSpace);
+    } 
+    else if (hasFlag(EntityFlag::Held) && ray)
+    {
+        glm::vec3 heldPoint = getProperty(EntityProperty::HeldInWorldSpace, position);
+        std::optional<glm::vec3> draggedPoint = intersectRayPlane(heldPoint, context.cameraFront, ray->origin, ray->direction);
+        if (draggedPoint) {
+            setProperty(EntityProperty::HeldInWorldSpace, *draggedPoint);
+        }
     }
 }
 

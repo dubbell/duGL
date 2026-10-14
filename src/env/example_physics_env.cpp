@@ -48,7 +48,10 @@ void ExamplePhysicsEnvironment::init()
     box->setFrozen(true);
 
     boxSettings.mPosition = JPH::RVec3(0.0f, 9.0f, 0.0f);
-    createEntity<PhysicsEntity>(boxRenderable, defaultShader, bodyInterface, boxSettings);
+    PhysicsEntity* secondBox = createEntity<PhysicsEntity>(boxRenderable, defaultShader, bodyInterface, boxSettings);
+    secondBox->setFeature(EntityFeature::Hoverable, true);
+    secondBox->setFeature(EntityFeature::Selectable, true);
+    secondBox->setFeature(EntityFeature::Holdable, true);
 
     Shader* outlineMaskShader = createShader("outline_mask.vert", "outline_mask.frag");
     Shader* outlineShader = createShader("outline.vert", "outline.frag");

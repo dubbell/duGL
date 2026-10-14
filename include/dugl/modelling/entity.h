@@ -58,6 +58,7 @@ struct EntityUpdateContext
 {
     float dt;
     std::optional<Ray> hoverRay;
+    glm::vec3 cameraFront{ 0.0f };
     bool leftMousePressed = false;
     bool leftMouseReleased = false;
 };
@@ -133,4 +134,5 @@ protected:
 
 private:
     void tick(const EntityUpdateContext& context);
+    void updateState(const EntityUpdateContext& context);
 };
