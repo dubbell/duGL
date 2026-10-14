@@ -1,0 +1,38 @@
+#include "dugl/physics/draggable_entity.h"
+
+
+static constexpr float HOLD_FREQUENCY = 4.0f;
+static constexpr float HOLD_DAMPING = 1.0f;
+
+DraggableEntity::DraggableEntity(Renderable* renderable, Shader* shader, JPH::PhysicsSystem& physicsSystem, const JPH::BodyCreationSettings& settings)
+    : PhysicsEntity(renderable, shader, physicsSystem, settings) {}
+
+void DraggableEntity::update(float dt)
+{
+    bool held = hasFlag(EntityFlag::Held);
+    if (holdConstraint && (!held || isFrozen())) {
+        removeConstraint(*holdConstraint);
+        holdConstraint.reset();
+    }
+
+    if (!held) {
+        return;
+    }
+
+    glm::vec3 heldInEntitySpace = getProperty(EntityProperty::HeldInEntitySpace, glm::vec3(0.0f));
+    glm::vec3 heldInWorldSpace = getProperty(EntityProperty::HeldInWorldSpace, position);
+
+    if (isFrozen()) {
+        setPosition(heldInWorldSpace - rotation * heldInEntitySpace);
+    }
+    else if (!holdConstraint) {
+        holdConstraint = addPointConstraint({
+            .pointInEntitySpace = heldInEntitySpace,
+            .anchorInWorldSpace = heldInWorldSpace,
+            .frequency = HOLD_FREQUENCY,
+            .damping = HOLD_DAMPING });
+    }
+    else {
+        setConstraintAnchor(*holdConstraint, heldInWorldSpace);
+    }
+}

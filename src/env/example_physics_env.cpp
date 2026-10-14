@@ -1,6 +1,7 @@
 #include "dugl/env/example_physics_env.h"
 #include "dugl/modelling/primitive_builder.h"
 #include "dugl/modelling/outline_pass.h"
+#include "dugl/physics/draggable_entity.h"
 
 #include <Jolt/Physics/Collision/Shape/MeshShape.h>
 
@@ -19,7 +20,6 @@ void ExamplePhysicsEnvironment::init()
     activeCamera->turnUp(-10.0f);
 
     Shader* defaultShader = createShader("basic_texture.vert", "basic_texture.frag");
-    JPH::BodyInterface& bodyInterface = physicsSystem.GetBodyInterface();
 
     PlaneBuilder planeBuilder(20.0f, 20.0f);
     JPH::TriangleList planeTriangles;
@@ -31,7 +31,7 @@ void ExamplePhysicsEnvironment::init()
         JPH::Quat::sIdentity(),
         JPH::EMotionType::Static,
         Layers::NON_MOVING);
-    createEntity<PhysicsEntity>(createRenderable(planeBuilder), defaultShader, bodyInterface, planeSettings);
+    createEntity<PhysicsEntity>(createRenderable(planeBuilder), defaultShader, physicsSystem, planeSettings);
 
     BoxBuilder boxBuilder(glm::vec3(1.0f));
     JPH::BodyCreationSettings boxSettings(
@@ -41,14 +41,14 @@ void ExamplePhysicsEnvironment::init()
         JPH::EMotionType::Dynamic,
         Layers::MOVING);
     Renderable* boxRenderable = createRenderable(boxBuilder);
-    box = createEntity<PhysicsEntity>(boxRenderable, defaultShader, bodyInterface, boxSettings);
+    box = createEntity<DraggableEntity>(boxRenderable, defaultShader, physicsSystem, boxSettings);
     box->setFeature(EntityFeature::Hoverable, true);
     box->setFeature(EntityFeature::Selectable, true);
     box->setFeature(EntityFeature::Holdable, true);
     box->setFrozen(true);
 
     boxSettings.mPosition = JPH::RVec3(0.0f, 9.0f, 0.0f);
-    PhysicsEntity* secondBox = createEntity<PhysicsEntity>(boxRenderable, defaultShader, bodyInterface, boxSettings);
+    DraggableEntity* secondBox = createEntity<DraggableEntity>(boxRenderable, defaultShader, physicsSystem, boxSettings);
     secondBox->setFeature(EntityFeature::Hoverable, true);
     secondBox->setFeature(EntityFeature::Selectable, true);
     secondBox->setFeature(EntityFeature::Holdable, true);

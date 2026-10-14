@@ -114,17 +114,17 @@ public:
     glm::vec3 getProperty(dugl::uint property, glm::vec3 defaultValue) const;
     void removeProperty(dugl::uint property);
 
-    void setPosition(glm::vec3 position);
-    glm::vec3& getPosition();
+    virtual void setPosition(glm::vec3 position);
+    glm::vec3 getPosition() const;
 
-    void setRotation(glm::quat rotation);
-    glm::quat& getRotation();
+    virtual void setRotation(glm::quat rotation);
+    glm::quat getRotation() const;
 
-    void setVelocity(glm::vec3 velocity);
-    glm::vec3& getVelocity();
+    virtual void setVelocity(glm::vec3 velocity);
+    glm::vec3 getVelocity() const;
 
-    void setAngularVelocity(glm::vec3 angularVelocity);
-    glm::vec3& getAngularVelocity();
+    virtual void setAngularVelocity(glm::vec3 angularVelocity);
+    glm::vec3 getAngularVelocity() const;
 
     glm::mat4 getModelTransform();
 

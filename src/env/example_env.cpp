@@ -150,7 +150,10 @@ void ExampleEnvironment::createImGuiFrame()
     int entityCount = 1;
     for (auto& entity : scene.getEntities())
     {
-        ImGui::DragFloat3(std::format("Entity {}", entityCount).c_str(), glm::value_ptr(entity->getPosition()), 0.1f);
+        glm::vec3 position = entity->getPosition();
+        if (ImGui::DragFloat3(std::format("Entity {}", entityCount).c_str(), glm::value_ptr(position), 0.1f)) {
+            entity->setPosition(position);
+        }
         entityCount++;
     }
 }

@@ -27,8 +27,8 @@ Entity::Entity(Renderable* renderable, Shader* shader, glm::vec3 position)
 void Entity::tick(const EntityUpdateContext& context)
 {
     preUpdate(context.dt);
-    update(context.dt);
     updateState(context);
+    update(context.dt);
 }
 
 void Entity::updateState(const EntityUpdateContext& context)
@@ -166,7 +166,7 @@ void Entity::setPosition(glm::vec3 position)
 }
 
 
-glm::vec3& Entity::getPosition()
+glm::vec3 Entity::getPosition() const
 {
     return position;
 }
@@ -176,7 +176,7 @@ void Entity::setRotation(glm::quat rotation)
     this->rotation = rotation;
 }
 
-glm::quat& Entity::getRotation()
+glm::quat Entity::getRotation() const
 {
     return rotation;
 }
@@ -186,7 +186,7 @@ void Entity::setVelocity(glm::vec3 velocity)
     this->velocity = velocity;
 }
 
-glm::vec3& Entity::getVelocity()
+glm::vec3 Entity::getVelocity() const
 {
     return velocity;
 }
@@ -196,7 +196,7 @@ void Entity::setAngularVelocity(glm::vec3 angularVelocity)
     this->angularVelocity = angularVelocity;
 }
 
-glm::vec3& Entity::getAngularVelocity()
+glm::vec3 Entity::getAngularVelocity() const
 {
     return angularVelocity;
 }
