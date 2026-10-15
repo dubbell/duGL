@@ -3,6 +3,8 @@
 
 #include <glm/gtc/matrix_transform.hpp>
 
+#include <utility>
+
 
 template <typename T>
 static T findProperty(const std::unordered_map<dugl::uint, EntityPropertyValue>& properties, dugl::uint property, T defaultValue)
@@ -35,9 +37,8 @@ void Entity::updateState(const EntityUpdateContext& context)
 {
     // Hover state.
     const std::optional<Ray>& ray = context.hoverRay;
-    float hoverRadius = getProperty(EntityProperty::HoverRadius, 1.0f);
-    bool hovered = ray && hasFeature(EntityFeature::Hoverable) && 
-        checkRayIntersection(position, hoverRadius, ray->origin, ray->direction);
+    std::optional<float> hit = ray && hasFeature(EntityFeature::Hoverable) ? castRay(*ray) : std::nullopt;
+    bool hovered = hit.has_value();
     setFlag(EntityFlag::Hovered, hovered);
 
     // Selection state.
@@ -58,12 +59,10 @@ void Entity::updateState(const EntityUpdateContext& context)
     // Hold state.
     if (hovered && hasFeature(EntityFeature::Holdable) && context.leftMousePressed)
     {
-        std::optional<glm::vec3> heldPoint = intersectRaySphere(position, hoverRadius, ray->origin, ray->direction);
-        if (heldPoint) {
-            setProperty(EntityProperty::HeldInEntitySpace, glm::inverse(rotation) * (*heldPoint - position));
-            setProperty(EntityProperty::HeldInWorldSpace, *heldPoint);
-            setFlag(EntityFlag::Held, true);
-        }
+        glm::vec3 heldPoint = ray->origin + *hit * ray->direction;
+        setProperty(EntityProperty::HeldInEntitySpace, glm::inverse(rotation) * (heldPoint - position));
+        setProperty(EntityProperty::HeldInWorldSpace, heldPoint);
+        setFlag(EntityFlag::Held, true);
     }
     else if (hasFlag(EntityFlag::Held) && (context.leftMouseReleased || !hasFeature(EntityFeature::Holdable))) 
     {
@@ -201,7 +200,27 @@ glm::vec3 Entity::getAngularVelocity() const
     return angularVelocity;
 }
 
-glm::mat4 Entity::getModelTransform()
+glm::mat4 Entity::getModelTransform() const
 {
     return glm::translate(glm::mat4(1.0f), position) * glm::mat4_cast(rotation);
+}
+
+void Entity::setRayHitTest(RayHitTest rayHitTest)
+{
+    this->rayHitTest = std::move(rayHitTest);
+}
+
+std::optional<float> Entity::castRay(const Ray& ray) const
+{
+    if (rayHitTest) {
+        return rayHitTest(*this, ray);
+    } else {
+        return intersectRay(ray);
+    }
+}
+
+std::optional<float> Entity::intersectRay(const Ray& ray) const
+{
+    float hoverRadius = getProperty(EntityProperty::HoverRadius, 1.0f);
+    return intersectRaySphere(position, hoverRadius, ray.origin, ray.direction);
 }

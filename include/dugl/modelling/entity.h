@@ -8,6 +8,7 @@
 #include <glm/gtc/quaternion.hpp>
 
 #include <cstdint>
+#include <functional>
 #include <optional>
 #include <unordered_map>
 #include <variant>
@@ -67,6 +68,10 @@ DUGL_NAMESPACE_BEGIN
 class EntityUpdateJob;
 DUGL_NAMESPACE_END
 
+class Entity;
+
+using RayHitTest = std::function<std::optional<float>(const Entity& entity, const Ray& ray)>;
+
 // An Entity is the world space representation of a Renderable. While
 // each Renderable is singular, multiple Entity objects with the same
 // Renderable can exist and be rendered on the screen simultaneously.
@@ -89,6 +94,7 @@ protected:
 
 private:
     bool selectArmed = false;
+    RayHitTest rayHitTest;
 
 public:
     Entity(Renderable* model, Shader* shader);
@@ -126,11 +132,15 @@ public:
     virtual void setAngularVelocity(glm::vec3 angularVelocity);
     glm::vec3 getAngularVelocity() const;
 
-    glm::mat4 getModelTransform();
+    glm::mat4 getModelTransform() const;
+
+    void setRayHitTest(RayHitTest rayHitTest);
+    std::optional<float> castRay(const Ray& ray) const;
 
 protected:
     virtual void preUpdate(float dt) {}
     virtual void update(float dt) {}
+    virtual std::optional<float> intersectRay(const Ray& ray) const;
 
 private:
     void tick(const EntityUpdateContext& context);

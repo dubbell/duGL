@@ -56,7 +56,7 @@ inline bool checkRayIntersection(glm::vec3 target, float distance, glm::vec3 ori
     return glm::length2(closestPoint - target) <= (distance * distance);
 }
 
-inline std::optional<glm::vec3> intersectRaySphere(glm::vec3 center, float radius, glm::vec3 origin, glm::vec3 direction)
+inline std::optional<float> intersectRaySphere(glm::vec3 center, float radius, glm::vec3 origin, glm::vec3 direction)
 {
     glm::vec3 toCenter = center - origin;
 
@@ -74,7 +74,7 @@ inline std::optional<glm::vec3> intersectRaySphere(glm::vec3 center, float radiu
         return std::nullopt;
     }
 
-    return origin + nearest * direction;
+    return nearest;
 }
 
 inline std::optional<glm::vec3> intersectRayPlane(glm::vec3 planePoint, glm::vec3 planeNormal, glm::vec3 origin, glm::vec3 direction)
