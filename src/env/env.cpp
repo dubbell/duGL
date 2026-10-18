@@ -153,7 +153,10 @@ Shader* Environment::createShader(const char* vertexShader, const char* fragment
 
 Renderable* Environment::createRenderable(RenderableBuilder& builder)
 {
-    return scene.addRenderable(std::make_unique<Renderable>(builder.build()));
+    if (!builder.renderable) {
+        builder.renderable = scene.addRenderable(std::make_unique<Renderable>(builder.build()));
+    }
+    return builder.renderable;
 }
 
 EntityUpdateContext Environment::createEntityUpdateContext(float dt) const

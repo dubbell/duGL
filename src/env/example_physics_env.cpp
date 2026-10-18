@@ -3,8 +3,6 @@
 #include "dugl/modelling/outline_pass.h"
 #include "dugl/physics/draggable_entity.h"
 
-#include <Jolt/Physics/Collision/Shape/MeshShape.h>
-
 #include <iostream>
 
 static constexpr float THRUST_FORCE = 20000.0f;
@@ -21,37 +19,53 @@ void ExamplePhysicsEnvironment::init()
 
     Shader* defaultShader = createShader("basic_texture.vert", "basic_texture.frag");
 
+    auto makeInteractive = [](Entity* entity) {
+        entity->setFeature(EntityFeature::Hoverable, true);
+        entity->setFeature(EntityFeature::Selectable, true);
+        entity->setFeature(EntityFeature::Holdable, true);
+    };
+
     PlaneBuilder planeBuilder(20.0f, 20.0f);
-    JPH::TriangleList planeTriangles;
-    planeTriangles.push_back(JPH::Triangle(JPH::Float3(-10.0f, 0.0f, -10.0f), JPH::Float3(-10.0f, 0.0f, 10.0f), JPH::Float3(10.0f, 0.0f, 10.0f)));
-    planeTriangles.push_back(JPH::Triangle(JPH::Float3(-10.0f, 0.0f, -10.0f), JPH::Float3(10.0f, 0.0f, 10.0f), JPH::Float3(10.0f, 0.0f, -10.0f)));
-    JPH::BodyCreationSettings planeSettings(
-        new JPH::MeshShapeSettings(planeTriangles),
-        JPH::RVec3::sZero(),
-        JPH::Quat::sIdentity(),
-        JPH::EMotionType::Static,
-        Layers::NON_MOVING);
-    createEntity<PhysicsEntity>(createRenderable(planeBuilder), defaultShader, physicsSystem, planeSettings);
+    createEntity<PhysicsEntity>(planeBuilder, defaultShader, { .motionType = MotionType::Static });
+
+    PhysicsMaterial dynamicMaterial;
+    glm::quat boxRotation = glm::angleAxis(0.4f, glm::normalize(glm::vec3(1.0f, 0.0f, 1.0f)));
 
     BoxBuilder boxBuilder(glm::vec3(1.0f));
-    JPH::BodyCreationSettings boxSettings(
-        new JPH::BoxShapeSettings(JPH::Vec3(0.5f, 0.5f, 0.5f)),
-        JPH::RVec3(0.0f, 5.0f, 0.0f),
-        JPH::Quat::sRotation(JPH::Vec3(1.0f, 0.0f, 1.0f).Normalized(), 0.4f),
-        JPH::EMotionType::Dynamic,
-        Layers::MOVING);
-    Renderable* boxRenderable = createRenderable(boxBuilder);
-    box = createEntity<DraggableEntity>(boxRenderable, defaultShader, physicsSystem, boxSettings);
-    box->setFeature(EntityFeature::Hoverable, true);
-    box->setFeature(EntityFeature::Selectable, true);
-    box->setFeature(EntityFeature::Holdable, true);
+    box = createEntity<DraggableEntity>(boxBuilder, defaultShader, dynamicMaterial);
+    box->setPosition(glm::vec3(0.0f, 5.0f, 0.0f));
+    box->setRotation(boxRotation);
+    makeInteractive(box);
     box->setFrozen(true);
 
-    boxSettings.mPosition = JPH::RVec3(0.0f, 9.0f, 0.0f);
-    DraggableEntity* secondBox = createEntity<DraggableEntity>(boxRenderable, defaultShader, physicsSystem, boxSettings);
-    secondBox->setFeature(EntityFeature::Hoverable, true);
-    secondBox->setFeature(EntityFeature::Selectable, true);
-    secondBox->setFeature(EntityFeature::Holdable, true);
+    DraggableEntity* secondBox = createEntity<DraggableEntity>(boxBuilder, defaultShader, dynamicMaterial);
+    secondBox->setPosition(glm::vec3(0.0f, 9.0f, 0.0f));
+    secondBox->setRotation(boxRotation);
+    makeInteractive(secondBox);
+
+    EllipsoidBuilder sphereBuilder(glm::vec3(0.75f));
+    sphereBuilder.setMaterial({ .diffuseColor = { 0.20f, 0.45f, 0.85f } });
+    DraggableEntity* sphere = createEntity<DraggableEntity>(sphereBuilder, defaultShader, dynamicMaterial);
+    sphere->setPosition(glm::vec3(0.0f, 3.0f, -6.0f));
+    makeInteractive(sphere);
+
+    EllipsoidBuilder ellipsoidBuilder(glm::vec3(0.5f, 1.0f, 0.5f));
+    ellipsoidBuilder.setMaterial({ .diffuseColor = { 0.30f, 0.75f, 0.35f } });
+    DraggableEntity* ellipsoid = createEntity<DraggableEntity>(ellipsoidBuilder, defaultShader, dynamicMaterial);
+    ellipsoid->setPosition(glm::vec3(0.0f, 3.0f, -3.0f));
+    makeInteractive(ellipsoid);
+
+    ConeBuilder coneBuilder(0.75f, 1.5f);
+    coneBuilder.setMaterial({ .diffuseColor = { 0.95f, 0.65f, 0.15f } });
+    DraggableEntity* cone = createEntity<DraggableEntity>(coneBuilder, defaultShader, dynamicMaterial);
+    cone->setPosition(glm::vec3(0.0f, 3.0f, 3.0f));
+    makeInteractive(cone);
+
+    PyramidBuilder pyramidBuilder(1.5f, 1.5f, 1.25f);
+    pyramidBuilder.setMaterial({ .diffuseColor = { 0.60f, 0.35f, 0.80f } });
+    DraggableEntity* pyramid = createEntity<DraggableEntity>(pyramidBuilder, defaultShader, dynamicMaterial);
+    pyramid->setPosition(glm::vec3(0.0f, 3.0f, 6.0f));
+    makeInteractive(pyramid);
 
     Shader* outlineMaskShader = createShader("outline_mask.vert", "outline_mask.frag");
     Shader* outlineShader = createShader("outline.vert", "outline.frag");

@@ -1,19 +1,44 @@
 #include "dugl/modelling/primitive_builder.h"
 
 #include <algorithm>
+#include <array>
 #include <cmath>
 #include <numbers>
+#include <utility>
 
 
 static const float PI = std::numbers::pi_v<float>;
 
+static constexpr float PLANE_HALF_THICKNESS = 0.05f;
+static constexpr dugl::uint ELLIPSOID_HULL_SEGMENTS = 16;
+static constexpr dugl::uint ELLIPSOID_HULL_RINGS = 8;
 
-PrimitiveBuilder::PrimitiveBuilder(Material material) : material(material)
-{}
+template <typename LocalHitTest>
+static RayHitTest inEntitySpace(LocalHitTest test)
+{
+    return [test = std::move(test)](const Entity& entity, const Ray& ray) {
+        glm::quat inverseRotation = glm::inverse(entity.getRotation());
+        return test(inverseRotation * (ray.origin - entity.getPosition()), inverseRotation * ray.direction);
+    };
+}
+
+static std::array<glm::vec3, 4> pyramidCorners(float baseWidth, float baseDepth)
+{
+    float halfWidth = baseWidth * 0.5f, halfDepth = baseDepth * 0.5f;
+    return {{
+        { -halfWidth, 0.0f,  halfDepth },
+        {  halfWidth, 0.0f,  halfDepth },
+        {  halfWidth, 0.0f, -halfDepth },
+        { -halfWidth, 0.0f, -halfDepth }}};
+}
+
+
+PrimitiveBuilder::PrimitiveBuilder(Material material) : material(material) {}
 
 void PrimitiveBuilder::setMaterial(Material material)
 {
     this->material = material;
+    renderable = nullptr;
 }
 
 void PrimitiveBuilder::addMesh(std::vector<StaticVertex> vertices, std::vector<unsigned int> indices)
@@ -85,9 +110,45 @@ void PlaneBuilder::generateMeshes()
     addMesh(std::move(vertices), std::move(indices));
 }
 
+Collider PlaneBuilder::createCollider() const
+{
+    return BoxCollider{
+        { width * 0.5f, PLANE_HALF_THICKNESS, depth * 0.5f },
+        { 0.0f, -PLANE_HALF_THICKNESS, 0.0f }};
+}
+
+RayHitTest PlaneBuilder::createRayHitTest() const
+{
+    glm::vec2 halfExtents(width * 0.5f, depth * 0.5f);
+    return inEntitySpace([halfExtents](glm::vec3 origin, glm::vec3 direction) {
+        return intersectRayRectangle(halfExtents, origin, direction);
+    });
+}
+
 
 BoxBuilder::BoxBuilder(glm::vec3 dimensions) : dimensions(dimensions)
 {}
+
+Collider BoxBuilder::createCollider() const
+{
+    return BoxCollider{ dimensions * 0.5f };
+}
+
+RayHitTest BoxBuilder::createRayHitTest() const
+{
+    glm::vec3 halfExtents = dimensions * 0.5f;
+    std::array<glm::vec4, 6> planes = {{
+        {  1.0f,  0.0f,  0.0f, halfExtents.x },
+        { -1.0f,  0.0f,  0.0f, halfExtents.x },
+        {  0.0f,  1.0f,  0.0f, halfExtents.y },
+        {  0.0f, -1.0f,  0.0f, halfExtents.y },
+        {  0.0f,  0.0f,  1.0f, halfExtents.z },
+        {  0.0f,  0.0f, -1.0f, halfExtents.z }}};
+
+    return inEntitySpace([planes](glm::vec3 origin, glm::vec3 direction) {
+        return intersectRayConvex(planes, origin, direction);
+    });
+}
 
 void BoxBuilder::generateMeshes()
 {
@@ -126,6 +187,39 @@ void BoxBuilder::generateMeshes()
 EllipsoidBuilder::EllipsoidBuilder(glm::vec3 radii, dugl::uint segments, dugl::uint rings)
     : radii(radii), segments(std::max(segments, 3u)), rings(std::max(rings, 2u))
 {}
+
+Collider EllipsoidBuilder::createCollider() const
+{
+    if (radii.x == radii.y && radii.y == radii.z) {
+        return SphereCollider{ radii.x };
+    }
+
+    std::vector<glm::vec3> points;
+    points.push_back({ 0.0f, radii.y, 0.0f });
+    points.push_back({ 0.0f, -radii.y, 0.0f });
+
+    for (dugl::uint ring = 1; ring < ELLIPSOID_HULL_RINGS; ring++)
+    {
+        float phi = PI * ring / ELLIPSOID_HULL_RINGS;
+        for (dugl::uint segment = 0; segment < ELLIPSOID_HULL_SEGMENTS; segment++)
+        {
+            float theta = 2.0f * PI * segment / ELLIPSOID_HULL_SEGMENTS;
+            points.push_back({
+                radii.x * std::sin(phi) * std::cos(theta),
+                radii.y * std::cos(phi),
+                radii.z * std::sin(phi) * std::sin(theta)});
+        }
+    }
+
+    return ConvexHullCollider{ std::move(points) };
+}
+
+RayHitTest EllipsoidBuilder::createRayHitTest() const
+{
+    return inEntitySpace([radii = radii](glm::vec3 origin, glm::vec3 direction) {
+        return intersectRayEllipsoid(radii, origin, direction);
+    });
+}
 
 void EllipsoidBuilder::generateMeshes()
 {
@@ -187,6 +281,26 @@ void EllipsoidBuilder::generateMeshes()
 ConeBuilder::ConeBuilder(float radius, float height, dugl::uint segments)
     : radius(radius), height(height), segments(std::max(segments, 3u))
 {}
+
+Collider ConeBuilder::createCollider() const
+{
+    std::vector<glm::vec3> points;
+    points.push_back({ 0.0f, height, 0.0f });
+
+    for (dugl::uint segment = 0; segment < segments; segment++) {
+        float theta = 2.0f * PI * segment / segments;
+        points.push_back({ radius * std::cos(theta), 0.0f, radius * std::sin(theta) });
+    }
+
+    return ConvexHullCollider{ std::move(points) };
+}
+
+RayHitTest ConeBuilder::createRayHitTest() const
+{
+    return inEntitySpace([radius = radius, height = height](glm::vec3 origin, glm::vec3 direction) {
+        return intersectRayCone(radius, height, origin, direction);
+    });
+}
 
 void ConeBuilder::generateMeshes()
 {
@@ -250,18 +364,42 @@ PyramidBuilder::PyramidBuilder(float baseWidth, float baseDepth, float height)
     : baseWidth(baseWidth), baseDepth(baseDepth), height(height)
 {}
 
+Collider PyramidBuilder::createCollider() const
+{
+    std::array<glm::vec3, 4> corners = pyramidCorners(baseWidth, baseDepth);
+
+    std::vector<glm::vec3> points(corners.begin(), corners.end());
+    points.push_back({ 0.0f, height, 0.0f });
+
+    return ConvexHullCollider{ std::move(points) };
+}
+
+RayHitTest PyramidBuilder::createRayHitTest() const
+{
+    std::array<glm::vec3, 4> corners = pyramidCorners(baseWidth, baseDepth);
+    glm::vec3 apex = { 0.0f, height, 0.0f };
+
+    std::array<glm::vec4, 5> planes;
+    planes[0] = { 0.0f, -1.0f, 0.0f, 0.0f };
+
+    for (dugl::uint side = 0; side < 4; side++)
+    {
+        glm::vec3 left = corners[side], right = corners[(side + 1) % 4];
+        glm::vec3 normal = glm::normalize(glm::cross(right - left, apex - left));
+        planes[side + 1] = glm::vec4(normal, glm::dot(normal, left));
+    }
+
+    return inEntitySpace([planes](glm::vec3 origin, glm::vec3 direction) {
+        return intersectRayConvex(planes, origin, direction);
+    });
+}
+
 void PyramidBuilder::generateMeshes()
 {
     std::vector<StaticVertex> vertices;
     std::vector<unsigned int> indices;
 
-    float halfWidth = baseWidth * 0.5f, halfDepth = baseDepth * 0.5f;
-
-    glm::vec3 corners[4] = {
-        { -halfWidth, 0.0f,  halfDepth },
-        {  halfWidth, 0.0f,  halfDepth },
-        {  halfWidth, 0.0f, -halfDepth },
-        { -halfWidth, 0.0f, -halfDepth }};
+    std::array<glm::vec3, 4> corners = pyramidCorners(baseWidth, baseDepth);
     glm::vec3 apex = { 0.0f, height, 0.0f };
 
     // base, wound counter-clockwise as seen from below

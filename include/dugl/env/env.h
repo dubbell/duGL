@@ -5,6 +5,7 @@
 #include "dugl/interfaces/perspective_interface.h"
 #include "dugl/view/camera.h"
 #include "dugl/modelling/scene.h"
+#include "dugl/modelling/primitive_builder.h"
 #include "dugl/utils/time.h"
 #include "dugl/shading/uniform_buffer.h"
 #include "dugl/async/dispatcher.h"
@@ -86,6 +87,13 @@ protected:
 
     /* Create a standard entity to be rendered in the environment scene. */
     Entity* createEntity(Renderable* renderable, Shader* shader) { return createEntity<Entity>(renderable, shader); }
+
+    template<typename T = Entity, typename... Args> requires std::is_base_of_v<Entity, T> && std::constructible_from<T, Renderable*, Shader*, Args...>
+    T* createEntity(PrimitiveBuilder& builder, Shader* shader, Args&&... args) {
+        T* entity = createEntity<T>(createRenderable(builder), shader, std::forward<Args>(args)...);
+        entity->setRayHitTest(builder.createRayHitTest());
+        return entity;
+    }
     
     /* Invoked before the main loop starts iterating. */
     virtual void init() {}

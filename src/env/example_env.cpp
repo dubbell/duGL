@@ -72,7 +72,7 @@ void ExampleEnvironment::createPrimitives(Shader* shader)
         .diffuseColor = { 0.35f, 0.40f, 0.35f },
         .specularColor = glm::vec3(0.05f),
         .shininess = 4.0f });
-    Entity* ground = createEntity(createRenderable(groundBuilder), shader);
+    Entity* ground = createEntity(groundBuilder, shader);
     ground->setPosition({ rowX, groundY, 0.0f });
 
     // matte, to contrast with the sphere
@@ -81,7 +81,7 @@ void ExampleEnvironment::createPrimitives(Shader* shader)
         .diffuseColor = { 0.85f, 0.25f, 0.20f },
         .specularColor = glm::vec3(0.08f),
         .shininess = 8.0f });
-    Entity* box = createEntity(createRenderable(boxBuilder), shader);
+    Entity* box = createEntity(boxBuilder, shader);
     box->setPosition({ rowX, groundY + 0.75f, -6.0f });
 
     // equal radii, so this is a plain sphere; glossy
@@ -90,7 +90,7 @@ void ExampleEnvironment::createPrimitives(Shader* shader)
         .diffuseColor = { 0.20f, 0.45f, 0.85f },
         .specularColor = glm::vec3(0.9f),
         .shininess = 128.0f });
-    Entity* sphere = createEntity(createRenderable(sphereBuilder), shader);
+    Entity* sphere = createEntity(sphereBuilder, shader);
     sphere->setPosition({ rowX, groundY + 1.0f, -3.0f });
 
     // unequal radii: the interesting case for the normals
@@ -99,7 +99,7 @@ void ExampleEnvironment::createPrimitives(Shader* shader)
         .diffuseColor = { 0.30f, 0.75f, 0.35f },
         .specularColor = glm::vec3(0.5f),
         .shininess = 48.0f });
-    Entity* ellipsoid = createEntity(createRenderable(ellipsoidBuilder), shader);
+    Entity* ellipsoid = createEntity(ellipsoidBuilder, shader);
     ellipsoid->setPosition({ rowX, groundY + 1.5f, 0.0f });
 
     // smoothly shaded around its axis
@@ -108,7 +108,7 @@ void ExampleEnvironment::createPrimitives(Shader* shader)
         .diffuseColor = { 0.95f, 0.65f, 0.15f },
         .specularColor = glm::vec3(0.4f),
         .shininess = 32.0f });
-    Entity* cone = createEntity(createRenderable(coneBuilder), shader);
+    Entity* cone = createEntity(coneBuilder, shader);
     cone->setPosition({ rowX, groundY, 3.0f });
 
     // faceted, unlike the cone: its four sides each carry a flat normal
@@ -117,7 +117,7 @@ void ExampleEnvironment::createPrimitives(Shader* shader)
         .diffuseColor = { 0.60f, 0.35f, 0.80f },
         .specularColor = glm::vec3(0.25f),
         .shininess = 16.0f });
-    Entity* pyramid = createEntity(createRenderable(pyramidBuilder), shader);
+    Entity* pyramid = createEntity(pyramidBuilder, shader);
     pyramid->setPosition({ rowX, groundY, 6.0f });
 }
 

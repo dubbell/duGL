@@ -5,6 +5,8 @@
 #include "dugl/shading/material.h"
 #include "renderable_builder.h"
 #include "vertex_layout.h"
+#include "collider.h"
+#include "entity.h"
 
 
 // Base for builders that generate their geometry procedurally instead of loading it.
@@ -17,6 +19,11 @@ protected:
 
 public:
     void setMaterial(Material material);
+
+    /* Get the parameters of the collision geometry. */
+    virtual Collider createCollider() const = 0;
+    /* Get the ray hit detection function. */
+    virtual RayHitTest createRayHitTest() const = 0;
 
 protected:
     PrimitiveBuilder() = default;
@@ -37,6 +44,9 @@ private:
 public:
     PlaneBuilder(float width, float depth, dugl::uint widthSegments = 1, dugl::uint depthSegments = 1);
 
+    Collider createCollider() const override;
+    RayHitTest createRayHitTest() const override;
+
 private:
     void generateMeshes() override;
 };
@@ -50,6 +60,9 @@ private:
 
 public:
     BoxBuilder(glm::vec3 dimensions);
+
+    Collider createCollider() const override;
+    RayHitTest createRayHitTest() const override;
 
 private:
     void generateMeshes() override;
@@ -67,6 +80,9 @@ private:
 public:
     EllipsoidBuilder(glm::vec3 radii, dugl::uint segments = 32, dugl::uint rings = 16);
 
+    Collider createCollider() const override;
+    RayHitTest createRayHitTest() const override;
+
 private:
     void generateMeshes() override;
 };
@@ -82,6 +98,9 @@ private:
 public:
     ConeBuilder(float radius, float height, dugl::uint segments = 32);
 
+    Collider createCollider() const override;
+    RayHitTest createRayHitTest() const override;
+
 private:
     void generateMeshes() override;
 };
@@ -95,6 +114,9 @@ private:
 
 public:
     PyramidBuilder(float baseWidth, float baseDepth, float height);
+
+    Collider createCollider() const override;
+    RayHitTest createRayHitTest() const override;
 
 private:
     void generateMeshes() override;

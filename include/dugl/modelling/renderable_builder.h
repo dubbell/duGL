@@ -11,8 +11,11 @@
 // have to fill 'meshes' in generateMeshes(); build() takes care of the rest.
 class RenderableBuilder
 {
+    friend class Environment;
+
 protected:
     std::vector<Mesh> meshes;
+    Renderable* renderable = nullptr;  // Cached to allow the creation of multiple entities with the same renderable.
 
 public:
     virtual ~RenderableBuilder() = default;
