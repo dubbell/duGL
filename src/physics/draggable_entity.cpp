@@ -1,9 +1,6 @@
 #include "dugl/physics/draggable_entity.h"
 
 
-static constexpr float HOLD_FREQUENCY = 4.0f;
-static constexpr float HOLD_DAMPING = 1.0f;
-
 DraggableEntity::DraggableEntity(Renderable* renderable, Shader* shader, JPH::PhysicsSystem& physicsSystem, const JPH::BodyCreationSettings& settings)
     : PhysicsEntity(renderable, shader, physicsSystem, settings) {}
 

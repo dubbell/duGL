@@ -2,42 +2,17 @@
 
 #include "dugl/modelling/entity.h"
 #include "dugl/physics/collision.h"
+#include "dugl/physics/anchored_constraints.h"
 
 #include <Jolt/Jolt.h>
 #include <Jolt/Physics/PhysicsSystem.h>
 #include <Jolt/Physics/Body/BodyInterface.h>
 #include <Jolt/Physics/Body/BodyCreationSettings.h>
-#include <Jolt/Physics/Constraints/TwoBodyConstraint.h>
 
-#include <unordered_map>
 #include <vector>
 
 
 class PhysicsEnvironment;
-
-struct DistanceConstraintParams
-{
-    glm::vec3 pointInEntitySpace{ 0.0f };
-    glm::vec3 anchorInWorldSpace{ 0.0f };
-    float minDistance = 0.0f;
-    float maxDistance = 0.0f;
-    float frequency = 0.0f;
-    float damping = 0.0f;
-};
-
-struct PointConstraintParams
-{
-    glm::vec3 pointInEntitySpace{ 0.0f };
-    glm::vec3 anchorInWorldSpace{ 0.0f };
-    float frequency = 0.0f;
-    float damping = 0.0f;
-};
-
-struct AnchoredConstraint
-{
-    JPH::BodyID anchorId;
-    JPH::Ref<JPH::Constraint> constraint;
-};
 
 class PhysicsEntity : public Entity
 {
@@ -52,8 +27,7 @@ private:
     JPH::EMotionType motionType;
     bool frozen = false;
     std::vector<CollisionEvent> pendingCollisions;
-    std::unordered_map<dugl::uint, AnchoredConstraint> constraints;
-    dugl::uint nextConstraintId = 0;
+    AnchoredConstraints constraints;
 
 public:
     PhysicsEntity(Renderable* renderable, Shader* shader, JPH::PhysicsSystem& physicsSystem, const JPH::BodyCreationSettings& settings);
@@ -99,7 +73,5 @@ protected:
     virtual void onCollision(const CollisionEvent& event, PhysicsEntity* other) {}
 
 private:
-    glm::vec3 toWorldSpace(glm::vec3 pointInEntitySpace) const;
-    dugl::uint addAnchoredConstraint(glm::vec3 anchorInWorldSpace, JPH::TwoBodyConstraintSettings& settings);
     void preUpdate(float dt) override final;
 };
