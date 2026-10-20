@@ -24,5 +24,4 @@ public:
 protected:
     void init() override;
     void update(float dt) override;
-    void prePhysicsStep(float stepDt) override;
 };

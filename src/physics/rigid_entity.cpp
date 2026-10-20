@@ -36,17 +36,17 @@ JPH::BodyID RigidEntity::getBodyId() const
 
 void RigidEntity::applyForce(glm::vec3 force)
 {
-    bodyInterface.AddForce(bodyId, toJolt(force));
+    addForce(bodyId, toJolt(force));
 }
 
 void RigidEntity::applyForce(glm::vec3 force, glm::vec3 point)
 {
-    bodyInterface.AddForce(bodyId, toJolt(force), toJolt(point));
+    addForce(bodyId, toJolt(force), toJolt(point));
 }
 
 void RigidEntity::applyTorque(glm::vec3 torque)
 {
-    bodyInterface.AddTorque(bodyId, toJolt(torque));
+    addTorque(bodyId, toJolt(torque));
 }
 
 void RigidEntity::applyImpulse(glm::vec3 impulse)

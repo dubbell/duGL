@@ -38,10 +38,16 @@ void PhysicsEnvironment::physicsUpdate(float dt)
     accumulator = std::min(accumulator + dt, MAX_ACCUMULATED_TIME);
     while (accumulator >= PHYSICS_STEP)
     {
-        prePhysicsStep(PHYSICS_STEP);
+        for (PhysicsEntity* entity : physicsEntities) {
+            entity->applyPendingForces();
+        }
         physicsSystem.Update(PHYSICS_STEP, 1, &tempAllocator, dispatcher.getJobSystem());
         collectCollisionEvents();
         accumulator -= PHYSICS_STEP;
+    }
+
+    for (PhysicsEntity* entity : physicsEntities) {
+        entity->clearPendingForces();
     }
 }
 

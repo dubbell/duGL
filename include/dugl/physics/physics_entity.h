@@ -24,7 +24,15 @@ protected:
     AnchoredConstraints constraints;
 
 private:
+    struct PendingForce
+    {
+        JPH::BodyID bodyId;
+        JPH::Vec3 force = JPH::Vec3::sZero();
+        JPH::Vec3 torque = JPH::Vec3::sZero();
+    };
+
     std::vector<CollisionEvent> pendingCollisions;
+    std::vector<PendingForce> pendingForces;
 
 public:
     PhysicsEntity(Renderable* renderable, Shader* shader, JPH::PhysicsSystem& physicsSystem);
@@ -48,6 +56,13 @@ protected:
     /* Called when something collides with the entity. */
     virtual void onCollision(const CollisionEvent& event, PhysicsEntity* other) {}
 
+    void addForce(JPH::BodyID bodyId, JPH::Vec3 force);
+    void addForce(JPH::BodyID bodyId, JPH::Vec3 force, JPH::RVec3 point);
+    void addTorque(JPH::BodyID bodyId, JPH::Vec3 torque);
+
 private:
     void preUpdate(float dt) override final;
+    PendingForce& getPendingForce(JPH::BodyID bodyId);
+    void applyPendingForces();
+    void clearPendingForces();
 };

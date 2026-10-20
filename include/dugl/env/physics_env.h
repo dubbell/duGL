@@ -36,6 +36,7 @@ protected:
 private:
     std::vector<CollisionEvent> collisionEvents;
     std::map<std::pair<JPH::BodyID, JPH::BodyID>, bool> sleepingContacts;
+    std::vector<PhysicsEntity*> physicsEntities;
 
 public:
     PhysicsEnvironment();
@@ -46,16 +47,19 @@ protected:
 
     template<typename T = RigidEntity> requires std::is_base_of_v<RigidEntity, T>
     T* createEntity(PrimitiveBuilder& builder, Shader* shader, const PhysicsMaterial& material) {
-        return Environment::createEntity<T>(builder, shader, physicsSystem, builder, material);
+        T* entity = Environment::createEntity<T>(builder, shader, physicsSystem, builder, material);
+        physicsEntities.push_back(entity);
+        return entity;
     }
 
     template<typename T = RagdollEntity> requires std::is_base_of_v<RagdollEntity, T>
     T* createRagdoll(RagdollBuilder& builder, Shader* shader) {
-        return Environment::createEntity<T>(createRenderable(builder), shader, physicsSystem, builder);
+        T* entity = Environment::createEntity<T>(createRenderable(builder), shader, physicsSystem, builder);
+        physicsEntities.push_back(entity);
+        return entity;
     }
 
     void physicsUpdate(float dt);
-    virtual void prePhysicsStep(float stepDt) {}
 
     const std::vector<CollisionEvent>& getCollisionEvents() const { return collisionEvents; }
 

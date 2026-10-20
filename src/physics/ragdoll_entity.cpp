@@ -116,8 +116,8 @@ void RagdollEntity::applyJointTorque(dugl::uint part, float torque)
     JPH::HingeConstraint* hinge = getHingeJoint(part);
     JPH::BodyID parentId = hinge->GetBody1()->GetID();
     JPH::Vec3 axis = bodyInterface.GetRotation(parentId) * hinge->GetLocalSpaceHingeAxis1();
-    bodyInterface.AddTorque(hinge->GetBody2()->GetID(), axis * torque);
-    bodyInterface.AddTorque(parentId, -axis * torque);
+    addTorque(hinge->GetBody2()->GetID(), axis * torque);
+    addTorque(parentId, -axis * torque);
 }
 
 float RagdollEntity::getJointAngle(dugl::uint part) const

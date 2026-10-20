@@ -129,6 +129,16 @@ void ExamplePhysicsEnvironment::update(float dt)
     }
     releaseHeld = release;
 
+    if (glfwGetKey(window, GLFW_KEY_F) == GLFW_PRESS) {
+        box->applyForce(glm::vec3(0.0f, THRUST_FORCE, 0.0f));
+    }
+    if (glfwGetKey(window, GLFW_KEY_Z) == GLFW_PRESS) {
+        arm->applyJointTorque(forearm, -JOINT_TORQUE);
+    }
+    if (glfwGetKey(window, GLFW_KEY_X) == GLFW_PRESS) {
+        arm->applyJointTorque(forearm, JOINT_TORQUE);
+    }
+
     physicsUpdate(dt);
 
     for (const CollisionEvent& event : getCollisionEvents())
@@ -142,18 +152,5 @@ void ExamplePhysicsEnvironment::update(float dt)
                       << ", relative speed " << glm::length(event.relativeVelocity);
         }
         std::cout << std::endl;
-    }
-}
-
-void ExamplePhysicsEnvironment::prePhysicsStep(float stepDt)
-{
-    if (glfwGetKey(window, GLFW_KEY_F) == GLFW_PRESS) {
-        box->applyForce(glm::vec3(0.0f, THRUST_FORCE, 0.0f));
-    }
-    if (glfwGetKey(window, GLFW_KEY_Z) == GLFW_PRESS) {
-        arm->applyJointTorque(forearm, -JOINT_TORQUE);
-    }
-    if (glfwGetKey(window, GLFW_KEY_X) == GLFW_PRESS) {
-        arm->applyJointTorque(forearm, JOINT_TORQUE);
     }
 }
