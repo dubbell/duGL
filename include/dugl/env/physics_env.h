@@ -5,6 +5,8 @@
 #include "dugl/physics/common.h"
 #include "dugl/physics/collision.h"
 #include "dugl/physics/physics_entity.h"
+#include "dugl/physics/ragdoll_builder.h"
+#include "dugl/physics/ragdoll_entity.h"
 #include "dugl/physics/body_settings.h"
 #include "dugl/modelling/scene.h"
 
@@ -45,6 +47,11 @@ protected:
     template<typename T = PhysicsEntity> requires std::is_base_of_v<PhysicsEntity, T>
     T* createEntity(PrimitiveBuilder& builder, Shader* shader, const PhysicsMaterial& material) {
         return Environment::createEntity<T>(builder, shader, physicsSystem, createBodySettings(builder, material));
+    }
+
+    template<typename T = RagdollEntity> requires std::is_base_of_v<RagdollEntity, T>
+    T* createRagdoll(RagdollBuilder& builder, Shader* shader) {
+        return Environment::createEntity<T>(createRenderable(builder), shader, physicsSystem, builder);
     }
 
     void physicsUpdate(float dt);

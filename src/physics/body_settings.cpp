@@ -6,8 +6,12 @@
 #include <Jolt/Physics/Collision/Shape/ConvexHullShape.h>
 #include <Jolt/Physics/Collision/Shape/RotatedTranslatedShape.h>
 #include <Jolt/Physics/Collision/Shape/SphereShape.h>
+#include <Jolt/Physics/Constraints/FixedConstraint.h>
+#include <Jolt/Physics/Constraints/HingeConstraint.h>
+#include <Jolt/Skeleton/Skeleton.h>
 
 #include <algorithm>
+#include <format>
 #include <stdexcept>
 #include <string>
 #include <variant>
@@ -74,4 +78,59 @@ JPH::BodyCreationSettings createBodySettings(const PrimitiveBuilder& builder, co
     settings.mRestitution = material.restitution;
 
     return settings;
+}
+
+static JPH::Ref<JPH::TwoBodyConstraintSettings> createJointSettings(const HingeJoint& joint)
+{
+    JPH::Ref<JPH::HingeConstraintSettings> settings = new JPH::HingeConstraintSettings();
+    settings->mSpace = JPH::EConstraintSpace::WorldSpace;
+    settings->mPoint1 = settings->mPoint2 = toJolt(joint.pivot);
+    settings->mHingeAxis1 = settings->mHingeAxis2 = toJolt(glm::normalize(joint.axis));
+    settings->mNormalAxis1 = settings->mNormalAxis2 = toJolt(glm::normalize(joint.normal));
+    settings->mLimitsMin = joint.minAngle;
+    settings->mLimitsMax = joint.maxAngle;
+    return settings.GetPtr();
+}
+
+static JPH::Ref<JPH::TwoBodyConstraintSettings> createJointSettings(const FixedJoint& joint)
+{
+    JPH::Ref<JPH::FixedConstraintSettings> settings = new JPH::FixedConstraintSettings();
+    settings->mSpace = JPH::EConstraintSpace::WorldSpace;
+    settings->mPoint1 = settings->mPoint2 = toJolt(joint.pivot);
+    return settings.GetPtr();
+}
+
+JPH::Ref<JPH::RagdollSettings> createRagdollSettings(const RagdollBuilder& builder)
+{
+    const std::vector<RagdollPart>& parts = builder.getParts();
+    if (parts.empty()) {
+        throw std::logic_error("A ragdoll needs at least a root part.");
+    }
+
+    JPH::Ref<JPH::Skeleton> skeleton = new JPH::Skeleton();
+    JPH::Ref<JPH::RagdollSettings> ragdollSettings = new JPH::RagdollSettings();
+    ragdollSettings->mParts.resize(parts.size());
+
+    for (size_t i = 0; i < parts.size(); i++)
+    {
+        const RagdollPart& part = parts[i];
+        skeleton->AddJoint(std::format("part{}", i), part.parent);
+
+        JPH::RagdollSettings::Part& settings = ragdollSettings->mParts[i];
+        static_cast<JPH::BodyCreationSettings&>(settings) = createBodySettings(*part.builder, part.material);
+        settings.mPosition = toJolt(part.position);
+        settings.mRotation = toJolt(part.rotation);
+
+        if (part.joint) {
+            settings.mToParent = std::visit([](const auto& joint) { return createJointSettings(joint); }, *part.joint);
+        }
+    }
+
+    ragdollSettings->mSkeleton = skeleton;
+    ragdollSettings->Stabilize();
+    ragdollSettings->DisableParentChildCollisions();
+    ragdollSettings->CalculateBodyIndexToConstraintIndex();
+    ragdollSettings->CalculateConstraintIndexToBodyIdxPair();
+
+    return ragdollSettings;
 }

@@ -219,6 +219,14 @@ void Shader::setMat4(const std::string &name, glm::mat4 value) const
     glProgramUniformMatrix4fv(ID, glGetUniformLocation(ID, name.c_str()), 1, GL_FALSE, glm::value_ptr(value));
 }
 
+void Shader::setMat4Array(const std::string& name, std::span<const glm::mat4> values) const
+{
+    if (values.empty()) {
+        return;
+    }
+    glProgramUniformMatrix4fv(ID, glGetUniformLocation(ID, name.c_str()), (int)values.size(), GL_FALSE, glm::value_ptr(values[0]));
+}
+
 // texture units the material's maps are bound to
 static const int DIFFUSE_MAP_UNIT = 0;
 static const int SPECULAR_MAP_UNIT = 1;

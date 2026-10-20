@@ -2,6 +2,7 @@
 
 #include <glm/glm.hpp>
 
+#include <span>
 #include <string>
 #include <unordered_set>
 
@@ -44,6 +45,7 @@ public:
     void setFloat(const std::string &name, float value) const;
     void setVec3(const std::string &name, glm::vec3 value) const;
     void setMat4(const std::string &name, glm::mat4 value) const;
+    void setMat4Array(const std::string& name, std::span<const glm::mat4> values) const;
 
     // sets the material's factors and binds its maps, substituting neutral defaults for
     // maps the material doesn't have
