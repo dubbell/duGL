@@ -8,6 +8,7 @@ class OutlinePass : public RenderPass
 {
 private:
     Shader* maskShader;
+    Shader* skinnedMaskShader = nullptr;
     Shader* outlineShader;
     std::uint64_t acceptedFlags;
 
@@ -40,6 +41,7 @@ public:
     void render(std::span<Entity* const> entities) override;
 
     void setMaskShader(Shader* maskShader);
+    void setSkinnedMaskShader(Shader* skinnedMaskShader);
     void setOutlineShader(Shader* outlineShader);
 
     void setOutlineThickness(float outlineThickness);
@@ -54,4 +56,5 @@ public:
 private:
     /* (Re-)create the images in the 2 framebuffers if the viewport size changed (or first call to resizeMask). */
     void resizeMask(int width, int height);
+    Shader* getMaskShader(const Entity& entity) const;
 };

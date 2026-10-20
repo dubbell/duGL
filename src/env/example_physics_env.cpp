@@ -67,10 +67,34 @@ void ExamplePhysicsEnvironment::init()
     pyramid->setPosition(glm::vec3(0.0f, 3.0f, 6.0f));
     makeInteractive(pyramid);
 
+    Shader* skinnedShader = createShader("skinned_texture.vert", "basic_texture.frag");
+
+    BoxBuilder upperArmBuilder(glm::vec3(1.2f, 0.3f, 0.3f));
+    upperArmBuilder.setMaterial({ .diffuseColor = { 0.85f, 0.30f, 0.25f } });
+    BoxBuilder forearmBuilder(glm::vec3(1.0f, 0.25f, 0.25f));
+    forearmBuilder.setMaterial({ .diffuseColor = { 0.90f, 0.55f, 0.25f } });
+    BoxBuilder handBuilder(glm::vec3(0.3f, 0.35f, 0.15f));
+    handBuilder.setMaterial({ .diffuseColor = { 0.95f, 0.80f, 0.40f } });
+
+    RagdollBuilder armBuilder;
+    dugl::uint upperArm = armBuilder.addRoot(upperArmBuilder, dynamicMaterial, glm::vec3(0.0f));
+    dugl::uint forearm = armBuilder.addPart(forearmBuilder, dynamicMaterial, glm::vec3(1.1f, 0.0f, 0.0f), glm::quat(1.0f, 0.0f, 0.0f, 0.0f),
+        upperArm, HingeJoint{ .pivot = { 0.6f, 0.0f, 0.0f }, .axis = { 0.0f, 0.0f, 1.0f }, .normal = { 1.0f, 0.0f, 0.0f },
+                              .minAngle = glm::radians(-140.0f), .maxAngle = 0.0f });
+    armBuilder.addPart(handBuilder, dynamicMaterial, glm::vec3(1.75f, 0.0f, 0.0f), glm::quat(1.0f, 0.0f, 0.0f, 0.0f),
+        forearm, FixedJoint{ .pivot = { 1.6f, 0.0f, 0.0f } });
+
+    RagdollEntity* arm = createRagdoll(armBuilder, skinnedShader);
+    arm->setPosition(glm::vec3(4.0f, 4.0f, 0.0f));
+    makeInteractive(arm);
+
     Shader* outlineMaskShader = createShader("outline_mask.vert", "outline_mask.frag");
+    Shader* skinnedOutlineMaskShader = createShader("skinned_outline_mask.vert", "outline_mask.frag");
     Shader* outlineShader = createShader("outline.vert", "outline.frag");
-    createRenderPass<OutlinePass>(outlineMaskShader, outlineShader, flagMask(EntityFlag::Hovered, EntityFlag::Selected));
+    OutlinePass* hoverPass = createRenderPass<OutlinePass>(outlineMaskShader, outlineShader, flagMask(EntityFlag::Hovered, EntityFlag::Selected));
+    hoverPass->setSkinnedMaskShader(skinnedOutlineMaskShader);
     OutlinePass* heldPass = createRenderPass<OutlinePass>(outlineMaskShader, outlineShader, flagMask(EntityFlag::Held));
+    heldPass->setSkinnedMaskShader(skinnedOutlineMaskShader);
     heldPass->setOutlineColor(glm::vec3(0.2f, 0.9f, 0.3f));
 
     physicsSystem.OptimizeBroadPhase();

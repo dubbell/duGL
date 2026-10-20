@@ -60,9 +60,15 @@ void OutlinePass::render(std::span<Entity* const> entities)
     glClearBufferfv(GL_COLOR, 0, noCoverage);               // Initially set all sample colors to 0.0
     glClearBufferfv(GL_DEPTH, 0, &farDepth);                // Initially set all sample depths to 1.0
 
-    maskShader->use();
-    for (Entity* entity : entities) {
-        entity->render(maskShader);
+    Shader* activeShader = nullptr;
+    for (Entity* entity : entities)
+    {
+        Shader* shader = getMaskShader(*entity);
+        if (shader != activeShader) {
+            shader->use();
+            activeShader = shader;
+        }
+        entity->render(shader);
     }
 
     // Blit maskFramebuffer into resolveFramebuffer, averaging the coverage samples 
@@ -182,6 +188,17 @@ void OutlinePass::resizeMask(int width, int height)
 void OutlinePass::setMaskShader(Shader* maskShader)
 {
     this->maskShader = dugl::requireNonNull(maskShader);
+}
+
+void OutlinePass::setSkinnedMaskShader(Shader* skinnedMaskShader)
+{
+    this->skinnedMaskShader = skinnedMaskShader;
+}
+
+Shader* OutlinePass::getMaskShader(const Entity& entity) const
+{
+    bool skinned = (entity.getShader()->getRequiredAttributes() & attributeMask(VertexAttribute::BoneIds)) != 0;
+    return skinned && skinnedMaskShader != nullptr ? skinnedMaskShader : maskShader;
 }
 
 void OutlinePass::setOutlineShader(Shader* outlineShader)
