@@ -6,6 +6,7 @@
 #include "dugl/physics/ragdoll_builder.h"
 
 #include <Jolt/Jolt.h>
+#include <Jolt/Physics/Constraints/HingeConstraint.h>
 #include <Jolt/Physics/PhysicsSystem.h>
 #include <Jolt/Physics/Ragdoll/Ragdoll.h>
 
@@ -50,6 +51,11 @@ public:
     /* Springs a point on a part to a world space anchor. Rotation remains free. */
     dugl::uint addPointConstraint(dugl::uint part, const PointConstraintParams& params);
 
+    void setJointTargetAngle(dugl::uint part, float angle);
+    void releaseJoint(dugl::uint part);
+    void applyJointTorque(dugl::uint part, float torque);
+    float getJointAngle(dugl::uint part) const;
+
     void setPosition(glm::vec3 position) override;
     void setRotation(glm::quat rotation) override;
     void setVelocity(glm::vec3 velocity) override;
@@ -66,4 +72,5 @@ protected:
 
 private:
     void moveRigidly(const glm::mat4& targetRootTransform);
+    JPH::HingeConstraint* getHingeJoint(dugl::uint part) const;
 };

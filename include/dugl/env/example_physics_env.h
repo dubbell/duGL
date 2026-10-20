@@ -13,6 +13,11 @@ private:
     bool kickHeld = false;
     bool freezeHeld = false;
 
+    RagdollEntity* arm = nullptr;
+    dugl::uint forearm = 0;
+    bool bendHeld = false;
+    bool releaseHeld = false;
+
 public:
     ExamplePhysicsEnvironment() : flightController(this, &keyboardController, &mouseController) {}
 

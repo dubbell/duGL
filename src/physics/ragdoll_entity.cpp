@@ -4,6 +4,7 @@
 
 #include <glm/gtc/matrix_transform.hpp>
 
+#include <format>
 #include <stdexcept>
 
 
@@ -95,6 +96,47 @@ dugl::uint RagdollEntity::addDistanceConstraint(dugl::uint part, const DistanceC
 dugl::uint RagdollEntity::addPointConstraint(dugl::uint part, const PointConstraintParams& params)
 {
     return constraints.addPointConstraint(ragdoll->GetBodyID((int)part), params);
+}
+
+void RagdollEntity::setJointTargetAngle(dugl::uint part, float angle)
+{
+    JPH::HingeConstraint* hinge = getHingeJoint(part);
+    hinge->SetMotorState(JPH::EMotorState::Position);
+    hinge->SetTargetAngle(angle);
+    bodyInterface.ActivateConstraint(hinge);
+}
+
+void RagdollEntity::releaseJoint(dugl::uint part)
+{
+    getHingeJoint(part)->SetMotorState(JPH::EMotorState::Off);
+}
+
+void RagdollEntity::applyJointTorque(dugl::uint part, float torque)
+{
+    JPH::HingeConstraint* hinge = getHingeJoint(part);
+    JPH::BodyID parentId = hinge->GetBody1()->GetID();
+    JPH::Vec3 axis = bodyInterface.GetRotation(parentId) * hinge->GetLocalSpaceHingeAxis1();
+    bodyInterface.AddTorque(hinge->GetBody2()->GetID(), axis * torque);
+    bodyInterface.AddTorque(parentId, -axis * torque);
+}
+
+float RagdollEntity::getJointAngle(dugl::uint part) const
+{
+    return getHingeJoint(part)->GetCurrentAngle();
+}
+
+JPH::HingeConstraint* RagdollEntity::getHingeJoint(dugl::uint part) const
+{
+    int index = ragdoll->GetRagdollSettings()->GetConstraintIndexForBodyIndex((int)part);
+    if (index < 0) {
+        throw std::invalid_argument(std::format("Ragdoll part {} has no joint.", part));
+    }
+
+    JPH::TwoBodyConstraint* constraint = ragdoll->GetConstraint(index);
+    if (constraint->GetSubType() != JPH::EConstraintSubType::Hinge) {
+        throw std::invalid_argument(std::format("Ragdoll part {} is not connected by a hinge joint.", part));
+    }
+    return static_cast<JPH::HingeConstraint*>(constraint);
 }
 
 std::optional<dugl::uint> RagdollEntity::getHitPart() const

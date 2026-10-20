@@ -89,6 +89,10 @@ static JPH::Ref<JPH::TwoBodyConstraintSettings> createJointSettings(const HingeJ
     settings->mNormalAxis1 = settings->mNormalAxis2 = toJolt(glm::normalize(joint.normal));
     settings->mLimitsMin = joint.minAngle;
     settings->mLimitsMax = joint.maxAngle;
+    settings->mMotorSettings.mSpringSettings.mFrequency = joint.motorFrequency;
+    settings->mMotorSettings.mSpringSettings.mDamping = joint.motorDamping;
+    settings->mMotorSettings.SetTorqueLimit(joint.maxMotorTorque);
+    settings->mMaxFrictionTorque = joint.maxFrictionTorque;
     return settings.GetPtr();
 }
 

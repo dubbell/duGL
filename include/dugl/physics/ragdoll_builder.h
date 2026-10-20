@@ -7,6 +7,7 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/quaternion.hpp>
 
+#include <limits>
 #include <numbers>
 #include <optional>
 #include <variant>
@@ -20,6 +21,10 @@ struct HingeJoint
     glm::vec3 normal{ 1.0f, 0.0f, 0.0f };
     float minAngle = -std::numbers::pi_v<float>;
     float maxAngle = std::numbers::pi_v<float>;
+    float motorFrequency = 2.0f;
+    float motorDamping = 1.0f;
+    float maxMotorTorque = std::numeric_limits<float>::max();
+    float maxFrictionTorque = 0.0f;
 };
 
 struct FixedJoint

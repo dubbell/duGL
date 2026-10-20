@@ -8,6 +8,8 @@
 
 static constexpr float THRUST_FORCE = 20000.0f;
 static constexpr float KICK_IMPULSE = 1000.0f;
+static constexpr float JOINT_TORQUE = 3000.0f;
+static constexpr float MAX_ELBOW_MOTOR_TORQUE = 5000.0f;
 
 void ExamplePhysicsEnvironment::init()
 {
@@ -79,13 +81,13 @@ void ExamplePhysicsEnvironment::init()
 
     RagdollBuilder armBuilder;
     dugl::uint upperArm = armBuilder.addRoot(upperArmBuilder, dynamicMaterial, glm::vec3(0.0f));
-    dugl::uint forearm = armBuilder.addPart(forearmBuilder, dynamicMaterial, glm::vec3(1.1f, 0.0f, 0.0f), glm::quat(1.0f, 0.0f, 0.0f, 0.0f),
+    forearm = armBuilder.addPart(forearmBuilder, dynamicMaterial, glm::vec3(1.1f, 0.0f, 0.0f), glm::quat(1.0f, 0.0f, 0.0f, 0.0f),
         upperArm, HingeJoint{ .pivot = { 0.6f, 0.0f, 0.0f }, .axis = { 0.0f, 0.0f, 1.0f }, .normal = { 1.0f, 0.0f, 0.0f },
-                              .minAngle = glm::radians(-140.0f), .maxAngle = 0.0f });
+                              .minAngle = glm::radians(-140.0f), .maxAngle = 0.0f, .maxMotorTorque = MAX_ELBOW_MOTOR_TORQUE });
     armBuilder.addPart(handBuilder, dynamicMaterial, glm::vec3(1.75f, 0.0f, 0.0f), glm::quat(1.0f, 0.0f, 0.0f, 0.0f),
         forearm, FixedJoint{ .pivot = { 1.6f, 0.0f, 0.0f } });
 
-    DraggableRagdollEntity* arm = createRagdoll<DraggableRagdollEntity>(armBuilder, skinnedShader);
+    arm = createRagdoll<DraggableRagdollEntity>(armBuilder, skinnedShader);
     arm->setPosition(glm::vec3(4.0f, 4.0f, 0.0f));
     makeInteractive(arm);
 
@@ -115,6 +117,18 @@ void ExamplePhysicsEnvironment::update(float dt)
     }
     freezeHeld = freeze;
 
+    bool bend = glfwGetKey(window, GLFW_KEY_C) == GLFW_PRESS;
+    if (bend && !bendHeld) {
+        arm->setJointTargetAngle(forearm, glm::radians(-90.0f));
+    }
+    bendHeld = bend;
+
+    bool release = glfwGetKey(window, GLFW_KEY_V) == GLFW_PRESS;
+    if (release && !releaseHeld) {
+        arm->releaseJoint(forearm);
+    }
+    releaseHeld = release;
+
     physicsUpdate(dt);
 
     for (const CollisionEvent& event : getCollisionEvents())
@@ -135,5 +149,11 @@ void ExamplePhysicsEnvironment::prePhysicsStep(float stepDt)
 {
     if (glfwGetKey(window, GLFW_KEY_F) == GLFW_PRESS) {
         box->applyForce(glm::vec3(0.0f, THRUST_FORCE, 0.0f));
+    }
+    if (glfwGetKey(window, GLFW_KEY_Z) == GLFW_PRESS) {
+        arm->applyJointTorque(forearm, -JOINT_TORQUE);
+    }
+    if (glfwGetKey(window, GLFW_KEY_X) == GLFW_PRESS) {
+        arm->applyJointTorque(forearm, JOINT_TORQUE);
     }
 }
