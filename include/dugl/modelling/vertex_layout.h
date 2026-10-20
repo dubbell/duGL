@@ -73,3 +73,20 @@ constexpr VertexAttributeMask STATIC_VERTEX_ATTRIBUTES =
     attributeMask(VertexAttribute::Position) |
     attributeMask(VertexAttribute::Normal) |
     attributeMask(VertexAttribute::TexCoord);
+
+
+constexpr dugl::uint MAX_BONES = 32;
+
+struct SkinnedVertex
+{
+    glm::vec3 position;
+    glm::vec3 normal;
+    glm::vec2 texCoord;
+    glm::uvec4 boneIds;
+    glm::vec4 weights;
+};
+
+constexpr VertexAttributeMask SKINNED_VERTEX_ATTRIBUTES =
+    STATIC_VERTEX_ATTRIBUTES |
+    attributeMask(VertexAttribute::BoneIds) |
+    attributeMask(VertexAttribute::Weights);

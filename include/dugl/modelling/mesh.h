@@ -20,13 +20,12 @@ private:
     // the attribute locations this mesh's vertex format supplies
     VertexAttributeMask attributes;
 
-    std::vector<StaticVertex> vertices;
-    std::vector<unsigned int> indices;
+    dugl::uint indexCount;
     Material material;
 
 public:
-
-    Mesh(std::vector<StaticVertex> vertices, std::vector<unsigned int> indices, Material material);
+    Mesh(const std::vector<StaticVertex>& vertices, const std::vector<unsigned int>& indices, Material material);
+    Mesh(const std::vector<SkinnedVertex>& vertices, const std::vector<unsigned int>& indices, Material material);
     ~Mesh();
 
     // enable move functionality
@@ -40,6 +39,10 @@ public:
     void render(Shader* shader, bool bindTextures);
 
 private:
-    void setupMesh();
+    template <typename Vertex>
+    void uploadBuffers(const std::vector<Vertex>& vertices, const std::vector<unsigned int>& indices);
+    template <typename Vertex>
+    void setupSurfaceAttributes();
+    void setupSkinningAttributes();
     void checkShaderCompatibility(Shader* shader) const;
 };

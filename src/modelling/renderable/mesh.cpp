@@ -7,11 +7,21 @@
 #include <string>
 
 
-Mesh::Mesh(std::vector<StaticVertex> vertices, std::vector<unsigned int> indices, Material material)
-    : attributes(STATIC_VERTEX_ATTRIBUTES),
-      vertices(std::move(vertices)), indices(std::move(indices)), material(material)
+Mesh::Mesh(const std::vector<StaticVertex>& vertices, const std::vector<unsigned int>& indices, Material material)
+    : attributes(STATIC_VERTEX_ATTRIBUTES), indexCount((dugl::uint)indices.size()), material(material)
 {
-    setupMesh();
+    uploadBuffers(vertices, indices);
+    setupSurfaceAttributes<StaticVertex>();
+    glBindVertexArray(0);
+}
+
+Mesh::Mesh(const std::vector<SkinnedVertex>& vertices, const std::vector<unsigned int>& indices, Material material)
+    : attributes(SKINNED_VERTEX_ATTRIBUTES), indexCount((dugl::uint)indices.size()), material(material)
+{
+    uploadBuffers(vertices, indices);
+    setupSurfaceAttributes<SkinnedVertex>();
+    setupSkinningAttributes();
+    glBindVertexArray(0);
 }
 
 Mesh::~Mesh()
@@ -23,7 +33,7 @@ Mesh::~Mesh()
 
 Mesh::Mesh(Mesh&& other) noexcept
     : VAO(other.VAO), VBO(other.VBO), EBO(other.EBO), attributes(other.attributes),
-      vertices(std::move(other.vertices)), indices(std::move(other.indices)), material(other.material)
+      indexCount(other.indexCount), material(other.material)
 {
     other.VAO = 0;
     other.VBO = 0;
@@ -42,8 +52,7 @@ Mesh& Mesh::operator=(Mesh&& other) noexcept
         VBO = other.VBO;
         EBO = other.EBO;
         attributes = other.attributes;
-        vertices = std::move(other.vertices);
-        indices = std::move(other.indices);
+        indexCount = other.indexCount;
         material = other.material;
 
         other.VAO = 0;
@@ -53,7 +62,8 @@ Mesh& Mesh::operator=(Mesh&& other) noexcept
     return *this;
 }
 
-void Mesh::setupMesh()
+template <typename Vertex>
+void Mesh::uploadBuffers(const std::vector<Vertex>& vertices, const std::vector<unsigned int>& indices)
 {
     glGenVertexArrays(1, &VAO);
     glGenBuffers(1, &VBO);
@@ -62,25 +72,38 @@ void Mesh::setupMesh()
     glBindVertexArray(VAO);
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
 
-    glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(StaticVertex), &vertices[0], GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(Vertex), vertices.data(), GL_STATIC_DRAW);
 
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(unsigned int), &indices[0], GL_STATIC_DRAW);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(unsigned int), indices.data(), GL_STATIC_DRAW);
+}
 
+template <typename Vertex>
+void Mesh::setupSurfaceAttributes()
+{
     // vertex positions
     glEnableVertexAttribArray(attributeLocation(VertexAttribute::Position));
     glVertexAttribPointer(attributeLocation(VertexAttribute::Position),
-        3, GL_FLOAT, GL_FALSE, sizeof(StaticVertex), (void*)offsetof(StaticVertex, position));
+        3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, position));
     // vertex normals
     glEnableVertexAttribArray(attributeLocation(VertexAttribute::Normal));
     glVertexAttribPointer(attributeLocation(VertexAttribute::Normal),
-        3, GL_FLOAT, GL_FALSE, sizeof(StaticVertex), (void*)offsetof(StaticVertex, normal));
+        3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, normal));
     // vertex texture coords
     glEnableVertexAttribArray(attributeLocation(VertexAttribute::TexCoord));
     glVertexAttribPointer(attributeLocation(VertexAttribute::TexCoord),
-        2, GL_FLOAT, GL_FALSE, sizeof(StaticVertex), (void*)offsetof(StaticVertex, texCoord));
+        2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, texCoord));
+}
 
-    glBindVertexArray(0);
+void Mesh::setupSkinningAttributes()
+{
+    glEnableVertexAttribArray(attributeLocation(VertexAttribute::BoneIds));
+    glVertexAttribIPointer(attributeLocation(VertexAttribute::BoneIds),
+        4, GL_UNSIGNED_INT, sizeof(SkinnedVertex), (void*)offsetof(SkinnedVertex, boneIds));
+
+    glEnableVertexAttribArray(attributeLocation(VertexAttribute::Weights));
+    glVertexAttribPointer(attributeLocation(VertexAttribute::Weights),
+        4, GL_FLOAT, GL_FALSE, sizeof(SkinnedVertex), (void*)offsetof(SkinnedVertex, weights));
 }
 
 void Mesh::checkShaderCompatibility(Shader* shader) const
@@ -119,6 +142,6 @@ void Mesh::render(Shader* shader, bool bindTextures)
     }
 
     glBindVertexArray(VAO);
-    glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);
+    glDrawElements(GL_TRIANGLES, indexCount, GL_UNSIGNED_INT, 0);
     glBindVertexArray(0);
 }
