@@ -1,5 +1,7 @@
 #pragma once
 
+#include <functional>
+#include <optional>
 #include <vector>
 
 #include "dugl/shading/material.h"
@@ -9,6 +11,14 @@
 #include "entity.h"
 
 
+struct MeshGeometry
+{
+    std::vector<StaticVertex> vertices;
+    std::vector<unsigned int> indices;
+};
+
+using LocalRayHitTest = std::function<std::optional<float>(glm::vec3 origin, glm::vec3 direction)>;
+
 // Base for builders that generate their geometry procedurally instead of loading it.
 // A primitive defaults to a plain white material, so giving one a solid colour is just
 // setting a material whose diffuseColor is that colour and which has no maps.
@@ -17,20 +27,33 @@ class PrimitiveBuilder : public RenderableBuilder
 protected:
     Material material;
 
+private:
+    std::vector<MeshGeometry> geometry;
+
 public:
     void setMaterial(Material material);
+    const Material& getMaterial() const;
 
     /* Get the parameters of the collision geometry. */
     virtual Collider createCollider() const = 0;
+    /* Get the ray hit detection function in the primitive's own space. */
+    virtual LocalRayHitTest createLocalRayHitTest() const = 0;
     /* Get the ray hit detection function. */
-    virtual RayHitTest createRayHitTest() const = 0;
+    RayHitTest createRayHitTest() const;
+    /* Get the primitive's geometry without uploading it to the GPU. */
+    std::vector<MeshGeometry> createGeometry();
 
 protected:
     PrimitiveBuilder() = default;
     PrimitiveBuilder(Material material);
 
+    virtual void generateGeometry() = 0;
+
     // appends one mesh made of the given geometry, shaded with this builder's material
     void addMesh(std::vector<StaticVertex> vertices, std::vector<unsigned int> indices);
+
+private:
+    void generateMeshes() override final;
 };
 
 
@@ -45,10 +68,10 @@ public:
     PlaneBuilder(float width, float depth, dugl::uint widthSegments = 1, dugl::uint depthSegments = 1);
 
     Collider createCollider() const override;
-    RayHitTest createRayHitTest() const override;
+    LocalRayHitTest createLocalRayHitTest() const override;
 
 private:
-    void generateMeshes() override;
+    void generateGeometry() override;
 };
 
 
@@ -62,10 +85,10 @@ public:
     BoxBuilder(glm::vec3 dimensions);
 
     Collider createCollider() const override;
-    RayHitTest createRayHitTest() const override;
+    LocalRayHitTest createLocalRayHitTest() const override;
 
 private:
-    void generateMeshes() override;
+    void generateGeometry() override;
 };
 
 
@@ -81,10 +104,10 @@ public:
     EllipsoidBuilder(glm::vec3 radii, dugl::uint segments = 32, dugl::uint rings = 16);
 
     Collider createCollider() const override;
-    RayHitTest createRayHitTest() const override;
+    LocalRayHitTest createLocalRayHitTest() const override;
 
 private:
-    void generateMeshes() override;
+    void generateGeometry() override;
 };
 
 
@@ -99,10 +122,10 @@ public:
     ConeBuilder(float radius, float height, dugl::uint segments = 32);
 
     Collider createCollider() const override;
-    RayHitTest createRayHitTest() const override;
+    LocalRayHitTest createLocalRayHitTest() const override;
 
 private:
-    void generateMeshes() override;
+    void generateGeometry() override;
 };
 
 
@@ -116,8 +139,8 @@ public:
     PyramidBuilder(float baseWidth, float baseDepth, float height);
 
     Collider createCollider() const override;
-    RayHitTest createRayHitTest() const override;
+    LocalRayHitTest createLocalRayHitTest() const override;
 
 private:
-    void generateMeshes() override;
+    void generateGeometry() override;
 };

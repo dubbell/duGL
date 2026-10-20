@@ -41,9 +41,33 @@ void PrimitiveBuilder::setMaterial(Material material)
     renderable = nullptr;
 }
 
+const Material& PrimitiveBuilder::getMaterial() const
+{
+    return material;
+}
+
+RayHitTest PrimitiveBuilder::createRayHitTest() const
+{
+    return inEntitySpace(createLocalRayHitTest());
+}
+
+std::vector<MeshGeometry> PrimitiveBuilder::createGeometry()
+{
+    geometry.clear();
+    generateGeometry();
+    return std::move(geometry);
+}
+
 void PrimitiveBuilder::addMesh(std::vector<StaticVertex> vertices, std::vector<unsigned int> indices)
 {
-    meshes.push_back(Mesh(std::move(vertices), std::move(indices), material));
+    geometry.push_back({ std::move(vertices), std::move(indices) });
+}
+
+void PrimitiveBuilder::generateMeshes()
+{
+    for (const MeshGeometry& mesh : createGeometry()) {
+        meshes.push_back(Mesh(mesh.vertices, mesh.indices, material));
+    }
 }
 
 static void addQuad(
@@ -74,7 +98,7 @@ PlaneBuilder::PlaneBuilder(float width, float depth, dugl::uint widthSegments, d
       widthSegments(std::max(widthSegments, 1u)), depthSegments(std::max(depthSegments, 1u))
 {}
 
-void PlaneBuilder::generateMeshes()
+void PlaneBuilder::generateGeometry()
 {
     std::vector<StaticVertex> vertices;
     std::vector<unsigned int> indices;
@@ -117,12 +141,12 @@ Collider PlaneBuilder::createCollider() const
         { 0.0f, -PLANE_HALF_THICKNESS, 0.0f }};
 }
 
-RayHitTest PlaneBuilder::createRayHitTest() const
+LocalRayHitTest PlaneBuilder::createLocalRayHitTest() const
 {
     glm::vec2 halfExtents(width * 0.5f, depth * 0.5f);
-    return inEntitySpace([halfExtents](glm::vec3 origin, glm::vec3 direction) {
+    return [halfExtents](glm::vec3 origin, glm::vec3 direction) {
         return intersectRayRectangle(halfExtents, origin, direction);
-    });
+    };
 }
 
 
@@ -134,7 +158,7 @@ Collider BoxBuilder::createCollider() const
     return BoxCollider{ dimensions * 0.5f };
 }
 
-RayHitTest BoxBuilder::createRayHitTest() const
+LocalRayHitTest BoxBuilder::createLocalRayHitTest() const
 {
     glm::vec3 halfExtents = dimensions * 0.5f;
     std::array<glm::vec4, 6> planes = {{
@@ -145,12 +169,12 @@ RayHitTest BoxBuilder::createRayHitTest() const
         {  0.0f,  0.0f,  1.0f, halfExtents.z },
         {  0.0f,  0.0f, -1.0f, halfExtents.z }}};
 
-    return inEntitySpace([planes](glm::vec3 origin, glm::vec3 direction) {
+    return [planes](glm::vec3 origin, glm::vec3 direction) {
         return intersectRayConvex(planes, origin, direction);
-    });
+    };
 }
 
-void BoxBuilder::generateMeshes()
+void BoxBuilder::generateGeometry()
 {
     // the in-plane axes of each face, ordered so that u x v points out of the box
     static const glm::vec3 faceAxes[6][2] = {
@@ -214,14 +238,14 @@ Collider EllipsoidBuilder::createCollider() const
     return ConvexHullCollider{ std::move(points) };
 }
 
-RayHitTest EllipsoidBuilder::createRayHitTest() const
+LocalRayHitTest EllipsoidBuilder::createLocalRayHitTest() const
 {
-    return inEntitySpace([radii = radii](glm::vec3 origin, glm::vec3 direction) {
+    return [radii = radii](glm::vec3 origin, glm::vec3 direction) {
         return intersectRayEllipsoid(radii, origin, direction);
-    });
+    };
 }
 
-void EllipsoidBuilder::generateMeshes()
+void EllipsoidBuilder::generateGeometry()
 {
     std::vector<StaticVertex> vertices;
     std::vector<unsigned int> indices;
@@ -295,14 +319,14 @@ Collider ConeBuilder::createCollider() const
     return ConvexHullCollider{ std::move(points) };
 }
 
-RayHitTest ConeBuilder::createRayHitTest() const
+LocalRayHitTest ConeBuilder::createLocalRayHitTest() const
 {
-    return inEntitySpace([radius = radius, height = height](glm::vec3 origin, glm::vec3 direction) {
+    return [radius = radius, height = height](glm::vec3 origin, glm::vec3 direction) {
         return intersectRayCone(radius, height, origin, direction);
-    });
+    };
 }
 
-void ConeBuilder::generateMeshes()
+void ConeBuilder::generateGeometry()
 {
     std::vector<StaticVertex> vertices;
     std::vector<unsigned int> indices;
@@ -374,7 +398,7 @@ Collider PyramidBuilder::createCollider() const
     return ConvexHullCollider{ std::move(points) };
 }
 
-RayHitTest PyramidBuilder::createRayHitTest() const
+LocalRayHitTest PyramidBuilder::createLocalRayHitTest() const
 {
     std::array<glm::vec3, 4> corners = pyramidCorners(baseWidth, baseDepth);
     glm::vec3 apex = { 0.0f, height, 0.0f };
@@ -389,12 +413,12 @@ RayHitTest PyramidBuilder::createRayHitTest() const
         planes[side + 1] = glm::vec4(normal, glm::dot(normal, left));
     }
 
-    return inEntitySpace([planes](glm::vec3 origin, glm::vec3 direction) {
+    return [planes](glm::vec3 origin, glm::vec3 direction) {
         return intersectRayConvex(planes, origin, direction);
-    });
+    };
 }
 
-void PyramidBuilder::generateMeshes()
+void PyramidBuilder::generateGeometry()
 {
     std::vector<StaticVertex> vertices;
     std::vector<unsigned int> indices;
