@@ -9,7 +9,7 @@ class ExamplePhysicsEnvironment : public PhysicsEnvironment
 private:
     FlightController flightController;
 
-    PhysicsEntity* box = nullptr;
+    RigidEntity* box = nullptr;
     bool kickHeld = false;
     bool freezeHeld = false;
 

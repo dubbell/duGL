@@ -13,12 +13,9 @@ static glm::mat4 toTransform(glm::vec3 position, glm::quat rotation)
 }
 
 RagdollEntity::RagdollEntity(Renderable* renderable, Shader* shader, JPH::PhysicsSystem& physicsSystem, RagdollBuilder& builder)
-    : Entity(renderable, shader),
-      physicsSystem(physicsSystem),
-      bodyInterface(physicsSystem.GetBodyInterface()),
+    : PhysicsEntity(renderable, shader, physicsSystem),
       ragdoll(createRagdollSettings(builder)->CreateRagdoll(nextCollisionGroup++, 0, &physicsSystem)),
-      localRayHitTests(builder.createLocalRayHitTests()),
-      constraints(physicsSystem)
+      localRayHitTests(builder.createLocalRayHitTests())
 {
     if (ragdoll == nullptr) {
         throw std::runtime_error("Failed to create ragdoll: out of bodies.");
@@ -30,8 +27,12 @@ RagdollEntity::RagdollEntity(Renderable* renderable, Shader* shader, JPH::Physic
     partTransforms.resize(inverseRestTransforms.size());
     boneMatrices.resize(inverseRestTransforms.size());
 
+    for (const JPH::BodyID& partBodyId : ragdoll->GetBodyIDs()) {
+        registerBody(partBodyId);
+    }
+
     ragdoll->AddToPhysicsSystem(JPH::EActivation::Activate);
-    syncTransforms();
+    syncWithPhysics();
 }
 
 RagdollEntity::~RagdollEntity()
@@ -40,12 +41,7 @@ RagdollEntity::~RagdollEntity()
     ragdoll->RemoveFromPhysicsSystem();
 }
 
-void RagdollEntity::preUpdate(float dt)
-{
-    syncTransforms();
-}
-
-void RagdollEntity::syncTransforms()
+void RagdollEntity::syncWithPhysics()
 {
     for (size_t i = 0; i < partTransforms.size(); i++)
     {
@@ -91,6 +87,21 @@ glm::mat4 RagdollEntity::getPartTransform(dugl::uint part) const
     return partTransforms[part];
 }
 
+dugl::uint RagdollEntity::addDistanceConstraint(dugl::uint part, const DistanceConstraintParams& params)
+{
+    return constraints.addDistanceConstraint(ragdoll->GetBodyID((int)part), params);
+}
+
+dugl::uint RagdollEntity::addPointConstraint(dugl::uint part, const PointConstraintParams& params)
+{
+    return constraints.addPointConstraint(ragdoll->GetBodyID((int)part), params);
+}
+
+std::optional<dugl::uint> RagdollEntity::getHitPart() const
+{
+    return hitPart;
+}
+
 void RagdollEntity::setPosition(glm::vec3 position)
 {
     moveRigidly(toTransform(position, rotation));
@@ -113,7 +124,7 @@ void RagdollEntity::moveRigidly(const glm::mat4& targetRootTransform)
             toJolt(glm::normalize(glm::quat_cast(glm::mat3(partTransform)))),
             JPH::EActivation::Activate);
     }
-    syncTransforms();
+    syncWithPhysics();
 }
 
 void RagdollEntity::setVelocity(glm::vec3 velocity)
@@ -131,35 +142,6 @@ void RagdollEntity::setAngularVelocity(glm::vec3 angularVelocity)
 void RagdollEntity::applyImpulse(glm::vec3 impulse)
 {
     ragdoll->AddImpulse(toJolt(impulse));
-}
-
-void RagdollEntity::update(float dt)
-{
-    bool held = hasFlag(EntityFlag::Held);
-    if (holdConstraint && !held) {
-        constraints.remove(*holdConstraint);
-        holdConstraint.reset();
-    }
-
-    if (!held) {
-        return;
-    }
-
-    glm::vec3 heldInWorldSpace = getProperty(EntityProperty::HeldInWorldSpace, position);
-
-    if (holdConstraint) {
-        constraints.setAnchor(*holdConstraint, heldInWorldSpace);
-    }
-    else if (hitPart)
-    {
-        glm::vec3 grabPoint = position + rotation * getProperty(EntityProperty::HeldInEntitySpace, glm::vec3(0.0f));
-        glm::vec3 grabPointInPartSpace = glm::vec3(glm::inverse(partTransforms[*hitPart]) * glm::vec4(grabPoint, 1.0f));
-        holdConstraint = constraints.addPointConstraint(ragdoll->GetBodyID((int)*hitPart), {
-            .pointInEntitySpace = grabPointInPartSpace,
-            .anchorInWorldSpace = heldInWorldSpace,
-            .frequency = HOLD_FREQUENCY,
-            .damping = HOLD_DAMPING });
-    }
 }
 
 std::optional<float> RagdollEntity::intersectRay(const Ray& ray) const

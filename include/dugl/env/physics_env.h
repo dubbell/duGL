@@ -4,7 +4,7 @@
 #include "dugl/async/dispatcher.h"
 #include "dugl/physics/common.h"
 #include "dugl/physics/collision.h"
-#include "dugl/physics/physics_entity.h"
+#include "dugl/physics/rigid_entity.h"
 #include "dugl/physics/ragdoll_builder.h"
 #include "dugl/physics/ragdoll_entity.h"
 #include "dugl/physics/body_settings.h"
@@ -44,9 +44,9 @@ public:
 protected:
     using Environment::createEntity;
 
-    template<typename T = PhysicsEntity> requires std::is_base_of_v<PhysicsEntity, T>
+    template<typename T = RigidEntity> requires std::is_base_of_v<RigidEntity, T>
     T* createEntity(PrimitiveBuilder& builder, Shader* shader, const PhysicsMaterial& material) {
-        return Environment::createEntity<T>(builder, shader, physicsSystem, createBodySettings(builder, material));
+        return Environment::createEntity<T>(builder, shader, physicsSystem, builder, material);
     }
 
     template<typename T = RagdollEntity> requires std::is_base_of_v<RagdollEntity, T>

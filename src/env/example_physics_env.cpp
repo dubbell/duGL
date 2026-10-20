@@ -2,6 +2,7 @@
 #include "dugl/modelling/primitive_builder.h"
 #include "dugl/modelling/outline_pass.h"
 #include "dugl/physics/draggable_entity.h"
+#include "dugl/physics/draggable_ragdoll_entity.h"
 
 #include <iostream>
 
@@ -26,7 +27,7 @@ void ExamplePhysicsEnvironment::init()
     };
 
     PlaneBuilder planeBuilder(20.0f, 20.0f);
-    createEntity<PhysicsEntity>(planeBuilder, defaultShader, { .motionType = MotionType::Static });
+    createEntity<RigidEntity>(planeBuilder, defaultShader, { .motionType = MotionType::Static });
 
     PhysicsMaterial dynamicMaterial;
     glm::quat boxRotation = glm::angleAxis(0.4f, glm::normalize(glm::vec3(1.0f, 0.0f, 1.0f)));
@@ -84,7 +85,7 @@ void ExamplePhysicsEnvironment::init()
     armBuilder.addPart(handBuilder, dynamicMaterial, glm::vec3(1.75f, 0.0f, 0.0f), glm::quat(1.0f, 0.0f, 0.0f, 0.0f),
         forearm, FixedJoint{ .pivot = { 1.6f, 0.0f, 0.0f } });
 
-    RagdollEntity* arm = createRagdoll(armBuilder, skinnedShader);
+    DraggableRagdollEntity* arm = createRagdoll<DraggableRagdollEntity>(armBuilder, skinnedShader);
     arm->setPosition(glm::vec3(4.0f, 4.0f, 0.0f));
     makeInteractive(arm);
 

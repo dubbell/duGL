@@ -1,8 +1,8 @@
 #include "dugl/physics/draggable_entity.h"
 
 
-DraggableEntity::DraggableEntity(Renderable* renderable, Shader* shader, JPH::PhysicsSystem& physicsSystem, const JPH::BodyCreationSettings& settings)
-    : PhysicsEntity(renderable, shader, physicsSystem, settings) {}
+DraggableEntity::DraggableEntity(Renderable* renderable, Shader* shader, JPH::PhysicsSystem& physicsSystem, const PrimitiveBuilder& builder, const PhysicsMaterial& material)
+    : RigidEntity(renderable, shader, physicsSystem, builder, material) {}
 
 void DraggableEntity::update(float dt)
 {

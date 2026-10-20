@@ -1,13 +1,12 @@
 #pragma once
 
-#include "dugl/modelling/entity.h"
 #include "dugl/modelling/primitive_builder.h"
 #include "dugl/physics/anchored_constraints.h"
+#include "dugl/physics/physics_entity.h"
 #include "dugl/physics/ragdoll_builder.h"
 
 #include <Jolt/Jolt.h>
 #include <Jolt/Physics/PhysicsSystem.h>
-#include <Jolt/Physics/Body/BodyInterface.h>
 #include <Jolt/Physics/Ragdoll/Ragdoll.h>
 
 #include <atomic>
@@ -16,11 +15,9 @@
 
 
 /* An entity made of several physics bodies (parts) connected by joints. */
-class RagdollEntity : public Entity
+class RagdollEntity : public PhysicsEntity
 {
 protected:
-    JPH::PhysicsSystem& physicsSystem;
-    JPH::BodyInterface& bodyInterface;
     JPH::Ref<JPH::Ragdoll> ragdoll;
     std::vector<glm::mat4> partTransforms;
 
@@ -30,8 +27,6 @@ private:
     std::vector<glm::mat4> inverseRestTransforms;
     std::vector<glm::mat4> boneMatrices;
     std::vector<LocalRayHitTest> localRayHitTests;
-    AnchoredConstraints constraints;
-    std::optional<dugl::uint> holdConstraint;
     mutable std::optional<dugl::uint> hitPart;
 
 public:
@@ -50,6 +45,11 @@ public:
     /* Get a part's transform in world space. */
     glm::mat4 getPartTransform(dugl::uint part) const;
 
+    /* Keeps a point on a part within a min/max distance of a world space anchor. */
+    dugl::uint addDistanceConstraint(dugl::uint part, const DistanceConstraintParams& params);
+    /* Springs a point on a part to a world space anchor. Rotation remains free. */
+    dugl::uint addPointConstraint(dugl::uint part, const PointConstraintParams& params);
+
     void setPosition(glm::vec3 position) override;
     void setRotation(glm::quat rotation) override;
     void setVelocity(glm::vec3 velocity) override;
@@ -58,11 +58,12 @@ public:
     void applyImpulse(glm::vec3 impulse);
 
 protected:
-    void update(float dt) override;
+    /* Get the part hit by the most recent ray hit test, if any. */
+    std::optional<dugl::uint> getHitPart() const;
+
+    void syncWithPhysics() override;
     std::optional<float> intersectRay(const Ray& ray) const override;
 
 private:
-    void preUpdate(float dt) override final;
-    void syncTransforms();
     void moveRigidly(const glm::mat4& targetRootTransform);
 };
