@@ -144,3 +144,26 @@ public:
 private:
     void generateGeometry() override;
 };
+
+
+// Ground whose heights are sampled from a matrix, centred on the origin in the XZ plane.
+// Columns run along the X axis (width), rows along the Z axis (length).
+class HeightFieldBuilder : public PrimitiveBuilder
+{
+private:
+    std::vector<float> heights;
+    dugl::uint rows, columns;
+    float width, length;
+
+public:
+    HeightFieldBuilder(const std::vector<std::vector<float>>& heights, float width, float length);
+
+    Collider createCollider() const override;
+    LocalRayHitTest createLocalRayHitTest() const override;
+
+private:
+    float heightAt(dugl::uint row, dugl::uint column) const;
+    glm::vec3 positionAt(dugl::uint row, dugl::uint column) const;
+
+    void generateGeometry() override;
+};

@@ -1,5 +1,7 @@
 #pragma once
 
+#include "dugl/common.h"
+
 #include <glm/glm.hpp>
 
 #include <variant>
@@ -22,5 +24,12 @@ struct ConvexHullCollider
     std::vector<glm::vec3> points;
 };
 
+struct HeightFieldCollider
+{
+    std::vector<float> heights;
+    dugl::uint rows, columns;
+    glm::vec2 size;
+};
+
 /* Parameters of the collision geometry for primitives. */
-using Collider = std::variant<BoxCollider, SphereCollider, ConvexHullCollider>;
+using Collider = std::variant<BoxCollider, SphereCollider, ConvexHullCollider, HeightFieldCollider>;

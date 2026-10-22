@@ -1,4 +1,4 @@
-#include "dugl/example/example_physics_env.h"
+#include "dugl/example/height_field_env.h"
 #include "dugl/utils/jolt_adapter.h"
 
 #include <exception>
@@ -13,7 +13,7 @@ int main()
         // build its AsyncDispatcher, regardless of whether this environment uses physics.
         initJolt();
 
-        Environment* env = new ExamplePhysicsEnvironment();
+        Environment* env = new HeightFieldEnvironment();
 
         env->start();
 

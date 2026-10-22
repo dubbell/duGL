@@ -4,6 +4,7 @@
 #include <array>
 #include <cmath>
 #include <numbers>
+#include <stdexcept>
 #include <utility>
 
 
@@ -450,4 +451,128 @@ void PyramidBuilder::generateGeometry()
     }
 
     addMesh(std::move(vertices), std::move(indices));
+}
+
+
+HeightFieldBuilder::HeightFieldBuilder(const std::vector<std::vector<float>>& heights, float width, float length)
+    : rows((dugl::uint)heights.size()), columns(heights.empty() ? 0 : (dugl::uint)heights.front().size()),
+      width(width), length(length)
+{
+    if (rows < 2 || columns < 2) {
+        throw std::invalid_argument("A height field needs at least 2 rows and 2 columns.");
+    }
+
+    this->heights.reserve(rows * columns);
+    for (const std::vector<float>& row : heights)
+    {
+        if (row.size() != columns) {
+            throw std::invalid_argument("All rows of a height field must have the same number of columns.");
+        }
+        this->heights.insert(this->heights.end(), row.begin(), row.end());
+    }
+}
+
+float HeightFieldBuilder::heightAt(dugl::uint row, dugl::uint column) const
+{
+    return heights[row * columns + column];
+}
+
+glm::vec3 HeightFieldBuilder::positionAt(dugl::uint row, dugl::uint column) const
+{
+    return {
+        -width * 0.5f + width * column / (columns - 1),
+        heightAt(row, column),
+        -length * 0.5f + length * row / (rows - 1)};
+}
+
+void HeightFieldBuilder::generateGeometry()
+{
+    std::vector<StaticVertex> vertices;
+    std::vector<unsigned int> indices;
+
+    for (dugl::uint row = 0; row < rows; row++)
+    {
+        for (dugl::uint column = 0; column < columns; column++)
+        {
+            dugl::uint left = column > 0 ? column - 1 : column;
+            dugl::uint right = column < columns - 1 ? column + 1 : column;
+            dugl::uint back = row > 0 ? row - 1 : row;
+            dugl::uint front = row < rows - 1 ? row + 1 : row;
+
+            float slopeX = (heightAt(row, right) - heightAt(row, left)) / (positionAt(row, right).x - positionAt(row, left).x);
+            float slopeZ = (heightAt(front, column) - heightAt(back, column)) / (positionAt(front, column).z - positionAt(back, column).z);
+
+            vertices.push_back({
+                positionAt(row, column),
+                glm::normalize(glm::vec3(-slopeX, 1.0f, -slopeZ)),
+                { (float)column / (columns - 1), (float)row / (rows - 1) }});
+        }
+    }
+
+    for (dugl::uint row = 0; row < rows - 1; row++)
+    {
+        for (dugl::uint column = 0; column < columns - 1; column++)
+        {
+            unsigned int corner = row * columns + column;
+
+            indices.insert(indices.end(), {
+                corner, corner + columns, corner + 1,
+                corner + 1, corner + columns, corner + columns + 1 });
+        }
+    }
+
+    addMesh(std::move(vertices), std::move(indices));
+}
+
+Collider HeightFieldBuilder::createCollider() const
+{
+    return HeightFieldCollider{ heights, rows, columns, { width, length } };
+}
+
+LocalRayHitTest HeightFieldBuilder::createLocalRayHitTest() const
+{
+    auto [minHeight, maxHeight] = std::minmax_element(heights.begin(), heights.end());
+    std::array<glm::vec4, 6> bounds = {{
+        {  1.0f,  0.0f,  0.0f, width * 0.5f },
+        { -1.0f,  0.0f,  0.0f, width * 0.5f },
+        {  0.0f,  1.0f,  0.0f, *maxHeight },
+        {  0.0f, -1.0f,  0.0f, -*minHeight },
+        {  0.0f,  0.0f,  1.0f, length * 0.5f },
+        {  0.0f,  0.0f, -1.0f, length * 0.5f }}};
+
+    std::vector<glm::vec3> positions;
+    positions.reserve(heights.size());
+    for (dugl::uint row = 0; row < rows; row++) {
+        for (dugl::uint column = 0; column < columns; column++) {
+            positions.push_back(positionAt(row, column));
+        }
+    }
+
+    return [bounds, positions = std::move(positions), rows = rows, columns = columns](glm::vec3 origin, glm::vec3 direction)
+        -> std::optional<float>
+    {
+        if (!intersectRayConvex(bounds, origin, direction)) {
+            return std::nullopt;
+        }
+
+        std::optional<float> nearest;
+        auto consider = [&](unsigned int a, unsigned int b, unsigned int c) {
+            std::optional<float> t = intersectRayTriangle(positions[a], positions[b], positions[c], origin, direction);
+            if (t && (!nearest || *t < *nearest)) {
+                nearest = t;
+            }
+        };
+
+        for (dugl::uint row = 0; row < rows - 1; row++)
+        {
+            for (dugl::uint column = 0; column < columns - 1; column++)
+            {
+                unsigned int corner = row * columns + column;
+                consider(corner, corner + columns, corner + 1);
+                consider(corner + 1, corner + columns, corner + columns + 1);
+            }
+        }
+
+        return nearest;
+    };
 }

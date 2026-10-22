@@ -4,6 +4,7 @@
 
 #include <Jolt/Physics/Collision/Shape/BoxShape.h>
 #include <Jolt/Physics/Collision/Shape/ConvexHullShape.h>
+#include <Jolt/Physics/Collision/Shape/HeightFieldShape.h>
 #include <Jolt/Physics/Collision/Shape/RotatedTranslatedShape.h>
 #include <Jolt/Physics/Collision/Shape/SphereShape.h>
 #include <Jolt/Physics/Constraints/FixedConstraint.h>
@@ -44,6 +45,29 @@ static JPH::Ref<JPH::ShapeSettings> createShapeSettings(const ConvexHullCollider
     return new JPH::ConvexHullShapeSettings(points);
 }
 
+static JPH::Ref<JPH::ShapeSettings> createShapeSettings(const HeightFieldCollider& collider)
+{
+    JPH::Ref<JPH::HeightFieldShapeSettings> settings = new JPH::HeightFieldShapeSettings();
+
+    // Jolt needs a square grid sized in whole blocks, so pad the samples with holes.
+    dugl::uint blockSize = settings->mBlockSize;
+    dugl::uint sampleCount = std::max(collider.rows, collider.columns);
+    sampleCount = std::max((sampleCount + blockSize - 1) / blockSize, 2u) * blockSize;
+
+    settings->mSampleCount = sampleCount;
+    settings->mHeightSamples.resize(sampleCount * sampleCount, JPH::HeightFieldShapeConstants::cNoCollisionValue);
+    for (dugl::uint row = 0; row < collider.rows; row++) {
+        for (dugl::uint column = 0; column < collider.columns; column++) {
+            settings->mHeightSamples[row * sampleCount + column] = collider.heights[row * collider.columns + column];
+        }
+    }
+
+    settings->mOffset = JPH::Vec3(-collider.size.x * 0.5f, 0.0f, -collider.size.y * 0.5f);
+    settings->mScale = JPH::Vec3(collider.size.x / (collider.columns - 1), 1.0f, collider.size.y / (collider.rows - 1));
+
+    return settings.GetPtr();
+}
+
 static JPH::EMotionType toJolt(MotionType motionType)
 {
     switch (motionType)
@@ -59,9 +83,14 @@ static JPH::EMotionType toJolt(MotionType motionType)
 
 JPH::BodyCreationSettings createBodySettings(const PrimitiveBuilder& builder, const PhysicsMaterial& material)
 {
+    Collider collider = builder.createCollider();
+    if (std::holds_alternative<HeightFieldCollider>(collider) && material.motionType != MotionType::Static) {
+        throw std::logic_error("A height field can only be simulated as a static body.");
+    }
+
     JPH::Ref<JPH::ShapeSettings> shapeSettings = std::visit([](const auto& collider) {
         return createShapeSettings(collider);
-    }, builder.createCollider());
+    }, collider);
 
     JPH::ShapeSettings::ShapeResult shape = shapeSettings->Create();
     if (shape.HasError()) {

@@ -157,6 +157,39 @@ inline std::optional<float> intersectRayConvex(std::span<const glm::vec4> planes
     return entryDistance >= 0.0f ? entryDistance : exitDistance;
 }
 
+// Get the distance to the nearest point on a triangle from an origin in a given direction, or nullopt if no such point exists.
+inline std::optional<float> intersectRayTriangle(glm::vec3 a, glm::vec3 b, glm::vec3 c, glm::vec3 origin, glm::vec3 direction)
+{
+    glm::vec3 edge1 = b - a, edge2 = c - a;
+    glm::vec3 p = glm::cross(direction, edge2);
+    float determinant = glm::dot(edge1, p);
+
+    if (std::abs(determinant) < 1e-8f) {
+        return std::nullopt;
+    }
+
+    float inverseDeterminant = 1.0f / determinant;
+    glm::vec3 toOrigin = origin - a;
+
+    float u = glm::dot(toOrigin, p) * inverseDeterminant;
+    if (u < 0.0f || u > 1.0f) {
+        return std::nullopt;
+    }
+
+    glm::vec3 q = glm::cross(toOrigin, edge1);
+    float v = glm::dot(direction, q) * inverseDeterminant;
+    if (v < 0.0f || u + v > 1.0f) {
+        return std::nullopt;
+    }
+
+    float t = glm::dot(edge2, q) * inverseDeterminant;
+    if (t < 0.0f) {
+        return std::nullopt;
+    }
+
+    return t;
+}
+
 // Get the distance to the nearest point on a cone from an origin in a given direction, or nullopt if no such point exists.
 inline std::optional<float> intersectRayCone(float radius, float height, glm::vec3 origin, glm::vec3 direction)
 {
