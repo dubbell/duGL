@@ -1,4 +1,4 @@
-#include "dugl/physics/draggable_entity.h"
+#include "dugl/example/draggable_entity.h"
 
 
 DraggableEntity::DraggableEntity(Renderable* renderable, Shader* shader, JPH::PhysicsSystem& physicsSystem, const PrimitiveBuilder& builder, const PhysicsMaterial& material)

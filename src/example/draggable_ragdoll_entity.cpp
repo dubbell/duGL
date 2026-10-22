@@ -1,4 +1,4 @@
-#include "dugl/physics/draggable_ragdoll_entity.h"
+#include "dugl/example/draggable_ragdoll_entity.h"
 
 
 DraggableRagdollEntity::DraggableRagdollEntity(Renderable* renderable, Shader* shader, JPH::PhysicsSystem& physicsSystem, RagdollBuilder& builder)

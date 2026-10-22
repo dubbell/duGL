@@ -1,4 +1,4 @@
-﻿#include "dugl/env/example_env.h"
+﻿#include "dugl/example/example_env.h"
 #include "dugl/utils/imgui_adapter.h"
 #include "dugl/modelling/model_builder.h"
 #include "dugl/modelling/primitive_builder.h"

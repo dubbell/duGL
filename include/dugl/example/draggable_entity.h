@@ -1,6 +1,6 @@
 #pragma once
 
-#include "rigid_entity.h"
+#include "dugl/physics/rigid_entity.h"
 
 #include <optional>
 

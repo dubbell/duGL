@@ -22,7 +22,7 @@ include(scripts/stb.cmake)
 
 # Internal dependencies.
 add_subdirectory(src)
-target_link_libraries(${PROJECT_NAME} PUBLIC env)
+target_link_libraries(${PROJECT_NAME} PUBLIC example)
 
 # Configure asset directories and variables.
 include(scripts/assets.cmake)

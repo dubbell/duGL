@@ -1,6 +1,6 @@
 #pragma once
 
-#include "ragdoll_entity.h"
+#include "dugl/physics/ragdoll_entity.h"
 
 #include <optional>
 

@@ -1,8 +1,8 @@
-#include "dugl/env/example_physics_env.h"
+#include "dugl/example/example_physics_env.h"
 #include "dugl/modelling/primitive_builder.h"
 #include "dugl/modelling/outline_pass.h"
-#include "dugl/physics/draggable_entity.h"
-#include "dugl/physics/draggable_ragdoll_entity.h"
+#include "dugl/example/draggable_entity.h"
+#include "dugl/example/draggable_ragdoll_entity.h"
 
 #include <iostream>
 

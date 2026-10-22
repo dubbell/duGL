@@ -4,7 +4,7 @@
 #define GLFW_INCLUDE_NONE
 #endif
 
-#include "env.h"
+#include "dugl/env/env.h"
 #include "dugl/controllers/flight_controller.h"
 #include "dugl/shading/uniform_buffer.h"
 #include "dugl/modelling/entity.h"

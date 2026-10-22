@@ -1,4 +1,4 @@
-#include "dugl/env/example_physics_env.h"
+#include "dugl/example/example_physics_env.h"
 #include "dugl/utils/jolt_adapter.h"
 
 #include <exception>
