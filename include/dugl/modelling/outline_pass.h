@@ -2,6 +2,7 @@
 
 #include "render_pass.h"
 #include "dugl/shading/shader.h"
+#include "dugl/shading/framebuffer.h"
 
 
 class OutlinePass : public RenderPass
@@ -17,18 +18,12 @@ private:
     glm::vec3 outlineColor;
 
     // multisampled target the mask is rendered into
-    dugl::uint maskFramebuffer = 0;
-    dugl::uint maskCoverageBuffer = 0;
-    dugl::uint maskDepthBuffer = 0;
+    Framebuffer mask;
 
     // single-sampled textures the mask is resolved into for sampling
-    dugl::uint resolveFramebuffer = 0;
-    dugl::uint coverageTexture = 0;
-    dugl::uint depthTexture = 0;
+    Framebuffer resolve;
 
     dugl::uint fullscreenVAO = 0;
-    int maskWidth = 0;
-    int maskHeight = 0;
 
 public:
     OutlinePass(Shader* maskShader, Shader* outlineShader, std::uint64_t acceptedFlags);
@@ -54,7 +49,5 @@ public:
     glm::vec3 getOutlineColor() const;
 
 private:
-    /* (Re-)create the images in the 2 framebuffers if the viewport size changed (or first call to resizeMask). */
-    void resizeMask(int width, int height);
     Shader* getMaskShader(const Entity& entity) const;
 };
