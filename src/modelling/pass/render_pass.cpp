@@ -3,6 +3,11 @@
 #include <algorithm>
 
 
+bool RenderPass::isSkinned(const Entity& entity)
+{
+    return (entity.getShader()->getRequiredAttributes() & attributeMask(VertexAttribute::BoneIds)) != 0;
+}
+
 void RenderPass::renderSurfaces(std::span<Entity* const> entities)
 {
     sortedEntities.assign(entities.begin(), entities.end());

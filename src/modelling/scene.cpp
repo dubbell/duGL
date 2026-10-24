@@ -1,20 +1,33 @@
 #include "dugl/modelling/scene.h"
 #include "dugl/modelling/opaque_pass.h"
+#include "dugl/modelling/shadow_pass.h"
 #include "dugl/utils/glad_include.h"
 
 #include <iostream>
 
 
-Scene::Scene()
+void Scene::init()
 {
+    shadowPass = addRenderPass(std::make_unique<ShadowPass>());
     addRenderPass(std::make_unique<OpaquePass>());
 }
 
 void Scene::render()
 {
-    for (auto& [shaderId, shader] : shaders) {
+    if (shadowPass) {
+        shadowPass->setLightDirection(directionalLightDirection(directionalLight));
+    }
+
+    for (auto& [shaderId, shader] : shaders)
+    {
         if (shader->hasActiveUniform("directionalLight.direction")) {
             shader->setDirectionalLight(directionalLight);
+        }
+        if (shadowPass && shader->hasActiveUniform("lightSpace")) {
+            shader->setMat4("lightSpace", shadowPass->getLightSpace());
+        }
+        if (shader->hasActiveUniform("shadowMap")) {
+            shader->setInt("shadowMap", ShadowPass::SHADOW_MAP_UNIT);
         }
     }
 
@@ -89,6 +102,11 @@ void Scene::clearEntities()
         passEntityList.clear();
     }
     entities.clear();
+}
+
+ShadowPass* Scene::getShadowPass()
+{
+    return shadowPass;
 }
 
 void Scene::setDirectionalLight(const DirectionalLight& directionalLight)

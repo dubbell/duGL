@@ -113,8 +113,7 @@ void OutlinePass::setSkinnedMaskShader(Shader* skinnedMaskShader)
 
 Shader* OutlinePass::getMaskShader(const Entity& entity) const
 {
-    bool skinned = (entity.getShader()->getRequiredAttributes() & attributeMask(VertexAttribute::BoneIds)) != 0;
-    return skinned && skinnedMaskShader != nullptr ? skinnedMaskShader : maskShader;
+    return isSkinned(entity) && skinnedMaskShader != nullptr ? skinnedMaskShader : maskShader;
 }
 
 void OutlinePass::setOutlineShader(Shader* outlineShader)

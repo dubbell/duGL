@@ -8,11 +8,13 @@ layout (location = 7) in vec4 aWeights;
 out vec2 TexCoord;
 out vec3 Normal;
 out vec3 FragPos;
+out vec4 FragPosLightSpace;
 
 const int MAX_BONES = 32;
 
 uniform mat4 model;
 uniform mat4 bones[MAX_BONES];
+uniform mat4 lightSpace;
 
 layout (std140) uniform Perspective
 {
@@ -32,4 +34,5 @@ void main()
     TexCoord = aTexCoord;
     Normal = mat3(transpose(inverse(skinnedModel))) * aNormal;
     FragPos = vec3(skinnedModel * vec4(aPos, 1.0));
+    FragPosLightSpace = lightSpace * vec4(FragPos, 1.0);
 }

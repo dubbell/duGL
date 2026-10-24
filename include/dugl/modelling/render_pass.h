@@ -18,5 +18,7 @@ public:
     virtual void render(std::span<Entity* const> entities) = 0;
 
 protected:
+    static bool isSkinned(const Entity& entity);
+
     void renderSurfaces(std::span<Entity* const> entities);
 };

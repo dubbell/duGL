@@ -14,6 +14,8 @@
 #include "dugl/modelling/renderable_builder.h"
 
 
+class ShadowPass;
+
 class Scene
 {
 private:
@@ -23,6 +25,7 @@ private:
     std::vector<std::unique_ptr<Entity>> entities;
     std::vector<std::unique_ptr<RenderPass>> renderPasses;
     std::vector<std::vector<Entity*>> passEntities;
+    ShadowPass* shadowPass = nullptr;
     std::map<dugl::uint, std::unique_ptr<Shader>> shaders;
 
     // a neutral overhead light, so a Scene renders sensibly before any lighting is set
@@ -35,8 +38,7 @@ private:
     std::vector<PointLight> pointLights;
 
 public:
-    Scene();
-
+    void init();
     void render();
 
     Shader* addShader(std::unique_ptr<Shader> shader);
@@ -65,6 +67,8 @@ public:
 
     std::vector<Entity*> getEntities();
     void clearEntities();
+
+    ShadowPass* getShadowPass();
 
     void setDirectionalLight(const DirectionalLight& directionalLight);
     DirectionalLight& getDirectionalLight() { return directionalLight; }

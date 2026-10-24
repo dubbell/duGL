@@ -63,6 +63,8 @@ Environment::Environment()
     glEnable(GL_CULL_FACE);
     glCullFace(GL_BACK);
 
+    scene.init();
+
     activeCamera = cameras.emplace_back(std::make_unique<Camera>()).get();
     activeCamera->setAspectRatio((float)16 / 9);
 
