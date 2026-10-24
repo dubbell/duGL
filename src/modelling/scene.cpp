@@ -24,12 +24,10 @@ void Scene::render()
 
     for (auto& entity : entities)
     {
-        // later passes take precedence, so each entity is drawn by exactly one pass
-        for (size_t pass_i = renderPasses.size(); pass_i >= 0; pass_i--)
+        for (size_t pass_i = 0; pass_i < renderPasses.size(); pass_i++)
         {
             if (renderPasses[pass_i]->accepts(*entity)) {
                 passEntities[pass_i].push_back(entity.get());
-                break;
             }
         }
     }

@@ -40,7 +40,7 @@ void ExampleEnvironment::init()
     Shader* cubeMapShader = createShader("skybox.vert", "skybox.frag");
 
     // create render passes
-    createRenderPass<OutlinePass>(outlineMaskShader, outlineShader, flagMask(EntityFlag::Hovered));
+    createRenderPass<OutlinePass>(outlineMaskShader, outlineShader, flagMask(EntityFlag::Hovered), flagMask(EntityFlag::Selected));
     OutlinePass* selectedPass = createRenderPass<OutlinePass>(outlineMaskShader, outlineShader, flagMask(EntityFlag::Selected));
     selectedPass->setOutlineColor(glm::vec3(1.0f, 0.6f, 0.1f));
 

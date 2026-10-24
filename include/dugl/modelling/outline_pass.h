@@ -12,6 +12,7 @@ private:
     Shader* skinnedMaskShader = nullptr;
     Shader* outlineShader;
     std::uint64_t acceptedFlags;
+    std::uint64_t excludedFlags;
 
     float outlineThickness;
     float depthBias;
@@ -26,7 +27,7 @@ private:
     dugl::uint fullscreenVAO = 0;
 
 public:
-    OutlinePass(Shader* maskShader, Shader* outlineShader, std::uint64_t acceptedFlags);
+    OutlinePass(Shader* maskShader, Shader* outlineShader, std::uint64_t acceptedFlags, std::uint64_t excludedFlags = 0);
     ~OutlinePass();
 
     OutlinePass(const OutlinePass&) = delete;

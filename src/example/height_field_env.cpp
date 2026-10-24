@@ -63,7 +63,8 @@ void HeightFieldEnvironment::init()
 
     Shader* outlineMaskShader = createShader("outline_mask.vert", "outline_mask.frag");
     Shader* outlineShader = createShader("outline.vert", "outline.frag");
-    createRenderPass<OutlinePass>(outlineMaskShader, outlineShader, flagMask(EntityFlag::Hovered, EntityFlag::Selected));
+    createRenderPass<OutlinePass>(outlineMaskShader, outlineShader,
+        flagMask(EntityFlag::Hovered, EntityFlag::Selected), flagMask(EntityFlag::Held));
     OutlinePass* heldPass = createRenderPass<OutlinePass>(outlineMaskShader, outlineShader, flagMask(EntityFlag::Held));
     heldPass->setOutlineColor(glm::vec3(0.2f, 0.9f, 0.3f));
 

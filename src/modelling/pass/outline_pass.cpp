@@ -5,9 +5,9 @@
 
 static constexpr int MASK_SAMPLES = 4;
 
-OutlinePass::OutlinePass(Shader* maskShader, Shader* outlineShader, std::uint64_t acceptedFlags)
+OutlinePass::OutlinePass(Shader* maskShader, Shader* outlineShader, std::uint64_t acceptedFlags, std::uint64_t excludedFlags)
     : maskShader(dugl::requireNonNull(maskShader)), outlineShader(dugl::requireNonNull(outlineShader)),
-      acceptedFlags(acceptedFlags), outlineThickness(3.0f), depthBias(0.02f), outlineColor(1.0f),
+      acceptedFlags(acceptedFlags), excludedFlags(excludedFlags), outlineThickness(3.0f), depthBias(0.02f), outlineColor(1.0f),
       mask({
           { GL_COLOR_ATTACHMENT0, GL_R8, MASK_SAMPLES },
           { GL_DEPTH_ATTACHMENT, GL_DEPTH_COMPONENT24, MASK_SAMPLES } }),
@@ -26,7 +26,7 @@ OutlinePass::~OutlinePass()
 
 bool OutlinePass::accepts(const Entity& entity) const
 {
-    return entity.hasAnyFlag(acceptedFlags);
+    return entity.hasAnyFlag(acceptedFlags) && !entity.hasAnyFlag(excludedFlags);
 }
 
 void OutlinePass::render(std::span<Entity* const> entities)
@@ -34,9 +34,6 @@ void OutlinePass::render(std::span<Entity* const> entities)
     if (entities.empty()) {
         return;
     }
-
-    // Render entity surfaces as normal.
-    renderSurfaces(entities);
 
     // Recreate framebuffer attachments if the viewport size has changed.
     GLint viewport[4];

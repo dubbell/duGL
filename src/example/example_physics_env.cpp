@@ -94,7 +94,8 @@ void ExamplePhysicsEnvironment::init()
     Shader* outlineMaskShader = createShader("outline_mask.vert", "outline_mask.frag");
     Shader* skinnedOutlineMaskShader = createShader("skinned_outline_mask.vert", "outline_mask.frag");
     Shader* outlineShader = createShader("outline.vert", "outline.frag");
-    OutlinePass* hoverPass = createRenderPass<OutlinePass>(outlineMaskShader, outlineShader, flagMask(EntityFlag::Hovered, EntityFlag::Selected));
+    OutlinePass* hoverPass = createRenderPass<OutlinePass>(outlineMaskShader, outlineShader,
+        flagMask(EntityFlag::Hovered, EntityFlag::Selected), flagMask(EntityFlag::Held));
     hoverPass->setSkinnedMaskShader(skinnedOutlineMaskShader);
     OutlinePass* heldPass = createRenderPass<OutlinePass>(outlineMaskShader, outlineShader, flagMask(EntityFlag::Held));
     heldPass->setSkinnedMaskShader(skinnedOutlineMaskShader);
