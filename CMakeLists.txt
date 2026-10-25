@@ -19,6 +19,7 @@ include(scripts/JoltPhysics.cmake)
 include(scripts/assimp.cmake)
 include(scripts/imgui.cmake)
 include(scripts/stb.cmake)
+include(scripts/FastNoiseLite.cmake)
 
 # Internal dependencies.
 add_subdirectory(src)

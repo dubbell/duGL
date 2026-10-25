@@ -1,21 +1,29 @@
 #include "dugl/example/height_field_env.h"
 #include "dugl/modelling/primitive_builder.h"
 #include "dugl/modelling/outline_pass.h"
+#include "dugl/modelling/terrain_noise.h"
 #include "dugl/example/draggable_entity.h"
 
 #include <vector>
 
 static constexpr dugl::uint TERRAIN_ROWS = 48;
 static constexpr dugl::uint TERRAIN_COLUMNS = 64;
-static constexpr float TERRAIN_WIDTH = 30.0f;
-static constexpr float TERRAIN_LENGTH = 20.0f;
+static constexpr float TERRAIN_WIDTH = 100.0f;
+static constexpr float TERRAIN_LENGTH = 100.0f;
 static constexpr float BOWL_DEPTH = 4.0f;
+static constexpr int TERRAIN_SEED = 1337;
+static constexpr float NOISE_FREQUENCY = 0.15f;
+static constexpr float NOISE_AMPLITUDE = 0.8f;
 
-static const glm::vec3 SPHERE_START(-13.0f, BOWL_DEPTH + 1.0f, 0.0f);
+static const glm::vec3 SPHERE_START(-13.0f, BOWL_DEPTH + NOISE_AMPLITUDE + 1.0f, 0.0f);
 
 static std::vector<std::vector<float>> createTerrainHeights()
 {
     std::vector<std::vector<float>> heights(TERRAIN_ROWS, std::vector<float>(TERRAIN_COLUMNS));
+    std::vector<std::vector<float>> noise = generateTerrainNoise(TERRAIN_ROWS, TERRAIN_COLUMNS, TERRAIN_WIDTH, TERRAIN_LENGTH, {
+        .seed = TERRAIN_SEED,
+        .frequency = NOISE_FREQUENCY,
+        .amplitude = NOISE_AMPLITUDE });
 
     for (dugl::uint row = 0; row < TERRAIN_ROWS; row++)
     {
@@ -26,7 +34,7 @@ static std::vector<std::vector<float>> createTerrainHeights()
 
             float u = 2.0f * x / TERRAIN_WIDTH;
             float v = 2.0f * z / TERRAIN_LENGTH;
-            heights[row][column] = BOWL_DEPTH * (u * u + v * v);
+            heights[row][column] = BOWL_DEPTH * (u * u + v * v) + noise[row][column];
         }
     }
 
