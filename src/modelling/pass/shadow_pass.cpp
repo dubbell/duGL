@@ -28,6 +28,8 @@ void ShadowPass::render(std::span<Entity* const> entities)
     {
         FramebufferScope scope(shadowMap);
         glClear(GL_DEPTH_BUFFER_BIT);
+        glEnable(GL_POLYGON_OFFSET_FILL);
+        glPolygonOffset(2.0f, 4.0f);
 
         depthShader.setMat4("lightSpace", lightSpace);
         skinnedDepthShader.setMat4("lightSpace", lightSpace);
@@ -42,6 +44,7 @@ void ShadowPass::render(std::span<Entity* const> entities)
             }
             entity->render(shader);
         }
+        glDisable(GL_POLYGON_OFFSET_FILL);
     }
 
     glActiveTexture(GL_TEXTURE0 + SHADOW_MAP_UNIT);
@@ -65,6 +68,11 @@ void ShadowPass::setBounds(glm::vec3 center, float radius)
 glm::mat4 ShadowPass::getLightSpace() const
 {
     return lightSpace;
+}
+
+float ShadowPass::getTexelWorldSize() const
+{
+    return 2.0f * boundsRadius / SHADOW_MAP_SIZE;
 }
 
 void ShadowPass::updateLightSpace()

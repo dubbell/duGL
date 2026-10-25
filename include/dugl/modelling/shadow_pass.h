@@ -32,6 +32,7 @@ public:
     void setLightDirection(glm::vec3 lightDirection);
     void setBounds(glm::vec3 center, float radius);
     glm::mat4 getLightSpace() const;
+    float getTexelWorldSize() const;
 
 private:
     void updateLightSpace();

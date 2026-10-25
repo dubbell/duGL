@@ -2,12 +2,13 @@
 in vec2 TexCoord;
 in vec3 Normal;
 in vec3 FragPos;
-in vec4 FragPosLightSpace;
 
 out vec4 FragColor;
 
 uniform vec3 viewPos;
+uniform mat4 lightSpace;
 uniform sampler2DShadow shadowMap;
+uniform float shadowTexelWorldSize;
 
 struct DirectionalLight
 {
@@ -49,16 +50,21 @@ struct Material
 uniform Material material;
 
 
-float computeShadow(vec4 fragPosLightSpace, vec3 norm, vec3 lightDir)
+float computeShadow(vec3 fragPos, vec3 norm, vec3 lightDir)
 {
+    // Offsetting by texel * sin(theta) keeps PCF neighbours within two texels in front of the surface.
+    float cosTheta = clamp(dot(norm, lightDir), -1.0, 1.0);
+    float sinTheta = sqrt(1.0 - cosTheta * cosTheta);
+    vec3 offsetPos = fragPos + norm * shadowTexelWorldSize * 2.0 * sinTheta;
+
     // transform to light space and map [-1,1] -> [0,1]
+    vec4 fragPosLightSpace = lightSpace * vec4(offsetPos, 1.0);
     vec3 coords = fragPosLightSpace.xyz / fragPosLightSpace.w;
     coords = coords * 0.5 + 0.5;
     if (coords.z > 1.0) {
         return 1.0;
     }
-    // bias to avoid a surface shading itself
-    float bias = max(0.002 * (1.0 - dot(norm, lightDir)), 0.0005);
+    float bias = 0.0005;
 
     vec2 texelSize = 1.0 / vec2(textureSize(shadowMap, 0));
     float lit = 0.0;
@@ -114,7 +120,7 @@ void main()
         diffuseColor,
         specularColor,
         norm,
-        computeShadow(FragPosLightSpace, norm, -directionalLight.direction));
+        computeShadow(FragPos, norm, -directionalLight.direction));
 
     for (int i = 0; i < min(pointLightCount, MAX_LIGHTS); i++)
     {

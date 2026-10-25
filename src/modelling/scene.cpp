@@ -26,6 +26,9 @@ void Scene::render()
         if (shadowPass && shader->hasActiveUniform("lightSpace")) {
             shader->setMat4("lightSpace", shadowPass->getLightSpace());
         }
+        if (shadowPass && shader->hasActiveUniform("shadowTexelWorldSize")) {
+            shader->setFloat("shadowTexelWorldSize", shadowPass->getTexelWorldSize());
+        }
         if (shader->hasActiveUniform("shadowMap")) {
             shader->setInt("shadowMap", ShadowPass::SHADOW_MAP_UNIT);
         }
